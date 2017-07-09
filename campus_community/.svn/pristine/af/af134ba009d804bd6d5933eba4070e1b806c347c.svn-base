@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.ActivityDao">
+
+	<!-- 列表查询所有可用活动 -->
+	<select id="listAllActivity" resultType="Activity"
+		parameterType="Map">
+		select *
+		from t_activity
+		<where>
+			a_is_enable=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND a_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND a_name like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 查询所有可用活动条数 -->
+	<select id="allCount" resultType="Integer" parameterType="Map">
+		select count(*)
+		from t_activity
+		<where>
+			a_is_enable=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND a_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND a_name like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+	</select>
+
+	<!-- 管理员列表查询所有 活动 -->
+	<select id="listActivityMng" resultType="Activity"
+		parameterType="Map">
+		select *
+		from t_activity
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND a_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND a_name like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 管理员查询所有活动条数 -->
+	<select id="countMng" resultType="Integer" parameterType="Map">
+		select count(*)
+		from t_activity
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND a_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND a_name like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+	</select>
+
+	<!-- 管理员后台添加活动 -->
+	<insert id="addAcMng" parameterType="Activity">
+		insert into t_activity(
+		a_name,
+		a_detail,
+		a_send_nickname,
+		a_send_date,
+		a_is_enable
+		)
+		values(
+		#{a_name},
+		#{a_detail},
+		#{a_send_nickname},
+		#{a_send_date},
+		#{a_is_enable}
+		)
+	</insert>
+
+	<!-- 后台管理员更新活动 -->
+	<update id="updateAcMng" parameterType="Activity">
+		update t_activity
+		set
+		a_name=#{a_name},
+		a_detail=#{a_detail},
+		a_update_nickname=#{a_update_nickname},
+		a_update_time=#{a_update_time},
+		a_is_enable=#{a_is_enable}
+		where
+		a_id=#{a_id}
+	</update>
+
+	<!-- 管理员通过id删除活动 -->
+	<delete id="deleteAcMng" parameterType="Integer">
+		delete
+		from t_activity
+		where
+		a_id=#{a_id}
+	</delete>
+</mapper>

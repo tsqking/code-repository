@@ -1,0 +1,62 @@
+/**
+ * Project Name:campus_community
+ * File Name:ActivityServiceImpl.java
+ * Package Name:com.clps.service.impl
+ * Date:2017年3月27日下午10:03:52
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.clps.common.bean.Activity;
+import com.clps.common.exception.ActivityServiceException;
+import com.clps.common.util.PageVo;
+import com.clps.dao.ActivityDao;
+import com.clps.service.IActivityService;
+
+/**
+ * ClassName:ActivityServiceImpl <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月27日 下午10:03:52 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@Service
+public class ActivityServiceImpl implements IActivityService {
+	@Autowired
+	private ActivityDao dao;
+
+	@Override
+	public PageVo<Activity> listAllActivity(PageVo<Activity> pv) throws ActivityServiceException {
+		Map<String, Object> map = new HashMap<>();
+		HashMap<String, String> where = pv.getWhere();
+
+		map.put("pageWhere1", where.get("pageWhere1"));
+		map.put("pageWhere2", where.get("pageWhere2"));
+		map.put("sortname", pv.getSortname());
+		map.put("sortorder", pv.getSortorder());
+		map.put("limit", pv.getLimit());
+		map.put("offset", pv.getOffset());
+
+		List<Activity> aclist = dao.listAllActivity(map);
+		PageVo<Activity> pageVo = new PageVo<>();
+		if (aclist != null) {
+			pageVo.setList(aclist);
+			pageVo.setCount(Integer.toString(dao.allCount(map)));
+			return pageVo;
+		}
+		return null;
+	}
+
+}

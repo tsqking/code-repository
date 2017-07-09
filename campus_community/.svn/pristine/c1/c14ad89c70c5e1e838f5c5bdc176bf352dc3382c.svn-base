@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.StudyDao">
+	<!-- 前台发表文章 -->
+	<insert id="insertStudy" parameterType="Study">
+		insert into
+		t_study(
+		s_title,
+		s_content,
+		s_nickname,
+		s_date
+		)
+		values(
+		#{s_title},
+		#{s_content},
+		#{s_nickname},
+		#{s_date}
+		)
+	</insert>
+
+	<!-- 前台分页查询所有可用文章 -->
+	<select id="listAllStudy" parameterType="Map" resultType="Study">
+		select *
+		from
+		t_study
+		where
+		s_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND s_id like concat(concat('%',#{pageWhere1}),'%')</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND s_title like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 前台查询所有可用文章数量 -->
+	<select id="countStudy" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_study
+		where
+		s_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND s_id like concat(concat('%',#{pageWhere1}),'%')</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND s_title like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+
+	<!-- 后台分页查询所有文章 -->
+	<select id="listAllStudyMng" parameterType="Map" resultType="Study">
+		select *
+		from
+		t_study
+		where
+		1=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND s_id like concat(concat('%',#{pageWhere1}),'%')</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND s_title like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 后台查询所有可用文章数量 -->
+	<select id="countStudyMng" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_study
+		where
+		1=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND s_id like concat(concat('%',#{pageWhere1}),'%')</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND s_title like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+
+	<!-- 后台审核文章 -->
+	<update id="updateStudyMng" parameterType="Study">
+		update t_study
+		set
+		s_title=#{s_title},
+		s_content=#{s_content},
+		s_check_nickname=#{s_check_nickname},
+		s_check_date=#{s_check_date},
+		s_is_enable=#{s_is_enable}
+		where
+		s_id=#{s_id}
+	</update>
+
+	<!-- 后台批量删除文章 -->
+	<delete id="deleteStudyMng" parameterType="Integer">
+		delete from
+		t_study
+		where
+		s_id in
+		<foreach collection="list" item="s_id" open="(" separator=","
+			close=")">
+			#{s_id}
+		</foreach>
+	</delete>
+</mapper>

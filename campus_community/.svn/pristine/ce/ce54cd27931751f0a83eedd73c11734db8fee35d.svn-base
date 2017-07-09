@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.WeiBoDao">
+	<select id="listAllWeiBo" resultType="Map">
+		SELECT
+		w.w_nickname,
+		w.w_content,
+		w.w_praise_num,
+		w.w_forward_num,
+		w.w_img,
+		w.w_date,
+		u.u_face
+		FROM
+		t_weibo w,
+		t_user u
+		WHERE
+		w_is_enable = 1
+		AND
+		w.w_nickname = u.u_nickname
+		order by w_date desc
+	</select>
+
+	<select id="listWeiboMng" parameterType="Map" resultType="WeiBo">
+		select *
+		from
+		t_weibo
+		where
+		1=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND w_nickname like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND w_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 管理员查询所有微博数量 -->
+	<select id="weiboCountMng" resultType="Integer" parameterType="Map">
+		select
+		count(*)
+		from
+		t_weibo
+		where
+		1=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND w_nickname like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND w_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+
+	<update id="bgUpdateWeibo" parameterType="WeiBo">
+		update
+		t_weibo
+		set
+		check_nickname=#{check_nickname},
+		w_check_date=#{w_check_date},
+		w_is_enable=#{w_is_enable}
+		where
+		w_id=#{w_id}
+	</update>
+
+	<delete id="deleteWeibo" parameterType="String">
+		delete from
+		t_weibo
+		where
+		w_id=#{w_id}
+	</delete>
+
+	<!-- 发布微博 -->
+	<insert id="publishWebo" parameterType="WeiBo">
+		insert into
+		t_weibo(
+		w_nickname,
+		w_date,
+		w_content,
+		w_img
+		)values(
+		#{w_nickname},
+		#{w_date},
+		#{w_content},
+		#{w_img}
+		)
+	</insert>
+	
+	<!-- 列出朋友圈所有微博 -->
+	<select id="listAllFriendWeiBo" resultType="Map">
+		SELECT
+		w.w_nickname,
+		w.w_content,
+		w.w_praise_num,
+		w.w_forward_num,
+		w.w_img,
+		w.w_date,
+		u.u_face
+		FROM
+		t_weibo w,
+		t_user u,
+		t_friend f
+		WHERE
+		w_is_enable = 1
+		AND
+		w.w_nickname = u.u_nickname
+		AND
+		f.f_friend_nickname=u.u_nickname
+		order by w_date desc
+	</select>
+</mapper>

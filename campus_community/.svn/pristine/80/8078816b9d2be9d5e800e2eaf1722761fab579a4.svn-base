@@ -1,0 +1,52 @@
+/**
+ * Project Name:campus_community
+ * File Name:StudyServiceImpl.java
+ * Package Name:com.clps.service.impl
+ * Date:2017年3月23日下午11:37:47
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.clps.common.bean.Study;
+import com.clps.common.exception.StudyServiceException;
+import com.clps.common.util.DataTableHelper;
+import com.clps.common.util.PageVo;
+import com.clps.dao.StudyDao;
+import com.clps.service.IStudyService;
+
+/**
+ * ClassName:StudyServiceImpl <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月23日 下午11:37:47 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@Service
+public class StudyServiceImpl implements IStudyService {
+	@Autowired
+	private StudyDao dao;
+
+	@Override
+	public PageVo<Study> listAllStudy(PageVo<Study> study) throws StudyServiceException {
+		DataTableHelper<Object> dt = new DataTableHelper<>();
+		List<Study> list = dao.listAllStudy(study);
+		PageVo<Study> pageVo = new PageVo<>();
+		if (list != null) {
+			pageVo.setList(list);
+			return pageVo;
+		}
+		return null;
+	}
+
+}

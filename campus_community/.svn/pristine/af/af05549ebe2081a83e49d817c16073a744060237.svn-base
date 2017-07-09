@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.MessageDao">
+	<!-- 分页查询所有未读信息 -->
+	<select id="listUnread" parameterType="Map" resultType="Message">
+		select *
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_status=0
+		and
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 分页查询所有未读信息数量 -->
+	<select id="unreadCount" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_status=0
+		and
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+	</select>
+	
+	<!-- 将信息改为已读状态 -->
+	<update id="toRead" parameterType="Integer">
+		update t_message
+		set
+		m_status=1
+		where
+		m_id=#{m_id}
+	</update>
+	
+	<!-- 批量删除信息 -->
+	<delete id="deleteMessage" parameterType="Integer">
+		delete from
+		t_message
+		where
+		m_id in
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<!-- 批量移动到重要信息 -->
+	<update id="moveToImp" parameterType="Integer">
+		update t_message
+		set
+		m_status=2
+		where
+		m_id in
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<!-- 移动到垃圾箱 -->
+	<update id="moveToTrash" parameterType="Integer">
+		update t_message
+		set
+		m_is_enable=0
+		where
+		m_id in
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<!-- 分页查询所有已读信息 -->
+	<select id="listRead" parameterType="Map" resultType="Message">
+		select *
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_status=1
+		and
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	
+	<!-- 分页查询所有已读信息数量 -->
+	<select id="countRead" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_status=1
+		and
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+	</select>
+	
+	<!-- 分页查询所有重要信息 -->
+	<select id="listImp" parameterType="Map" resultType="Message">
+		select *
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_status=2
+		and
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	
+	<!-- 分页查询所有重要信息数量 -->
+	<select id="countImp" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_status=2
+		and
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+	</select>
+	
+	<!-- 重要信息批量移动到已读	 -->
+	<update id="impToRead" parameterType="Integer">
+		update t_message
+		set
+		m_status=1
+		where
+		m_id in
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<!-- 发送信息 -->
+	<insert id="sendMessage" parameterType="Message">
+		insert into
+		t_message(
+		m_title,
+		m_content,
+		m_send_nickname,
+		m_rec_nickname,
+		m_date
+		)values(
+		#{m_title},
+		#{m_content},
+		#{m_send_nickname},
+		#{m_rec_nickname},
+		#{m_date}
+		)
+	</insert>
+	
+	<!-- 分页查询所有垃圾箱信息 -->
+	<select id="listTrash" parameterType="Map" resultType="Message">
+		select *
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_is_enable=0
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	
+	<!-- 分页查询所有垃圾箱信息数量 -->
+	<select id="countTrash" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_message
+		where
+		m_rec_nickname=#{pageWhere4}
+		and
+		m_is_enable=0
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_title like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_content like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="pageWhere3 !=null and pageWhere3 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere3}),'%')</if>
+	</select>
+</mapper>

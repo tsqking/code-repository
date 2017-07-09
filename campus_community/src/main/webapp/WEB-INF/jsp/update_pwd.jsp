@@ -1,0 +1,83 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<!DOCTYPE html>
+<html>
+<head>
+<jsp:include page="base.jsp"></jsp:include>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>个人资料</title>
+</head>
+<body>
+	<section id="main-content">
+		<section class="wrapper">
+			<!-- page start-->
+			<div class="row">
+				<div class="col-lg-12">
+					<section class="panel" style="height: 520px;">
+						<header class="panel-heading"> 修改密码 </header>
+						<div class="panel-body">
+							<div class="stepy-tab">
+								<ul id="default-titles" class="stepy-titles clearfix">
+									<li id="default-title-0" class="current-step">
+										<div>第一步</div>
+									</li>
+									<li id="default-title-1" class="">
+										<div>第二步</div>
+									</li>
+								</ul>
+							</div>
+							<form class="form-horizontal" id="default"
+								action="updateSelfPwd.do" method="post">
+								<fieldset title="第一步" class="step" id="default-step-0">
+									<legend></legend>
+									<div class="form-group input-group">
+										<span class="input-group-btn">
+											<button class="btn btn-white" type="button"
+												disabled="disabled">请输入当前密码:</button>
+										</span><input id="currentPassword" type="password"
+											class="form-control" placeholder="密码">
+									</div>
+								</fieldset>
+
+								<fieldset title="第二步" class="step" id="default-step-1">
+									<legend> </legend>
+									<div class="form-group">
+										<label class="col-lg-2 control-label">请输入新的密码</label>
+										<div class="col-lg-10">
+											<input id="password1" type="password" class="form-control"
+												placeholder="新密码">
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-lg-2 control-label">请重复输入新的密码</label>
+										<div class="col-lg-10">
+											<input id="password2" type="password" class="form-control"
+												placeholder="重复新密码">
+										</div>
+									</div>
+								</fieldset>
+								<input id="updatePwdBtn" type="button"
+									class="finish btn btn-danger" value="提交" />
+							</form>
+						</div>
+					</section>
+				</div>
+			</div>
+		</section>
+	</section>
+</body>
+<script src="js/own/updatePwd.js"></script>
+<script>
+	$(function() {
+		$('#default').stepy({
+			backLabel : '上一步',
+			block : true,
+			nextLabel : '下一步',
+			titleClick : true,
+			titleTarget : '.stepy-tab'
+		});
+	});
+</script>
+</html>

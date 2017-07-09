@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.UserInfoDao">
+	<!-- 插入用户，用于用户注册 -->
+	<insert id="insertUserInfo" parameterType="UserInfo">
+		insert into t_user(
+		u_id,
+		u_nickname,
+		u_password,
+		u_face,
+		u_point,
+		u_register_date
+		)values(
+		#{u_id},
+		#{u_nickname},
+		#{u_password},
+		"img/face/default.png",
+		#{u_point},
+		#{u_register_date}
+		)
+	</insert>
+
+	<!-- 按照id查找用户，用于验证该id是否存在 -->
+	<select id="findUserById" parameterType="String" resultType="UserInfo">
+		select *
+		from t_user
+		where
+		u_id=#{u_id}
+	</select>
+
+	<!-- 按照昵称查找用户，用于验证该用户名是否存在 -->
+	<select id="findUserByNickName" parameterType="String"
+		resultType="UserInfo">
+		select *
+		from t_user
+		where
+		u_nickname=#{u_nickname}
+	</select>
+
+	<!-- 按照用户名查找密码。用于用户 登录 -->
+	<select id="findPasswordByNickName" parameterType="String"
+		resultType="String">
+		select u_password
+		from t_user
+		where
+		u_nickname=#{u_nickname}
+	</select>
+
+	<!-- 更新用户信息。用于更新自身信息 -->
+	<update id="updateUserInfo" parameterType="UserInfo">
+		update
+		t_user
+		set
+		u_name=#{u_name},
+		u_gender=#{u_gender},
+		u_age=#{u_age},
+		u_email=#{u_email},
+		u_address=#{u_address},
+		u_phone=#{u_phone},
+		u_motto=#{u_motto},
+		u_password_ques=#{u_password_ques},
+		u_password_ans=#{u_password_ans}
+		where
+		u_nickname=#{u_nickname}
+	</update>
+
+	<!-- 根据用户名查找 签名 -->
+	<select id="queryNicMotto" resultType="UserInfo">
+		select
+		u_nickname,
+		u_motto
+		from
+		t_user
+		order by
+		u_nickname asc
+		limit 11
+	</select>
+
+	<!-- 根据用户名查找积分 -->
+	<select id="queryPoint" resultType="UserInfo">
+		select
+		u_face,
+		u_nickname,
+		u_point
+		from
+		t_user
+		order by
+		u_point desc
+		limit 5
+	</select>
+
+	<!-- 分页查找所有用户信息。用于管理员管理用户 -->
+	<select id="listAllUser" resultType="UserInfo" parameterType="Map">
+		select *
+		from
+		t_user
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND u_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND u_nickname like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 查找用户数量 -->
+	<select id="UserCount" resultType="Integer" parameterType="Map">
+		select count(*)
+		from
+		t_user
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND u_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND u_nickname like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+	</select>
+
+	<!-- 用于后台管理员更新用户 -->
+	<update id="bgUpdateUser" parameterType="UserInfo">
+		update
+		t_user
+		set
+		u_name=#{u_name},
+		u_gender=#{u_gender},
+		u_age=#{u_age},
+		u_email=#{u_email},
+		u_address=#{u_address},
+		u_phone=#{u_phone},
+		u_password_ques=#{u_password_ques},
+		u_password_ans=#{u_password_ans},
+		u_type=#{u_type},
+		u_is_enable=#{u_is_enable}
+		where
+		u_nickname=#{u_nickname}
+	</update>
+
+	<!-- 根据用户名 删除用户 -->
+	<delete id="deleteUserByNickname" parameterType="String">
+		delete
+		from
+		t_user
+		where
+		u_nickname=#{u_nickname}
+	</delete>
+</mapper>

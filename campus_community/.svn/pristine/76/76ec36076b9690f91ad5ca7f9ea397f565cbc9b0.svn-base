@@ -1,0 +1,456 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<jsp:include page="base.jsp"></jsp:include>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>我的地盘</title>
+</head>
+<body>
+	<!--main content start-->
+	<section id="main-content">
+		<section class="wrapper">
+			<!--mail inbox start-->
+			<div class="mail-box">
+				<aside class="sm-side">
+					<div class="user-head">
+						<a href="javascript:;" class="inbox-avatar"> <img
+							src="${userinfo.u_face }" alt="头像"
+							style="width: 60px; height: 60px">
+						</a>
+						<div class="user-name">
+							<h5>
+								<a href="#">${userinfo.u_nickname }</a>
+							</h5>
+							<span><a href="#">${userinfo.u_motto }</a></span>
+						</div>
+					</div>
+					<div class="inbox-body">
+						<a class="btn btn-compose" data-toggle="modal" href="#myModal">
+							写信息 </a>
+						<!-- Modal -->
+						<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+							aria-labelledby="myModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal"
+											aria-hidden="true">&times;</button>
+										<h4 class="modal-title">写信息</h4>
+									</div>
+									<div class="modal-body">
+										<form class="form-horizontal" role="form">
+											<div class="form-group">
+												<label class="col-lg-2 control-label">收信人</label>
+												<div class="col-lg-10">
+													<input type="text" class="form-control" id="inputEmail1"
+														placeholder="">
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="col-lg-2 control-label">信息内容</label>
+												<div class="col-lg-10">
+													<textarea name="" id="" class="form-control" cols="30"
+														rows="10"></textarea>
+												</div>
+											</div>
+
+											<div class="form-group">
+												<div class="col-lg-offset-2 col-lg-10">
+													<button type="submit" class="btn btn-send">发送</button>
+													<button type="reset" class="btn btn-reset">重置</button>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+								<!-- /.modal-content -->
+							</div>
+							<!-- /.modal-dialog -->
+						</div>
+						<!-- /.modal -->
+					</div>
+					<ul class="inbox-nav inbox-divider" style="height: 400px;">
+						<li class="active"><a data-toggle="tab" href="#unread_div"><i
+								class="icon-envelope-alt"></i> 未读信息 <span
+								class="label label-danger pull-right">1</span></a></li>
+						<li><a data-toggle="tab" href="#read_div"><i
+								class="icon-inbox"></i> 已读信息</a></li>
+						<li><a data-toggle="tab" href="#important_div"><i
+								class="icon-bookmark-empty"></i> 重要信息</a></li>
+						<li><a data-toggle="tab" href="#send_div"><i
+								class=" icon-external-link"></i> 发件箱 </a></li>
+						<li><a data-toggle="tab" href="#trash_div"><i
+								class=" icon-trash"></i> 垃圾箱</a></li>
+						<li><a href="myfriend"><button
+									class="btn btn-success btn-block">好友列表</button></a></li>
+						<li><a href="black"><button
+									class="btn btn-danger btn-block">黑名单</button></a></li>
+					</ul>
+				</aside>
+
+				<aside class="lg-side">
+					<div class="tab-content">
+						<div class="tab-pane active" id="unread_div">
+							<div class="inbox-head">
+								<h3>未读信息</h3>
+								<form class="pull-right position" action="#">
+									<div class="input-append">
+										<input type="text" placeholder="搜索信息" class="sr-input">
+										<button type="button" class="btn sr-btn">
+											<i class="icon-search"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+							<div class="inbox-body">
+								<div class="mail-option">
+
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Refresh"> <i
+											class=" icon-refresh"></i>
+										</a>
+									</div>
+									<div class="btn-group hidden-phone">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											更多操作 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 标记为已读</a></li>
+											<li><a href="#"><i class="icon-trash"></i> 删除</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											移动到 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 重要信息</a></li>
+											<li><a href="#"><i class="icon-ban-circle"></i> 垃圾箱</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Delete"> <i
+											class=" icon-trash"></i>
+										</a>
+									</div>
+									<ul class="unstyled inbox-pagination">
+										<li><span>1-10 of 20</span></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-left  pagination-left"></i></a></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-right pagination-right"></i></a></li>
+									</ul>
+								</div>
+								<table class="table table-inbox table-hover">
+									<tbody>
+										<tr class="unread">
+											<td class="inbox-small-cells"><input type="checkbox"
+												class="mail-checkbox"></td>
+											<td class="inbox-small-cells"><i class="icon-star"></i></td>
+											<td class="view-message  dont-show">Vector Lab</td>
+											<td class="view-message ">Lorem ipsum dolor imit set.</td>
+											<td class="view-message  inbox-small-cells"><i
+												class="icon-paper-clip"></i></td>
+											<td class="view-message  text-right">9:27 AM</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+
+						<div class="tab-pane" id="read_div">
+							<div class="inbox-head">
+								<h3>已读信息</h3>
+								<form class="pull-right position" action="#">
+									<div class="input-append">
+										<input type="text" placeholder="搜索信息" class="sr-input">
+										<button type="button" class="btn sr-btn">
+											<i class="icon-search"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+							<div class="inbox-body">
+								<div class="mail-option">
+
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Refresh"> <i
+											class=" icon-refresh"></i>
+										</a>
+									</div>
+									<div class="btn-group hidden-phone">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											更多操作 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 标记为已读</a></li>
+											<li><a href="#"><i class="icon-trash"></i> 删除</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											移动到 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 重要信息</a></li>
+											<li><a href="#"><i class="icon-ban-circle"></i> 垃圾箱</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Delete"> <i
+											class=" icon-trash"></i>
+										</a>
+									</div>
+									<ul class="unstyled inbox-pagination">
+										<li><span>1-20 of 20</span></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-left  pagination-left"></i></a></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-right pagination-right"></i></a></li>
+									</ul>
+								</div>
+								<table class="table table-inbox table-hover">
+									<tbody>
+										<tr class="unread">
+											<td class="inbox-small-cells"><input type="checkbox"
+												class="mail-checkbox"></td>
+											<td class="inbox-small-cells"><i class="icon-star"></i></td>
+											<td class="view-message  dont-show">Vector Lab</td>
+											<td class="view-message ">Lorem ipsum dolor imit set.</td>
+											<td class="view-message  inbox-small-cells"><i
+												class="icon-paper-clip"></i></td>
+											<td class="view-message  text-right">9:27 AM</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						<div class="tab-pane" id="important_div">
+							<div class="inbox-head">
+								<h3>重要信息</h3>
+								<form class="pull-right position" action="#">
+									<div class="input-append">
+										<input type="text" placeholder="搜索信息" class="sr-input">
+										<button type="button" class="btn sr-btn">
+											<i class="icon-search"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+							<div class="inbox-body">
+								<div class="mail-option">
+
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Refresh"> <i
+											class=" icon-refresh"></i>
+										</a>
+									</div>
+									<div class="btn-group hidden-phone">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											更多操作 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 标记为已读</a></li>
+											<li><a href="#"><i class="icon-trash"></i> 删除</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											移动到 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 重要信息</a></li>
+											<li><a href="#"><i class="icon-ban-circle"></i> 垃圾箱</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Delete"> <i
+											class=" icon-trash"></i>
+										</a>
+									</div>
+									<ul class="unstyled inbox-pagination">
+										<li><span>1-20 of 20</span></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-left  pagination-left"></i></a></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-right pagination-right"></i></a></li>
+									</ul>
+								</div>
+								<table class="table table-inbox table-hover">
+									<tbody>
+										<tr class="unread">
+											<td class="inbox-small-cells"><input type="checkbox"
+												class="mail-checkbox"></td>
+											<td class="inbox-small-cells"><i class="icon-star"></i></td>
+											<td class="view-message  dont-show">Vector Lab</td>
+											<td class="view-message ">Lorem ipsum dolor imit set.</td>
+											<td class="view-message  inbox-small-cells"><i
+												class="icon-paper-clip"></i></td>
+											<td class="view-message  text-right">9:27 AM</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						<div class="tab-pane" id="send_div">
+							<div class="inbox-head">
+								<h3>发件箱</h3>
+								<form class="pull-right position" action="#">
+									<div class="input-append">
+										<input type="text" placeholder="搜索信息" class="sr-input">
+										<button type="button" class="btn sr-btn">
+											<i class="icon-search"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+							<div class="inbox-body">
+								<div class="mail-option">
+
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Refresh"> <i
+											class=" icon-refresh"></i>
+										</a>
+									</div>
+									<div class="btn-group hidden-phone">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											更多操作 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 标记为已读</a></li>
+											<li><a href="#"><i class="icon-trash"></i> 删除</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											移动到 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 重要信息</a></li>
+											<li><a href="#"><i class="icon-ban-circle"></i> 垃圾箱</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Delete"> <i
+											class=" icon-trash"></i>
+										</a>
+									</div>
+									<ul class="unstyled inbox-pagination">
+										<li><span>1-20 of 20</span></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-left  pagination-left"></i></a></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-right pagination-right"></i></a></li>
+									</ul>
+								</div>
+								<table class="table table-inbox table-hover">
+									<tbody>
+										<tr class="unread">
+											<td class="inbox-small-cells"><input type="checkbox"
+												class="mail-checkbox"></td>
+											<td class="inbox-small-cells"><i class="icon-star"></i></td>
+											<td class="view-message  dont-show">Vector Lab</td>
+											<td class="view-message ">Lorem ipsum dolor imit set.</td>
+											<td class="view-message  inbox-small-cells"><i
+												class="icon-paper-clip"></i></td>
+											<td class="view-message  text-right">9:27 AM</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+
+						<div class="tab-pane" id="trash_div">
+							<div class="inbox-head">
+								<h3>垃圾箱</h3>
+								<form class="pull-right position" action="#">
+									<div class="input-append">
+										<input type="text" placeholder="搜索信息" class="sr-input">
+										<button type="button" class="btn sr-btn">
+											<i class="icon-search"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+							<div class="inbox-body">
+								<div class="mail-option">
+
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Refresh"> <i
+											class=" icon-refresh"></i>
+										</a>
+									</div>
+									<div class="btn-group hidden-phone">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											更多操作 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 标记为已读</a></li>
+											<li><a href="#"><i class="icon-trash"></i> 删除</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini blue" href="#" data-toggle="dropdown">
+											移动到 <i class="icon-angle-down "></i>
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="#"><i class="icon-pencil"></i> 重要信息</a></li>
+											<li><a href="#"><i class="icon-ban-circle"></i> 垃圾箱</a></li>
+										</ul>
+									</div>
+									<div class="btn-group">
+										<a class="btn mini tooltips" href="#" data-toggle="dropdown"
+											data-placement="top" data-original-title="Delete"> <i
+											class=" icon-trash"></i>
+										</a>
+									</div>
+									<ul class="unstyled inbox-pagination">
+										<li><span>1-20 of 20</span></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-left  pagination-left"></i></a></li>
+										<li><a href="#" class="np-btn"><i
+												class="icon-angle-right pagination-right"></i></a></li>
+									</ul>
+								</div>
+								<table class="table table-inbox table-hover">
+									<tbody>
+										<tr class="unread">
+											<td class="inbox-small-cells"><input type="checkbox"
+												class="mail-checkbox"></td>
+											<td class="inbox-small-cells"><i class="icon-star"></i></td>
+											<td class="view-message  dont-show">Vector Lab</td>
+											<td class="view-message ">Lorem ipsum dolor imit set.</td>
+											<td class="view-message  inbox-small-cells"><i
+												class="icon-paper-clip"></i></td>
+											<td class="view-message  text-right">9:27 AM</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+					</div>
+				</aside>
+			</div>
+			<!--mail inbox end-->
+		</section>
+	</section>
+	<!--main content end-->
+	</section>
+</body>
+</html>

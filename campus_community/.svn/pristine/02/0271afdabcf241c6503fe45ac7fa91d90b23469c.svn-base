@@ -1,0 +1,584 @@
+/**
+ * Project Name:campus_community
+ * File Name:UserController.java
+ * Package Name:com.clps.web.controller
+ * Date:2017年3月22日上午11:47:34
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.web.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.clps.common.bean.UserInfo;
+import com.clps.common.exception.ActivityServiceException;
+import com.clps.common.exception.UserServiceException;
+import com.clps.common.util.DataTableHelper;
+import com.clps.common.util.DateFormat;
+import com.clps.common.util.MD5;
+import com.clps.common.util.PageVo;
+import com.clps.common.util.UploadUtil;
+import com.clps.dao.UserInfoDao;
+import com.clps.service.IUserInfoService;
+
+/**
+ * ClassName:UserController <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月22日 上午11:47:34 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@SuppressWarnings("all")
+@Controller
+public class UserController {
+	Logger log = Logger.getRootLogger();
+	private final String MESSAGE = "msg";
+	Map<String, Object> resultMap = new HashMap<>();
+	@Autowired
+	private IUserInfoService service;
+	@Autowired
+	private UserInfoDao userInfoDao;
+
+	/**
+	 * register:(用户注册). <br/>
+	 * 
+	 * @author Charles
+	 * @param request
+	 * @param session
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "register.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> register(@RequestBody UserInfo userInfo) {
+		resultMap.clear();
+		String md5Str = MD5.getMD5Str(userInfo.getU_password());
+		userInfo.setU_password(md5Str);
+		userInfo.setU_point("100");
+		userInfo.setU_register_date(DateFormat.format(new Date(), DateFormat.FORMAT_LONG));
+		try {
+			if (service.register(userInfo)) {
+				if (userInfoDao.findUserById(userInfo.getU_id()) != null) {
+					resultMap.put(MESSAGE, "该用户已存在");
+					log.error("学号/工号" + userInfo.getU_id() + "已存在");
+					return resultMap;
+				}
+				if (userInfoDao.findUserByNickName(userInfo.getU_nickname()) != null) {
+					resultMap.put(MESSAGE, "该用户已存在");
+					log.error("用户名" + userInfo.getU_nickname() + "已存在");
+					return resultMap;
+				} else {
+					resultMap.put(MESSAGE, "注册成功");
+					return resultMap;
+				}
+			} else {
+				resultMap.put(MESSAGE, "注册失败");
+				return resultMap;
+			}
+		} catch (UserServiceException e) {
+			resultMap.put(MESSAGE, "注册失败");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * login:(用户登录). <br/>
+	 * 
+	 * @author Charles
+	 * @param request
+	 * @param session
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "login.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> login(@RequestBody UserInfo userInfo, HttpSession session) {
+		resultMap.clear();
+		String nickName = userInfo.getU_nickname();
+		String password = userInfo.getU_password();
+		try {
+			if (service.login(nickName, password)) {
+				UserInfo user = service.findUserByNickname(nickName);
+				session.setAttribute("userinfo", user);
+				resultMap.put("username", userInfo.getU_nickname());
+				resultMap.put(MESSAGE, "登录成功");
+			} else {
+				resultMap.put(MESSAGE, "登录失败");
+			}
+		} catch (UserServiceException e) {
+			resultMap.put(MESSAGE, "登录失败");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * self:(显示个人资料). <br/>
+	 * 
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "self.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public UserInfo self(@RequestBody UserInfo userInfo) {
+		UserInfo user = null;
+		try {
+			user = service.findUserByNickname(userInfo.getU_nickname());
+		} catch (UserServiceException e) {
+			e.printStackTrace();
+		}
+
+		log.info(user);
+		return user;
+	}
+
+	/**
+	 * update:(修改自己的信息). <br/>
+	 * 
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "updateSelf.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> update(@RequestBody UserInfo userInfo, HttpSession session) {
+		resultMap.clear();
+		try {
+			UserInfo user = service.updateUserInfo(userInfo);
+			if (user != null) {
+				resultMap.put(MESSAGE, "修改成功");
+				session.setAttribute("userinfo", user);
+			} else {
+				resultMap.put(MESSAGE, "修改失败");
+			}
+		} catch (UserServiceException e) {
+			resultMap.put(MESSAGE, "修改失败");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * listAllUser:(分页查询所有用户). <br/>
+	 * 
+	 * @author Charles
+	 * @param map
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "listUser.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	private Map<String, Object> listAllUser(@RequestBody Map<String, Object> map) {
+		resultMap.clear();
+		DataTableHelper<UserInfo> dt = new DataTableHelper<>();
+		PageVo<UserInfo> pv = dt.getTableData(map);
+		try {
+			pv = service.listAllUser(pv);
+			resultMap = dt.getReturnMap(pv);
+		} catch (UserServiceException e) {
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * updateUser:(管理员修修改用户资料). <br/>
+	 * 
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "updateUser.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> updateUser(@RequestBody UserInfo userInfo) {
+		resultMap.clear();
+		try {
+			if (service.bgUpdateUser(userInfo)) {
+				resultMap.put(MESSAGE, "修改成功");
+			} else {
+				resultMap.put(MESSAGE, "修改失败");
+			}
+		} catch (UserServiceException e) {
+			resultMap.put(MESSAGE, "修改失败");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * deleteUser:(管理员删除用户). <br/>
+	 * 
+	 * @author Charles
+	 * @param u_nickname
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "deleteUser.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> deleteUser(@RequestBody List<String> u_nickname) {
+		resultMap.clear();
+		if (u_nickname == null) {
+			resultMap.put(MESSAGE, "删除失败");
+		} else {
+			for (String nickname : u_nickname) {
+				try {
+					if (service.deleteUser(nickname)) {
+						resultMap.put(MESSAGE, "删除成功");
+					} else {
+						resultMap.put(MESSAGE, "删除失败");
+					}
+				} catch (UserServiceException e) {
+					resultMap.put(MESSAGE, "删除失败");
+					e.printStackTrace();
+				}
+			}
+		}
+		return resultMap;
+	}
+
+	/**
+	 * identifiyPwd:(修改密码). <br/>
+	 * 
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "identifiyPwd.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> identifiyPwd(@RequestBody UserInfo userInfo) {
+		resultMap.clear();
+		String nickName = userInfo.getU_nickname();
+		String password = userInfo.getU_password();
+		try {
+			if (service.login(nickName, password)) {
+				resultMap.put(MESSAGE, "验证成功");
+			} else {
+				resultMap.put(MESSAGE, "验证失败");
+			}
+		} catch (UserServiceException e) {
+			resultMap.put(MESSAGE, "验证失败");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * listAllFriends:(列出所有好友). <br/>
+	 * 
+	 * @author Charles
+	 * @param map
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "myfriendList.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	private Map<String, Object> listAllFriends(@RequestBody Map<String, Object> map) {
+		resultMap.clear();
+		DataTableHelper<Map<String, Object>> dt = new DataTableHelper<>();
+		PageVo<Map<String, Object>> pv = dt.getTableData(map);
+		try {
+			pv = service.listAllFriends(pv);
+			resultMap = dt.getReturnMap(pv);
+		} catch (UserServiceException e) {
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * findUser:(根据昵称查找用户). <br/>
+	 * 
+	 * @author Charles
+	 * @param map
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "findFriend.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	private Map<String, Object> findUser(@RequestBody Map<String, Object> map) {
+		Map<String, Object> returnData = new HashMap<>();
+		String nickname = (String) map.get("u_nickname");
+		UserInfo userInfo = null;
+		if (map.get("u_nickname") != null) {
+			try {
+				userInfo = service.findUserByNickname(nickname);
+			} catch (UserServiceException e) {
+				e.printStackTrace();
+			}
+			if (userInfo == null) {
+				returnData.put(MESSAGE, "查无此人");
+				return returnData;
+			} else {
+				returnData.clear();
+				returnData.put("finduser", userInfo);
+				return returnData;
+			}
+		} else {
+			returnData.put(MESSAGE, "查无此人");
+			return returnData;
+		}
+	}
+
+	/**
+	 * addFriend:(添加好友). <br/>
+	 * 
+	 * @author Charles
+	 * @param map
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "addFriend.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	private Map<String, Object> addFriend(@RequestBody Map<String, Object> map) {
+		resultMap.clear();
+		if (map != null) {
+			try {
+				String nickname = (String) map.get("f_friend_nickname");
+				if (service.findFriendByNickname(nickname) != null) {
+					resultMap.put(MESSAGE, "好友已存在");
+					return resultMap;
+				} else {
+					if (service.addFriend(map)) {
+						resultMap.put(MESSAGE, "添加好友成功");
+						return resultMap;
+					} else {
+						resultMap.put(MESSAGE, "添加好友失败");
+						return resultMap;
+					}
+				}
+			} catch (UserServiceException e) {
+				resultMap.put(MESSAGE, "添加好友失败");
+				e.printStackTrace();
+				return resultMap;
+			}
+		} else {
+			resultMap.put(MESSAGE, "添加好友失败");
+			return resultMap;
+		}
+	}
+
+	/**
+	 * deleteFriends:(批量删除好友). <br/>
+	 * 
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "deleteFriend.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> deleteFriends(@RequestBody List<String> friendList) {
+		resultMap.clear();
+		if (friendList != null) {
+			try {
+				if (service.deleteFriends(friendList)) {
+					resultMap.put(MESSAGE, "删除成功");
+				} else {
+					resultMap.put(MESSAGE, "删除失败");
+				}
+			} catch (UserServiceException e) {
+				resultMap.put(MESSAGE, "删除失败");
+				e.printStackTrace();
+			}
+		} else {
+			resultMap.put(MESSAGE, "删除失败");
+		}
+		return resultMap;
+
+	}
+
+	/**
+	 * toBlack:(批量加入黑名单). <br/>
+	 * 
+	 * @author Charles
+	 * @param friendList
+	 * @param session
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "blackFriend.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> toBlack(@RequestBody List<String> friendList, HttpSession session) {
+		resultMap.clear();
+		List<Map<String, Object>> friends = new ArrayList<>();
+		UserInfo userinfo = (UserInfo) session.getAttribute("userinfo");
+		if (friendList != null) {
+			for (String s : friendList) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("b_self_nickname", userinfo.getU_nickname());
+				map.put("b_date", DateFormat.getNow());
+				map.put("b_friend_nickname", s);
+				friends.add(map);
+			}
+			try {
+				if (service.toBlack(friends) && service.blackMark(friendList)) {
+					resultMap.put(MESSAGE, "操作成功");
+					return resultMap;
+				} else {
+					resultMap.put(MESSAGE, "操作失败");
+					return resultMap;
+				}
+			} catch (UserServiceException e) {
+				resultMap.put(MESSAGE, "操作失败");
+				e.printStackTrace();
+				return resultMap;
+
+			}
+		} else {
+			resultMap.put(MESSAGE, "操作失败");
+			return resultMap;
+		}
+	}
+
+	/**
+	 * listAllFriends:(列出所有黑名单好友). <br/>
+	 * 
+	 * @author Charles
+	 * @param map
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "myblackList.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	private Map<String, Object> listAllBlacks(@RequestBody Map<String, Object> map) {
+		resultMap.clear();
+		DataTableHelper<Map<String, Object>> dt = new DataTableHelper<>();
+		PageVo<Map<String, Object>> pv = dt.getTableData(map);
+		try {
+			pv = service.listAllBlacks(pv);
+			resultMap = dt.getReturnMap(pv);
+		} catch (UserServiceException e) {
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	/**
+	 * removeBlack:(从黑名单批量移除). <br/>
+	 * 
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping(value = "removeBlack.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> removeBlack(@RequestBody List<String> blackList) {
+		resultMap.clear();
+		if (blackList != null) {
+			try {
+				if (service.deleteBlack(blackList) && service.blackMark2(blackList)) {
+					resultMap.put(MESSAGE, "操作成功");
+					return resultMap;
+				} else {
+					resultMap.put(MESSAGE, "操作失败");
+					return resultMap;
+				}
+			} catch (UserServiceException e) {
+				resultMap.put(MESSAGE, "操作失败");
+				e.printStackTrace();
+				return resultMap;
+			}
+		} else {
+			resultMap.put(MESSAGE, "操作失败");
+			return resultMap;
+
+		}
+	}
+
+	/**
+	 * upload:(上传头像). <br/>
+	 * 
+	 * @author Charles
+	 * @param files
+	 * @param request
+	 * @param session
+	 * @return
+	 * @since JDK 1.8
+	 */
+	@RequestMapping("upFace.do")
+	public String upload(@RequestParam("icon") MultipartFile[] files, HttpServletRequest request, HttpSession session) {
+		resultMap.clear();
+		UserInfo currentUser = (UserInfo) session.getAttribute("userinfo");
+		if (files != null) {
+			for (MultipartFile file : files) {
+				// 保存的文件路径
+				String filePath = request.getServletContext().getRealPath("/") + "WEB-INF/img/face/"
+						+ file.getOriginalFilename();
+				// 再保存一份到指定路径
+				String localPath = "E:/jxust/workspace/campus_community/src/main/webapp/WEB-INF/img/face/"
+						+ file.getOriginalFilename();
+				if (files != null && files.length > 0) {
+					// 保存文件
+					if (UploadUtil.saveFile(request, file, filePath, localPath)) {
+						UserInfo userInfo = new UserInfo();
+						userInfo.setU_nickname(currentUser.getU_nickname());
+						userInfo.setU_face("img/face/" + file.getOriginalFilename());
+						try {
+							if (service.updateFace(userInfo)) {
+								UserInfo newData = userInfoDao.findUserByNickName(currentUser.getU_nickname());
+								session.setAttribute("userinfo", newData);
+								return "self";
+							}
+						} catch (UserServiceException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		return "self";
+	}
+
+	@RequestMapping(value = "checkPwd.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> checkPwd(@RequestBody UserInfo userInfo) {
+		resultMap.clear();
+		if (userInfo != null) {
+			String nickName = userInfo.getU_nickname();
+			String password = userInfo.getU_password();
+			try {
+				if (service.login(nickName, password)) {
+					resultMap.put(MESSAGE, "密码验证成功");
+					return resultMap;
+				} else {
+					resultMap.put(MESSAGE, "密码验证失败");
+				}
+			} catch (UserServiceException e) {
+				resultMap.put(MESSAGE, "密码验证失败");
+				e.printStackTrace();
+			}
+		}
+		return resultMap;
+
+	}
+}

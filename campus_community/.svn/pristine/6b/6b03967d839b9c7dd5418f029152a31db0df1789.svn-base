@@ -1,0 +1,56 @@
+/**
+ * Project Name:campus_community
+ * File Name:ActivityController.java
+ * Package Name:com.clps.web.controller
+ * Date:2017年3月27日下午10:07:21
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.web.controller;
+
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.clps.common.bean.Activity;
+import com.clps.common.exception.ActivityServiceException;
+import com.clps.common.util.DataTableHelper;
+import com.clps.common.util.PageVo;
+import com.clps.service.IActivityService;
+
+/**
+ * ClassName:ActivityController <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月27日 下午10:07:21 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@Controller
+public class ActivityController {
+
+	@Autowired
+	private IActivityService service;
+
+	@RequestMapping(value = "activity.do", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> listActivity(@RequestBody Map<String, Object> map) {
+		DataTableHelper<Activity> dth = new DataTableHelper<>();
+		Map<String, Object> allActivity = null;
+		PageVo<Activity> pv = dth.getTableData(map);
+		try {
+			pv = service.listAllActivity(pv);
+			allActivity = dth.getReturnMap(pv);
+		} catch (ActivityServiceException e) {
+			e.printStackTrace();
+		}
+		return allActivity;
+	}
+}

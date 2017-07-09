@@ -1,0 +1,24 @@
+/**
+ * Project Name:campus_community
+ * File Name:NewsServiceImpl.java
+ * Package Name:com.clps.service.impl
+ * Date:2017年4月1日下午3:27:32
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.service.impl;
+/**
+ * ClassName:NewsServiceImpl <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2017年4月1日 下午3:27:32 <br/>
+ * @author   Charles
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+public class NewsServiceImpl {
+
+}
+

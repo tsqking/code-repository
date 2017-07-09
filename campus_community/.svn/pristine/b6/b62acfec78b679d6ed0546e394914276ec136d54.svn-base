@@ -1,0 +1,35 @@
+var userid = $("#userid");
+var nickname = $("#nickname");
+var password1 = $("#password1");
+var password2 = $("#password2");
+var submit_btn = $("#submit_btn");
+$(function() {
+	// 注册
+	submit_btn.click(function() {
+		var json = {
+			u_id : userid.val(),
+			u_nickname : nickname.val(),
+			u_password : password2.val()
+		}
+		$.ajax({
+			type : "post",
+			url : "register.do",
+			contentType : "application/json",
+			data : JSON.stringify(json),
+			dataType : "json",
+			success : function(data) {
+				$("#propose").html(data.msg);
+				$('#myModal').modal({
+					keyboard : true
+				});
+			},
+			error : function() {
+				$("#propose").html(data.msg);
+				$('#myModal').modal({
+					keyboard : true
+				});
+			}
+		});
+
+	});
+});

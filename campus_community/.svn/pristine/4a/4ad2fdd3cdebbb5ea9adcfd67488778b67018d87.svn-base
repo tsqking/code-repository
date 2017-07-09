@@ -1,0 +1,100 @@
+$(function() {
+	function queryParams(params) { // 配置参数
+		var temp = { // 这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+			limit : params.limit, // 页面大小
+			offset : params.offset, // 页码
+			sortname : params.sort, // 排序列名
+			sortorder : params.order,// 排序规则
+			pageWhere1 : $("#searchAcId").val(),
+			pageWhere2 : $("#searchAcName").val()
+
+		};
+		return temp;
+	}
+
+	$('#activityTbl').bootstrapTable({
+		method : "post",// 请求方式（*）
+		url : "activity.do",// 请求后台的URL（*）
+		queryParams : queryParams,// 传递参数（*)
+		uniqueId : "a_id",// 唯一标识
+		sidePagination : 'server',// 分页方式：client客户端分页，server服务端分页（*）
+		sortName : "a_send_date",// 排序字段
+		sortOrder : "desc",// 排序方式
+		pageList : [ 5, 10, 15, 20, 25, 30 ],// 可供选择的每页的行数（*）
+		pageNumber : 1,// 初始化加载第一页，默认第一页
+		pagination : true,// 是否显示分页（*）
+		pageSize : 10,// 每页的记录行数（*）
+		showColumns : true, // 是否显示所有的列
+		toolbar : "#toolbar",// 工具按钮用哪个容器
+		clickToSelect : true,// 是否启用点击选中行
+		cache : false,// 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+		striped : false,// 是否显示行间隔色
+		showRefresh : true,// 是否显示刷新按钮
+		showToggle : true,// 是否显示详细视图和列表视图的切换按钮
+		cardView : false,// 是否显示详细视图
+		detailView : false,// 是否显示父子表
+		paginationLoop : false,// 是否允许循环分页
+		paginationPreText : "上一页",// 指定上一页按钮文字，不配置默认<
+		paginationNextText : "下一页",
+		columns : [ {
+			checkbox : true
+		}, {
+			field : 'a_id',
+			title : '活动ID'
+		}, {
+			field : 'a_name',
+			title : '活动名称'
+		}, {
+			field : 'a_send_nickname',
+			title : '发布人'
+		}, {
+			field : 'a_send_date',
+			title : '发布时间'
+		}, {
+			field : 'a_update_nickname',
+			title : '更新人'
+		}, {
+			field : 'a_update_time',
+			title : '更新时间'
+		}],
+		onDblClickRow : function(row) {
+			$("#acName").html(row.a_name);
+			$("#acDetail").html(row.a_detail);
+			$("#check_detail").modal({
+				keyboard : true
+			});
+		}
+	});
+	// 多条件模糊查询
+	$("#bgAcSearchBtn").click(function() {
+		$('#activityTbl').bootstrapTable("refresh", {
+			silent : true
+		});
+	});
+	
+	//活动报名
+	$("#btn_apply").click(function() {
+		var rows = $('#activityTbl').bootstrapTable('getAllSelections');
+		var json = [];
+		for (var i = 0; i < rows.length; i++) {
+			json.push(rows[i].a_id);
+		}
+		if (json == null || json == "") {
+			alert("操作失败,您还未选择任何数据");
+		} else {
+			$.ajax({
+				type : "post",
+				url : "applyAct.do",
+				contentType : "application/json",
+				data : JSON.stringify(json),
+				dataType : "json",
+				success : function(data) {
+					alert(data.msg);
+				},
+				error : function(data) {
+					alert(data.msg);
+				}
+			});
+		}
+	});
+});

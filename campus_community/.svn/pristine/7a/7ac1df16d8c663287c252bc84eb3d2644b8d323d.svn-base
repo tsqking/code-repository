@@ -1,0 +1,49 @@
+/**
+ * Project Name:campus_community
+ * File Name:ActivityDao.java
+ * Package Name:com.clps.dao
+ * Date:2017年3月23日下午9:50:54
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.dao;
+
+/**
+ * ClassName:ActivityDao <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2017年3月23日 下午9:50:54 <br/>
+ * @author   Charles
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+
+import java.util.List;
+import org.springframework.dao.DataAccessException;
+import com.clps.common.bean.Activity;
+import com.clps.common.util.PageVo;
+
+public interface ActivityDao {
+	/**
+	 * listAllActivity:(罗列出所有活动列表). <br/>
+	 * 
+	 * @author Charles
+	 * @param pv
+	 * @return
+	 * @throws DataAccessException
+	 * @since JDK 1.8
+	 */
+	List<Activity> listAllActivity(PageVo<Activity> pv) throws DataAccessException;
+
+	/**
+	 * allCount:(查询活动数量). <br/>
+	 * 
+	 * @author Charles
+	 * @return
+	 * @throws DataAccessException
+	 * @since JDK 1.8
+	 */
+	int allCount() throws DataAccessException;
+}

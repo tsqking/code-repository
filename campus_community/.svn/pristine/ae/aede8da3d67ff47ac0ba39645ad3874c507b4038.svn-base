@@ -1,0 +1,209 @@
+/**
+ * Project Name:campus_community
+ * File Name:IUserInfoService.java
+ * Package Name:com.clps.service
+ * Date:2017年3月22日上午11:44:31
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.clps.common.bean.UserInfo;
+import com.clps.common.exception.ActivityServiceException;
+import com.clps.common.exception.UserServiceException;
+import com.clps.common.util.PageVo;
+
+/**
+ * ClassName:IUserInfoService <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月22日 上午11:44:31 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+public interface IUserInfoService {
+	/**
+	 * register:(用户注册). <br/>
+	 * 
+	 * @author Charles
+	 * @param paramUserInfo
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean register(UserInfo paramUserInfo) throws UserServiceException;
+
+	/**
+	 * login:(用户登录). <br/>
+	 * 
+	 * @author Charles
+	 * @param paramString1
+	 * @param paramString2
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean login(String paramString1, String paramString2) throws UserServiceException;
+
+	/**
+	 * findUserByNickname:(根据昵称查找用户). <br/>
+	 * 
+	 * @author Charles
+	 * @param paramString
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	UserInfo findUserByNickname(String paramString) throws UserServiceException;
+
+	/**
+	 * updateUserInfo:(修改用户信息). <br/>
+	 * 
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	UserInfo updateUserInfo(UserInfo userInfo) throws UserServiceException;
+
+	/**
+	 * listAllActivity:(分页查询所有用户信息). <br/>
+	 * 
+	 * @author Charles
+	 * @param pv
+	 * @return
+	 * @throws ActivityServiceException
+	 * @since JDK 1.8
+	 */
+	PageVo<UserInfo> listAllUser(PageVo<UserInfo> pv) throws UserServiceException;
+
+	/**
+	 * bgUpdateUser:(管理员修改用户信息). <br/>
+	 * 
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean bgUpdateUser(UserInfo userInfo) throws UserServiceException;
+
+	/**
+	 * deleteUser:(管理员删除用户). <br/>
+	 * 
+	 * @author Charles
+	 * @param username
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean deleteUser(String username) throws UserServiceException;
+
+	/**
+	 * listAllFriends:(列出所有好友). <br/>
+	 * @author Charles
+	 * @param pv
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	PageVo<Map<String, Object>> listAllFriends(PageVo<Map<String, Object>> pv) throws UserServiceException;
+
+	/**
+	 * addFriend:(添加好友). <br/>
+	 * @author Charles
+	 * @param username
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean addFriend(Map<String, Object> map)throws UserServiceException;
+	
+	/**
+	 * findFriendByNickname:(根据昵称查找好友). <br/>
+	 * @author Charles
+	 * @param nickname
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	Map<String, Object> findFriendByNickname(String nickname)throws UserServiceException;
+	
+	/**
+	 * deleteFriends:(批量删除好友). <br/>
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean deleteFriends(List<String> friendList)throws UserServiceException;
+	
+	/**
+	 * toBlack:(批量加入黑名单). <br/>
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean toBlack(List<Map<String, Object>> friendList)throws UserServiceException;
+	
+	/**
+	 * blackMark:(批量修改黑名单标记为0). <br/>
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean blackMark(List<String> friendList)throws UserServiceException;
+	
+	/**
+	 * listAllFriends:(列出所有黑名单好友). <br/>
+	 * @author Charles
+	 * @param pv
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	PageVo<Map<String, Object>> listAllBlacks(PageVo<Map<String, Object>> pv) throws UserServiceException;
+	
+	/**
+	 * deleteFriends:(批量删除黑名单). <br/>
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean deleteBlack(List<String> blackList)throws UserServiceException;
+	
+	/**
+	 * blackMark:(批量修改黑名单标记为1). <br/>
+	 * @author Charles
+	 * @param friendList
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean blackMark2(List<String> blackList)throws UserServiceException;
+	
+	/**
+	 * updateFace:(修改头像). <br/>
+	 * @author Charles
+	 * @param userInfo
+	 * @return
+	 * @throws UserServiceException
+	 * @since JDK 1.8
+	 */
+	boolean updateFace(UserInfo userInfo)throws UserServiceException;
+}

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.NewsDao">
+	<!-- 管理员添加新闻 -->
+	<insert id="addMngNews" parameterType="News">
+		insert
+		into
+		t_news(
+		n_title,
+		n_content,
+		n_send_nickname,
+		n_send_date,
+		n_is_enable
+		)values(
+		#{n_title},
+		#{n_content},
+		#{n_send_nickname},
+		#{n_send_date},
+		#{n_is_enable}
+		)
+	</insert>
+
+	<!-- 后台分页查询所有新闻 -->
+	<select id="listMngNews" parameterType="Map" resultType="News">
+		select *
+		from
+		t_news
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND n_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND n_title like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 后台分页查询所有新闻数目 -->
+	<select id="mngNewsCout" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_news
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND n_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND n_title like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+	</select>
+
+	<!-- 后台管理员修改新闻 -->
+	<update id="mngUpdateNews" parameterType="News">
+		update
+		t_news
+		set
+		n_title=#{n_title},
+		n_content=#{n_content},
+		n_update_nickname=#{n_update_nickname},
+		n_update_date=#{n_update_date},
+		n_is_enable=#{n_is_enable}
+		where
+		n_id=#{n_id}
+	</update>
+
+	<!-- 前台查询所有新闻 -->
+	<select id="queryAllNews" resultType="News">
+		select *
+		from
+		t_news
+		where
+		n_is_enable=1
+		order by
+		n_send_date desc
+	</select>
+
+	<!-- 后台批量删除新闻 -->
+	<delete id="mngDeleteNews" parameterType="Integer">
+		delete
+		from
+		t_news
+		where
+		n_id=#{n_id}
+	</delete>
+</mapper>

@@ -1,0 +1,21 @@
+$(function() {
+	$("#emojiContent").emoji({
+		button : "#emojiBtn",
+		showTab : false,
+		animation : 'slide',
+		icons : [ {
+			name : "QQ表情",
+			path : "img/qq/",
+			maxNum : 91,
+			excludeNums : [ 41, 45, 54 ],
+			file : ".gif",
+			placeholder : "[#qq{alias}qq#]"
+		}, {
+			name : "贴吧表情",
+			path : "img/tieba/",
+			maxNum : 50,
+			file : ".jpg",
+			placeholder : "[#tb{alias}tb#]",
+		} ]
+	});
+});

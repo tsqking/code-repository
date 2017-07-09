@@ -1,0 +1,31 @@
+// JavaScript Document
+var showImg = $("#showImg");
+function checkIcon() {
+	var icon = $("#icon").val();
+	var iconMsg = $("#iconMsg");
+	var foot = icon.split(".")[1];
+	if (icon == "") {
+		iconMsg
+				.html("<img src='img/checkbox/check-off.png' align='absmiddle'> <font color='red'>请选择图片</font>");
+	} else if (foot == "png" || foot == "jpg" || foot == "gif") {
+		iconMsg
+				.html("<img src='img/checkbox/check-on.png' align='absmiddle'>&nbsp;图片可用");
+	}
+}
+
+function chechMyFace() {
+	var icon = $("icon").val();
+	var foot = icon.split(".")[1];
+	if (foot == "png" || foot == "jpg" || foot == "gif" || foot == "jpeg") {
+		return ture;
+	} else {
+		alert("文件格式有误！");
+		return false;
+	}
+}
+
+function showIcon(pic, imgfile) {
+	if (imgfile.val()) {
+		pic.src = imgfile.val();
+	}
+}

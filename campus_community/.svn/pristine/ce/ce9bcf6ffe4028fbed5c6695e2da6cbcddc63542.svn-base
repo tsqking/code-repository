@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.ActivityDao">
+	<select id="listAllActivity" resultType="Activity"
+		parameterType="Map">
+		select *
+		from t_activity
+		where
+		a_is_enable=1
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<select id="allCount" resultType="Integer">
+		select count(*)
+		from t_activity
+		where
+		a_is_enable=1
+	</select>
+</mapper>

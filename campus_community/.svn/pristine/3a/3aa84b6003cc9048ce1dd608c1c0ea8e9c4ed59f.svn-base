@@ -1,0 +1,32 @@
+/**
+ * Project Name:campus_community
+ * File Name:StudyController.java
+ * Package Name:com.clps.web.controller
+ * Date:2017年3月23日下午11:40:49
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.web.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import com.clps.service.IStudyService;
+
+/**
+ * ClassName:StudyController <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月23日 下午11:40:49 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@Controller
+public class StudyController {
+	@Autowired
+	private IStudyService service;
+
+}

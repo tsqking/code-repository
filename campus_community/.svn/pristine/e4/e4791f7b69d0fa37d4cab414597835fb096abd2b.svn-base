@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.ActivityDao">
+	<select id="listAllActivity" resultType="Activity"
+		parameterType="Map">
+		select *
+		from t_activity
+		<where>
+			a_is_enable=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND a_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND a_name like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<select id="allCount" resultType="Integer">
+		select count(*)
+		from t_activity
+		where
+		<where>
+			a_is_enable=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND a_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND a_name like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.UserInfoDao">
+	<!-- 插入用户，用于用户注册 -->
+	<insert id="insertUserInfo" parameterType="UserInfo">
+		insert into t_user(
+		u_id,
+		u_nickname,
+		u_password,
+		u_face,
+		u_point,
+		u_register_date
+		)values(
+		#{u_id},
+		#{u_nickname},
+		#{u_password},
+		"img/face/default.png",
+		#{u_point},
+		#{u_register_date}
+		)
+	</insert>
+
+	<!-- 按照id查找用户，用于验证该id是否存在 -->
+	<select id="findUserById" parameterType="String" resultType="UserInfo">
+		select *
+		from t_user
+		where
+		u_id=#{u_id}
+	</select>
+
+	<!-- 按照昵称查找用户，用于验证该用户名是否存在 -->
+	<select id="findUserByNickName" parameterType="String"
+		resultType="UserInfo">
+		select *
+		from t_user
+		where
+		u_nickname=#{u_nickname}
+	</select>
+
+	<!-- 按照用户名查找密码。用于用户 登录 -->
+	<select id="findPasswordByNickName" parameterType="String"
+		resultType="String">
+		select u_password
+		from t_user
+		where
+		u_is_enable=1
+		and
+		u_nickname=#{u_nickname}
+	</select>
+
+	<!-- 更新用户信息。用于更新自身信息 -->
+	<update id="updateUserInfo" parameterType="UserInfo">
+		update
+		t_user
+		set
+		u_name=#{u_name},
+		u_gender=#{u_gender},
+		u_age=#{u_age},
+		u_email=#{u_email},
+		u_address=#{u_address},
+		u_phone=#{u_phone},
+		u_motto=#{u_motto},
+		u_password_ques=#{u_password_ques},
+		u_password_ans=#{u_password_ans}
+		where
+		u_nickname=#{u_nickname}
+	</update>
+
+	<!-- 根据用户名查找 签名 -->
+	<select id="queryNicMotto" resultType="UserInfo">
+		select
+		u_nickname,
+		u_motto
+		from
+		t_user
+		order by
+		u_nickname asc
+		limit 11
+	</select>
+
+	<!-- 根据用户名查找积分 -->
+	<select id="queryPoint" resultType="UserInfo">
+		select
+		u_face,
+		u_nickname,
+		u_point
+		from
+		t_user
+		order by
+		u_point desc
+		limit 5
+	</select>
+
+	<!-- 分页查找所有用户信息。用于管理员管理用户 -->
+	<select id="listAllUser" resultType="UserInfo" parameterType="Map">
+		select *
+		from
+		t_user
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND u_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND u_nickname like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 查找用户数量 -->
+	<select id="UserCount" resultType="Integer" parameterType="Map">
+		select count(*)
+		from
+		t_user
+		<where>
+			1=1
+			<if test="pageWhere1 !=null and pageWhere1 !=''">AND u_id like concat(concat('%',#{pageWhere1}),'%')</if>
+			<if test="pageWhere2 !=null and pageWhere2 !=''">AND u_nickname like concat(concat('%',#{pageWhere2}),'%')
+			</if>
+		</where>
+	</select>
+
+	<!-- 用于后台管理员更新用户 -->
+	<update id="bgUpdateUser" parameterType="UserInfo">
+		update
+		t_user
+		set
+		u_name=#{u_name},
+		u_gender=#{u_gender},
+		u_age=#{u_age},
+		u_email=#{u_email},
+		u_address=#{u_address},
+		u_phone=#{u_phone},
+		u_password_ques=#{u_password_ques},
+		u_password_ans=#{u_password_ans},
+		u_type=#{u_type},
+		u_is_enable=#{u_is_enable}
+		where
+		u_nickname=#{u_nickname}
+	</update>
+
+	<!-- 根据用户名 删除用户 -->
+	<delete id="deleteUserByNickname" parameterType="String">
+		delete
+		from
+		t_user
+		where
+		u_nickname=#{u_nickname}
+	</delete>
+
+	<!-- 分页查询所有好友 -->
+	<select id="listAllFriends" parameterType="Map" resultType="Map">
+		SELECT
+		f.f_friend_nickname,
+		f.f_add_date,
+		u.u_id,
+		u.u_nickname,
+		u.u_name,
+		u.u_gender,
+		u.u_age,
+		u.u_email,
+		u.u_address,
+		u.u_phone,
+		u.u_point,
+		u.u_motto,
+		u.u_face
+		FROM
+		t_friend f,
+		t_user u
+		WHERE
+		f.f_black_mark=1
+		AND
+		f.f_self_nickname =#{pageWhere3}
+		AND f.f_friend_nickname = u.u_nickname
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND u.u_id like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND u.u_nickname like
+			concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 分页查询好友个数 -->
+	<select id="friendCount" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_friend f,
+		t_user u
+		WHERE
+		f.f_black_mark=1
+		AND
+		f.f_self_nickname =#{pageWhere3}
+		AND f.f_friend_nickname = u.u_nickname
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND u.u_id like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND u.u_nickname like
+			concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+
+	<!-- 添加好友 -->
+	<insert id="addFriend" parameterType="Map">
+		insert into
+		t_friend(
+		f_self_nickname,
+		f_friend_nickname,
+		f_add_date
+		)values(
+		#{f_self_nickname},
+		#{f_friend_nickname},
+		#{f_add_date}
+		)
+	</insert>
+
+	<!-- 根据昵称查找好友 -->
+	<select id="findFriendByNickname" parameterType="String"
+		resultType="Map">
+		select *
+		from
+		t_friend
+		where
+		f_friend_nickname=#{nickname}
+	</select>
+
+	<!-- 批量删除好友 -->
+	<delete id="deleteFriends" parameterType="String">
+		delete from
+		t_friend
+		where
+		f_friend_nickname in
+		<foreach collection="list" item="u_nickname" open="("
+			separator="," close=")">
+			#{u_nickname}
+		</foreach>
+	</delete>
+
+	<!-- 批量添加黑名单 -->
+	<insert id="toBlack" parameterType="Map">
+		insert into
+		t_black(
+		b_self_nickname,
+		b_friend_nickname,
+		b_date
+		)values
+		<foreach collection="list" item="friendList" separator=",">
+			(
+			#{friendList.b_self_nickname},
+			#{friendList.b_friend_nickname},
+			#{friendList.b_date}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 批量修改黑名单标记为0 -->
+	<update id="blackMark" parameterType="String">
+		update t_friend
+		set
+		f_black_mark=0
+		where
+		f_friend_nickname in
+		<foreach collection="list" item="nickname" open="(" separator=","
+			close=")">
+			#{nickname}
+		</foreach>
+	</update>
+
+	<!-- 分页查询所有黑名单好友 -->
+	<select id="listAllBlack" parameterType="Map" resultType="Map">
+		SELECT
+		b.b_friend_nickname,
+		b.b_date,
+		u.u_id,
+		u.u_nickname,
+		u.u_name,
+		u.u_gender,
+		u.u_age,
+		u.u_email,
+		u.u_address,
+		u.u_phone,
+		u.u_point,
+		u.u_motto,
+		u.u_face
+		FROM
+		t_black b,
+		t_user u
+		WHERE
+		b.b_self_nickname
+		=#{pageWhere3}
+		AND b.b_friend_nickname = u.u_nickname
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND u.u_id like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND u.u_nickname like
+			concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!-- 分页查询黑名单好友个数 -->
+	<select id="blackCount" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_black b,
+		t_user u
+		WHERE
+		b.b_self_nickname
+		=#{pageWhere3}
+		AND b.b_friend_nickname = u.u_nickname
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND u.u_id like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND u.u_nickname like
+			concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+
+	<!-- 批量移除黑名单 -->
+	<delete id="deleteBlack" parameterType="String">
+		delete from
+		t_black
+		where
+		b_friend_nickname in
+		<foreach collection="list" item="nickname" open="(" separator=","
+			close=")">
+			#{nickname}
+		</foreach>
+	</delete>
+
+	<!-- 批量修改黑名单标记为1 -->
+	<update id="blackMark2" parameterType="String">
+		update t_friend
+		set
+		f_black_mark=1
+		where
+		f_friend_nickname in
+		<foreach collection="list" item="nickname" open="(" separator=","
+			close=")">
+			#{nickname}
+		</foreach>
+	</update>
+
+	<!-- 更改头像 -->
+	<update id="updateFace" parameterType="UserInfo">
+		update t_user
+		set
+		u_face=#{u_face}
+		where
+		u_nickname=#{u_nickname}
+	</update>
+</mapper>

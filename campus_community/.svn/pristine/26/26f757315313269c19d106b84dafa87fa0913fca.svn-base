@@ -1,0 +1,88 @@
+/**
+ * Project Name:campus_community
+ * File Name:WeiBoServiceImpl.java
+ * Package Name:com.clps.service.impl
+ * Date:2017年3月24日上午12:19:41
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.clps.common.bean.WeiBo;
+import com.clps.common.exception.ActivityServiceException;
+import com.clps.common.exception.WeiBoServiceException;
+import com.clps.common.util.PageVo;
+import com.clps.dao.WeiBoDao;
+import com.clps.service.IWeiBoService;
+
+/**
+ * ClassName:WeiBoServiceImpl <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月24日 上午12:19:41 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@Service
+public class WeiBoServiceImpl implements IWeiBoService {
+	private Boolean flag = false;
+	Logger log = Logger.getRootLogger();
+	@Autowired
+	private WeiBoDao dao;
+
+	@Override
+	public List<Map<String, Object>> listAllWeiBo() throws WeiBoServiceException {
+		List<Map<String, Object>> list = dao.listAllWeiBo();
+		if (list != null) {
+			return list;
+		}
+		return null;
+	}
+
+	@Override
+	public PageVo<WeiBo> listWeiboMng(PageVo<WeiBo> pv) throws ActivityServiceException {
+		List<WeiBo> allWeibo = dao.listWeiboMng(pv);
+		PageVo<WeiBo> pageVo = new PageVo<>();
+		if (allWeibo != null) {
+			pageVo.setList(allWeibo);
+			pageVo.setCount(Integer.toString(dao.weiboCount()));
+			return pageVo;
+		}
+		return null;
+	}
+
+	@Override
+	public boolean checkWeibo(WeiBo weiBo) throws WeiBoServiceException {
+		if (weiBo != null) {
+			if (dao.bgUpdateWeibo(weiBo)) {
+				log.info("审核成功");
+				return dao.bgUpdateWeibo(weiBo);
+			} else
+				log.info("审核失败");
+		}
+		return flag;
+	}
+
+	@Override
+	public boolean deleteWeibo(String w_id) throws WeiBoServiceException {
+		if (w_id != null) {
+			if (dao.deleteWeibo(w_id)) {
+				log.info("删除成功");
+				return dao.deleteWeibo(w_id);
+			} else {
+				log.info("删除失败");
+			}
+		}
+		return flag;
+	}
+}

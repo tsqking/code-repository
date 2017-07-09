@@ -1,0 +1,48 @@
+/**
+ * Project Name:campus_community
+ * File Name:StudyDao.java
+ * Package Name:com.clps.dao
+ * Date:2017年3月23日下午11:29:57
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.dao;
+
+/**
+ * ClassName:StudyDao <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2017年3月23日 下午11:29:57 <br/>
+ * @author   Charles
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+import java.util.List;
+import org.springframework.dao.DataAccessException;
+import com.clps.common.bean.Study;
+import com.clps.common.util.PageVo;
+
+public interface StudyDao {
+	/**
+	 * listAllStudy:(分页列出所有文章). <br/>
+	 * 
+	 * @author Charles
+	 * @param study
+	 * @return
+	 * @throws DataAccessException
+	 * @since JDK 1.8
+	 */
+	List<Study> listAllStudy(PageVo<Study> study) throws DataAccessException;
+
+	/**
+	 * studyCount:(列出查询到的文章总数). <br/>
+	 * 
+	 * @author Charles
+	 * @return
+	 * @throws DataAccessException
+	 * @since JDK 1.8
+	 */
+	int studyCount() throws DataAccessException;
+}

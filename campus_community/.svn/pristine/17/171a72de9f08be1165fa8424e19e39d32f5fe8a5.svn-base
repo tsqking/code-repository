@@ -1,0 +1,30 @@
+/**
+ * Project Name:campus_community
+ * File Name:IActivityService.java
+ * Package Name:com.clps.service
+ * Date:2017年3月27日下午10:02:37
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.service;
+
+import com.clps.common.bean.Activity;
+import com.clps.common.exception.ActivityServiceException;
+import com.clps.common.util.PageVo;
+
+/**
+ * ClassName:IActivityService <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2017年3月27日 下午10:02:37 <br/>
+ * 
+ * @author Charles
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+
+public interface IActivityService {
+	PageVo<Activity> listAllActivity(PageVo<Activity> pv) throws ActivityServiceException;
+}

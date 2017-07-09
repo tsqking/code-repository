@@ -1,0 +1,24 @@
+/**
+ * Project Name:campus_community
+ * File Name:NewsDao.java
+ * Package Name:com.clps.dao
+ * Date:2017年4月12日下午3:26:39
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.dao;
+/**
+ * ClassName:NewsDao <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2017年4月12日 下午3:26:39 <br/>
+ * @author   Charles
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+public interface NewsDao {
+
+}
+

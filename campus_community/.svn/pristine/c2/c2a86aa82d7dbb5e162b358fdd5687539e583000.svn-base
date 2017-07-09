@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.dao.MarketDao">
+	<!-- 列表查询所有可用商品 -->
+	<select id="listAllGoods" resultType="Market"
+		parameterType="Map">
+		select *
+		from t_market
+		where
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_name like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	
+	<!-- 分页查询所有商品数量 -->
+	<select id="countGoods" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_market
+		where
+		m_is_enable=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_name like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+	
+	<!-- 添加商品 -->
+	<insert id="addGoods" parameterType="Market">
+		insert into
+		t_market(
+		m_name,
+		m_detail,
+		m_send_nickname,
+		m_date
+		)values(
+		#{m_name},
+		#{m_detail},
+		#{m_send_nickname},
+		#{m_date}
+		)
+	</insert>
+	
+		<!-- 后台分页查询所有商品 -->
+	<select id="listAllGoodsMng" resultType="Market"
+		parameterType="Map">
+		select *
+		from t_market
+		where
+		1=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_name like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	
+	<!-- 后台分页查询所有商品数量 -->
+	<select id="countGoodsMng" parameterType="Map" resultType="Integer">
+		select count(*)
+		from
+		t_market
+		where
+		1=1
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND m_name like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_send_nickname like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	</select>
+
+	<!-- 批量申请商品 -->
+	<insert id="applyGoods" parameterType="Map">
+		insert into
+		t_maket_apply(
+		ma_market_id,
+		ma_nickname,
+		ma_apply_date,
+		ma_phone
+		)values
+		<foreach collection="list" item="goodsList" separator=",">
+			(#{goodsList.ma_market_id},
+			#{goodsList.ma_nickname},
+			#{goodsList.ma_apply_date},
+			#{goodsList.ma_phone})
+		</foreach>
+	</insert>
+	
+	<!-- 分页查询所有商品申请情况 -->
+	<select id="listGoodsApply" parameterType="Map" resultType="Map">
+		SELECT
+		ma_id,
+		ma_market_id,
+		ma_nickname,
+		ma_apply_date,
+		ma_phone,
+		m_name
+		FROM
+		t_maket_apply ma,
+		t_market m
+		WHERE
+		ma_market_id = m_id
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND ma_market_id like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_name like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	
+	<!-- 分页查询所有商品申请情况数量 -->
+	<select id="countGoodsApply" parameterType="Map" resultType="Integer">
+		select count(*)
+		FROM
+		t_maket_apply ma,
+		t_market m
+		WHERE
+		ma_market_id = m_id
+		<if test="pageWhere1 !=null and pageWhere1 !=''">AND ma_market_id like concat(concat('%',#{pageWhere1}),'%')
+		</if>
+		<if test="pageWhere2 !=null and pageWhere2 !=''">AND m_name like concat(concat('%',#{pageWhere2}),'%')
+		</if>
+	
+	</select>
+</mapper>

@@ -1,0 +1,151 @@
+/**
+ * Project Name:campus_community
+ * File Name:WeiBo.java
+ * Package Name:com.clps.common.bean
+ * Date:2017年3月24日上午12:09:50
+ * Copyright (c) 2017, tsqking@163.com All Rights Reserved.
+ *
+*/
+
+package com.clps.common.bean;
+
+/**
+ * ClassName:WeiBo <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2017年3月24日 上午12:09:50 <br/>
+ * @author   Charles
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+import java.io.Serializable;
+
+public class WeiBo implements Serializable {
+
+	/**
+	 * serialVersionUID:TODO(用一句话描述这个变量表示什么).
+	 * 
+	 * @since JDK 1.8
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private int w_id;
+	private String w_nickname;
+	private String w_content;
+	private int w_praise_num;
+	private int w_forward_num;
+	private String w_img;
+	private String w_date;
+	private String check_nickname;
+	private String w_check_date;
+	private int w_is_enable;
+
+	public WeiBo() {
+		super();
+	}
+
+	public WeiBo(int w_id, String w_nickname, String w_content, int w_praise_num, int w_forward_num, String w_img,
+			String w_date, String check_nickname, String w_check_date, int w_is_enable) {
+		super();
+		this.w_id = w_id;
+		this.w_nickname = w_nickname;
+		this.w_content = w_content;
+		this.w_praise_num = w_praise_num;
+		this.w_forward_num = w_forward_num;
+		this.w_img = w_img;
+		this.w_date = w_date;
+		this.check_nickname = check_nickname;
+		this.w_check_date = w_check_date;
+		this.w_is_enable = w_is_enable;
+	}
+
+	public int getW_id() {
+		return w_id;
+	}
+
+	public String getW_nickname() {
+		return w_nickname;
+	}
+
+	public String getW_content() {
+		return w_content;
+	}
+
+	public int getW_praise_num() {
+		return w_praise_num;
+	}
+
+	public int getW_forward_num() {
+		return w_forward_num;
+	}
+
+	public String getW_img() {
+		return w_img;
+	}
+
+	public String getW_date() {
+		return w_date;
+	}
+
+	public String getCheck_nickname() {
+		return check_nickname;
+	}
+
+	public String getW_check_date() {
+		return w_check_date;
+	}
+
+	public int getW_is_enable() {
+		return w_is_enable;
+	}
+
+	public void setW_id(int w_id) {
+		this.w_id = w_id;
+	}
+
+	public void setW_nickname(String w_nickname) {
+		this.w_nickname = w_nickname;
+	}
+
+	public void setW_content(String w_content) {
+		this.w_content = w_content;
+	}
+
+	public void setW_praise_num(int w_praise_num) {
+		this.w_praise_num = w_praise_num;
+	}
+
+	public void setW_forward_num(int w_forward_num) {
+		this.w_forward_num = w_forward_num;
+	}
+
+	public void setW_img(String w_img) {
+		this.w_img = w_img;
+	}
+
+	public void setW_date(String w_date) {
+		this.w_date = w_date;
+	}
+
+	public void setCheck_nickname(String check_nickname) {
+		this.check_nickname = check_nickname;
+	}
+
+	public void setW_check_date(String w_check_date) {
+		this.w_check_date = w_check_date;
+	}
+
+	public void setW_is_enable(int w_is_enable) {
+		this.w_is_enable = w_is_enable;
+	}
+
+	@Override
+	public String toString() {
+		return "WeiBo [w_id=" + w_id + ", w_nickname=" + w_nickname + ", w_content=" + w_content + ", w_praise_num="
+				+ w_praise_num + ", w_forward_num=" + w_forward_num + ", w_img=" + w_img + ", w_date=" + w_date
+				+ ", check_nickname=" + check_nickname + ", w_check_date=" + w_check_date + ", w_is_enable="
+				+ w_is_enable + "]";
+	}
+
+}

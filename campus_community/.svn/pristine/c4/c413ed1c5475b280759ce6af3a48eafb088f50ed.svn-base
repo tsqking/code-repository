@@ -1,0 +1,390 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<jsp:include page="base.jsp"></jsp:include>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>后台管理</title>
+</head>
+<body>
+	<section id="main-content">
+		<section class="wrapper">
+			<!-- page start-->
+			<div class="row">
+				<div class="col-lg-12">
+					<section class="panel">
+						<header class="panel-heading tab-bg-dark-navy-blue ">
+							<ul class="nav nav-pills">
+								<li class="active"><a data-toggle="tab" href="#back_news">新闻管理</a>
+								</li>
+								<li id="to_userMng" class=""><a data-toggle="tab"
+									href="#back_user">用户管理</a></li>
+								<li id="to_weiboMng" class=""><a data-toggle="tab"
+									href="#back_weibo">微博管理</a></li>
+								<li class=""><a data-toggle="tab" href="#back_study">文章管理</a></li>
+								<li class=""><a data-toggle="tab" href="#back_activity">校园活动管理</a>
+								</li>
+								<li class=""><a data-toggle="tab" href="#back_market">跳蚤市场管理</a></li>
+							</ul>
+						</header>
+						<div class="panel-body">
+							<div class="tab-content">
+								<div id="back_news" class="tab-pane active">Home</div>
+
+								<!-- 用户管理模块 -->
+								<div id="back_user" class="tab-pane">
+									<form>
+										<div class="row">
+											<div class="col-lg-4">
+												<input id="searchUserId" class="form-control" type="text"
+													placeholder="按学号/工号搜索">
+											</div>
+											<div class="col-lg-4">
+												<input id="searchUserName" class="form-control" type="text"
+													placeholder="按用户名搜索">
+											</div>
+											<div class="col-lg-4">
+												<input class="btn btn-danger pull-right" type="reset"
+													value="清空条件"> <input
+													class="btn btn-primary pull-right" id="bgUserSearchBtn"
+													value="搜索" type="button">
+											</div>
+										</div>
+									</form>
+									<div id="toolbar_User">
+										<button id="btn_deleteUser" type="button"
+											class="btn btn-danger btm-sm">
+											<span class="icon-remove" aria-hidden="false"></span>删除
+										</button>
+									</div>
+									<table id="userMngTbl"></table>
+
+									<!-- 修改资料模态框开始 -->
+									<div class="modal fade responsive" id="update_user"
+										role="dialog" aria-labelledby="myModalLabel"
+										aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal"
+														aria-hidden="true">&times;</button>
+													<h4 class="modal-title" id="myModalLabel">修改用户信息</h4>
+												</div>
+												<div class="modal-body" style="margin: 30px;">
+													<form id="selfForm" class="form-horizontal" role="form">
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">学号/工号：</button>
+															</span> <input type="text" class="form-control" id="inputUserid"
+																disabled="disabled">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">昵称:</button>
+															</span> <input type="text" class="form-control"
+																id="inputNickname" disabled="disabled">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">姓名:</button>
+															</span> <input type="text" class="form-control" id="inputName">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">性别:</button>
+															</span> <select id="inputGender" type="text"
+																class="form-control">
+																<option value="" selected="selected">&nbsp;</option>
+																<option value="男">男</option>
+																<option value="女">女</option>
+															</select>
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">年龄:</button>
+															</span><input type="text" class="form-control" id="inputAge">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">邮箱:</button>
+															</span> <input type="text" class="form-control email"
+																id="inputEmail">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">地址:</button>
+															</span> <input type="text" class="form-control"
+																id="inputAddress">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">电话:</button>
+															</span> <input type="text" class="form-control email"
+																id="inputPhone">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">密保问题:</button>
+															</span> <input type="text" class="form-control"
+																id="inputPasswordQues">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">密保答案:</button>
+															</span> <input type="text" class="form-control"
+																id="inputPasswordAns">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">用户类型:</button>
+															</span> <select id="inputType" type="text" class="form-control">
+																<option value="" selected="selected">&nbsp;</option>
+																<option value="1">普通用户</option>
+																<option value="0">管理员</option>
+															</select>
+														</div>
+
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">是否可用:</button>
+															</span> <select id="inputEnable" type="text"
+																class="form-control">
+																<option value="" selected="selected">&nbsp;</option>
+																<option value="1">可用</option>
+																<option value="0">不可用</option>
+															</select>
+														</div>
+													</form>
+												</div>
+												<div class="modal-footer">
+													<button id="editUserBtn" type="button"
+														class="btn btn-primary">提交更改</button>
+													<button type="button" class="btn btn-danger"
+														data-dismiss="modal">关闭</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- 修改资料模态框结束 -->
+								</div>
+
+								<!-- 微博管理模块 -->
+								<div id="back_weibo" class="tab-pane">
+									<div id="toolbar_Weibo" class="">
+										<button id="btn_deleteWeibo" type="button"
+											class="btn btn-danger btm-sm">
+											<span class="icon-remove" aria-hidden="true"></span>删除
+										</button>
+									</div>
+									<table id="weiboMngTbl"></table>
+
+									<!-- 修改微博模态框开始 -->
+									<div class="modal fade responsive" id="update_weibo"
+										role="dialog" aria-labelledby="myModalLabel"
+										aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal"
+														aria-hidden="true">&times;</button>
+													<h4 class="modal-title" id="myModalLabel">审核微博</h4>
+												</div>
+												<div class="modal-body" style="margin: 30px;">
+													<form id="selfForm" class="form-horizontal" role="form">
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">微博ID:</button>
+															</span> <input type="text" class="form-control" id="inputWbid"
+																disabled="disabled">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">是否可用:</button>
+															</span> <select id="wbEnable" type="text" class="form-control">
+																<option value="" selected="selected">&nbsp;</option>
+																<option value="1">可用</option>
+																<option value="0">不可用</option>
+															</select>
+														</div>
+													</form>
+												</div>
+												<div class="modal-footer">
+													<button id="editWeiboBtn" type="button"
+														class="btn btn-primary">提交更改</button>
+													<button type="button" class="btn btn-danger"
+														data-dismiss="modal">关闭</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- 修改微博模态框结束 -->
+								</div>
+
+
+								<div id="back_study" class="tab-pane">study</div>
+
+								<!-- 活动管理模块 -->
+								<div id="back_activity" class="tab-pane">
+									<form>
+										<div class="row">
+											<div class="col-lg-4">
+												<input id="searchAcId" class="form-control" type="text"
+													placeholder="按活动ID搜索">
+											</div>
+											<div class="col-lg-4">
+												<input id="searchAcName" class="form-control" type="text"
+													placeholder="按活动名称搜索">
+											</div>
+											<div class="col-lg-4">
+												<input id="acReset" class="btn btn-danger pull-right" type="reset"
+													value="清空条件"> <input
+													class="btn btn-primary pull-right" id="bgAcSearchBtn"
+													value="搜索" type="button">
+											</div>
+										</div>
+									</form>
+									<div id="toolbar_activity" class="">
+										<button id="btn_addActivity" type="button"
+											class="btn btn-info btm-sm">
+											<span class="icon-plus" aria-hidden="true"></span>添加
+										</button>
+										<button id="btn_deleteActivity" type="button"
+											class="btn btn-danger btm-sm">
+											<span class="icon-remove" aria-hidden="true"></span>删除
+										</button>
+									</div>
+									<table id="activityMngTbl"></table>
+
+									<!-- 添加活动模态框开始 -->
+									<div class="modal fade responsive" id="add_activity"
+										role="dialog" aria-labelledby="myModalLabel"
+										aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal"
+														aria-hidden="true">&times;</button>
+													<h4 class="modal-title" id="myModalLabel">添加活动</h4>
+												</div>
+												<div class="modal-body" style="margin: 30px;">
+													<form id="selfForm" class="form-horizontal" role="form">
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">活动名称:</button>
+															</span> <input type="text" class="form-control" id="addAcName">
+														</div>
+														<div class="form-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white pull-up" type="button"
+																	style="width: 100px;" disabled="disabled">活动详情:</button>
+															</span>
+															<textarea class="form-control" id="addAcContent" rows="8"></textarea>
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">是否可用:</button>
+															</span> <select id="addAcEnable" type="text"
+																class="form-control">
+																<option value="1" selected="selected">可用</option>
+																<option value="0">不可用</option>
+															</select>
+														</div>
+													</form>
+												</div>
+												<div class="modal-footer">
+													<button id="addAcBtn" type="button" class="btn btn-primary">提交更改</button>
+													<button type="button" class="btn btn-danger"
+														data-dismiss="modal">关闭</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- 添加活动模态框结束 -->
+									
+									<!-- 修改活动模态框开始 -->
+									<div class="modal fade responsive" id="update_activity"
+										role="dialog" aria-labelledby="myModalLabel"
+										aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal"
+														aria-hidden="true">&times;</button>
+													<h4 class="modal-title" id="myModalLabel">修改活动</h4>
+												</div>
+												<div class="modal-body" style="margin: 30px;">
+													<form id="selfForm" class="form-horizontal" role="form">
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">活动ID:</button>
+															</span> <input type="text" class="form-control"
+																id="updateAcId" disabled="disabled">
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">活动名称:</button>
+															</span> <input type="text" class="form-control" id="updateAcName">
+														</div>
+														<div class="form-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white pull-up" type="button"
+																	style="width: 100px;" disabled="disabled">活动详情:</button>
+															</span>
+															<textarea class="form-control" id="updateAcContent" rows="8"></textarea>
+														</div>
+														<div class="form-group input-group">
+															<span class="input-group-btn">
+																<button class="btn btn-white" type="button"
+																	style="width: 100px;" disabled="disabled">是否可用:</button>
+															</span> <select id="updateAcEnable" type="text"
+																class="form-control">
+																<option value="" selected="selected">&nbsp;</option>
+																<option value="1">可用</option>
+																<option value="0">不可用</option>
+															</select>
+														</div>
+													</form>
+												</div>
+												<div class="modal-footer">
+													<button id="updateAcBtn" type="button" class="btn btn-primary">提交更改</button>
+													<button type="button" class="btn btn-danger"
+														data-dismiss="modal">关闭</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- 修改活动模态框结束 -->
+								</div>
+
+								<div id="back_market" class="tab-pane">market</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</section>
+	</section>
+</body>
+<script src="js/own/backMng/userMng.js"></script>
+<script src="js/own/backMng/weiboMng.js"></script>
+<script src="js/own/backMng/activityMng.js"></script>
+</html>
