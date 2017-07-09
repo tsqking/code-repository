@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="talent" > 
+	
+	<!-- Result Map-->
+	<resultMap id="talentMap" type="TalentVo" >
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="spell_name" property="spell_name"/>
+		<result column="gender" property="gender"/>
+		<result column="age" property="age"/>
+		<result column="birthday" property="birthday"/>
+		<result column="cardno" property="cardno"/>
+		<result column="mobile" property="mobile"/>
+		<result column="email" property="email"/>
+		<result column="degree" property="degree"/>
+		<result column="english_level" property="english_level"/>
+		<result column="talent_source" property="talent_source"/>
+		<result column="recruit_state" property="recruit_state"/>
+		<result column="state_comment" property="state_comment"/>
+		<result column="resume_url" property="resume_url"/>
+		<result column="photo_url" property="photo_url"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_person" property="update_person"/>
+		
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="univ_comment" property="univComment"/>
+		<result column="position" property="position"/>
+		<result column="position_comment" property="positionComment"/>
+		<result column="college_comment" property="collegeComment"/>
+		
+		<result column="graduate_month" property="graduate_month"/>
+		<result column="work_location" property="work_location"/>
+		<result column="work_loc_comment" property="work_loc_comment"/>
+		<result column="proj_group" property="proj_group"/>
+		<result column="proj_group_comment" property="proj_group_comment"/>
+		<result column="native_place_prov" property="native_place_prov"/>
+		<result column="native_place_city" property="native_place_city"/>
+		<result column="native_place_comment" property="native_place_comment"/>
+		<result column="employmt_agreemt" property="employmt_agreemt"/>		
+		<result column="major" property="major"/>
+		<result column="major_comment" property="major_comment"/>
+		<result column="remark" property="remark"/>
+		<result column="in_company_time" property="in_company_time"/>
+		<result column="in_proj_time" property="in_proj_time"/>
+		<result column="leave_time" property="leave_time"/>
+		
+		<association property="univ" javaType="UniversityVo" columnPrefix="univ_" >
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+		<association property="college" javaType="CollegeVo" columnPrefix="college_" >
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+	</resultMap>
+	
+	<!-- 分页查询条件 -->
+	<sql id="findCondition_page">
+		<where>
+		    1=1 and a.`del`='N'  
+			<if test="name !=null">AND a.name like concat('%',#{name},'%') </if>
+			<if test="mobile !=null">AND a.mobile like concat('%',#{mobile},'%')  </if>
+			<if test="gender !=null">AND a.gender=#{gender}  </if>
+			<if test="talent_source !=null">AND a.talent_source=#{talent_source}  </if>
+			<if test="univ_id !=null">AND a.univ_id=#{univ_id}  </if>
+			<if test="college_id !=null">AND a.college_id=#{college_id}  </if>
+			<if test="recruit_state !=null">AND a.recruit_state=#{recruit_state}  </if>
+			<if test="create_time !=null">AND (a.create_time>=#{create_time_start}  and a.create_time &lt;= #{create_time_end} )</if>
+			<if test="create_person !=null">AND a.create_person like concat('%',#{create_person},'%') </if>
+			<if test="update_time !=null">AND (a.update_time>=#{update_time_start}  and a.update_time &lt;= #{update_time_end} )</if>
+			<if test="update_person !=null">AND a.update_person like concat('%',#{update_person},'%') </if>
+			<if test="graduate_month_start !=null">AND a.graduate_month>=#{graduate_month_start} </if>
+			<if test="graduate_month_end !=null">AND a.graduate_month &lt;= #{graduate_month_end} </if>
+			<if test="proj_group !=null">AND a.proj_group=#{proj_group}  </if>
+			<if test="work_location !=null">AND a.work_location=#{work_location}  </if>
+			<if test="position !=null">AND a.position=#{position}  </if>
+			<if test="in_company_time !=null">AND (a.in_company_time>=#{in_company_time_start}  and a.in_company_time &lt;= #{in_company_time_end} )</if>
+			<if test="in_proj_time !=null">AND (a.in_proj_time>=#{in_proj_time_start}  and a.in_proj_time &lt;= #{in_proj_time_end} )</if>
+		</where>
+	</sql>
+	
+	<!-- 所有列 -->
+	<sql id="Base_Column_List" >
+		a.`id`,a.`name`,a.`spell_name`,o1.`name` as `gender`,a.`age`,a.`birthday`,a.`cardno`,a.`mobile`,a.`email`,o4.`name` as `degree`,
+		o5.`name` as `english_level`,o2.`name` as `talent_source`,o3.`name` as `recruit_state`,a.`state_comment`,a.`resume_url`,a.`photo_url`,a.`create_time`,
+		a.`create_person`,a.`update_time`,a.`update_person`,a.`username`,a.`password`,a.`univ_comment`,o7.`name` as `position`,a.`position_comment`,a.`college_comment`,
+		a.`graduate_month`,a.`work_loc_comment`,a.`proj_group_comment`,o12.`name` as `native_place_prov`,o13.`name` as `native_place_city`,a.`native_place_comment`,
+		a.`major_comment`,a.`remark`,a.`in_company_time`,a.`in_proj_time`,a.`leave_time`,o8.`name` as `major`,o9.`name` as `proj_group`,o10.`name` as `work_location`,
+		o11.`name` as `employmt_agreemt`
+	</sql>
+	<!-- 原始所有列 -->
+	<sql id="Ori_Base_Column_List" >
+		a.`id`,a.`name`,a.`spell_name`,a.`gender`,a.`age`,a.`birthday`,a.`cardno`,a.`mobile`,a.`email`,a.`degree`,a.`univ_id`,
+		a.`college_id`,a.`english_level`,a.`talent_source`,a.`recruit_state`,a.`state_comment`,a.`resume_url`,a.`photo_url`,a.`create_time`,
+		a.`create_person`,a.`update_time`,a.`update_person`,a.`username`,a.`password`,a.`univ_comment`,a.`position`,a.`position_comment`,a.`college_comment`,
+		a.`graduate_month`,a.`work_location`,a.`work_loc_comment`,a.`proj_group`,a.`proj_group_comment`,a.`native_place_prov`,a.`native_place_city`,a.`native_place_comment`,
+		a.`employmt_agreemt`,a.`major`,a.`major_comment`,a.`remark`,a.`in_company_time`,a.`in_proj_time`,a.`leave_time`
+	</sql>
+	<!-- 分页总数查询 -->
+	<select id="allCount" resultType="Long" parameterType="map">
+		select count(*) as `CT` 
+		from `INTERVIEWEE` a
+		<include refid="findCondition_page" />
+	</select>
+	<!-- 分页数据查询 -->
+	<!-- 枚举的(在OPTION中定义的)对象化时，使用String保存数据； 外键的(如下的学校、学院)对象化时，使用对象保存-->
+	<select id="findTalentList" resultMap="talentMap" parameterType="map">  
+		select a.`id`,a.`name`,a.`spell_name`,o1.`name` as `gender`,a.`age`,a.`birthday`,a.`cardno`,a.`mobile`,a.`email`,o4.`name` as `degree`,
+				o5.`name` as `english_level`,o2.`name` as `talent_source`,o3.`name` as `recruit_state`,a.`state_comment`,a.`resume_url`,a.`photo_url`,a.`create_time`,
+				a.`create_person`,a.`update_time`,a.`update_person`,a.`username`,a.`password`,a.`univ_comment`,a.`college_comment`,
+				a.`graduate_month`,o12.`name` as `native_place_prov`,o13.`name` as `native_place_city`,a.`native_place_comment`,
+				a.`major_comment`,a.`remark`,a.`in_company_time`,a.`in_proj_time`,a.`leave_time`,o8.`name` as `major`,
+				o11.`name` as `employmt_agreemt`,
+			   univ.`id` as `univ_id`,concat(ifnull(univ.`name`,''),' ',a.`univ_comment`) as `univ_name`,college.`id` as `college_id`,
+			   concat(ifnull(college.`name`,''),' ',a.`college_comment`) as `college_name`,concat(ifnull(o9.`name`,''),' ',a.`proj_group_comment`) as `proj_group`,
+			   concat(ifnull(o10.`name`,''),' ',a.`work_loc_comment`) as `work_location`,concat(ifnull(o7.`name`,''),' ',a.`position_comment`) as `position`
+			   
+		from `INTERVIEWEE` a left join `UNIVERSITY` univ on a.`univ_id`=univ.`id`
+			 left join `UNIV_COLLEGE` college on a.`college_id`=college.`id` 
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SEX') o1 on a.`gender`=o1.`value`                                                                                                                                                                                       
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='TAL_SOURCE') o2 on a.`talent_source`=o2.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='RC_STATE') o3 on a.`recruit_state`=o3.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='EDU_BAK') o4 on a.`degree`=o4.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='ENG_LEVEL') o5 on a.`english_level`=o5.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='POSITION') o7 on a.`position`=o7.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='MAJOR') o8 on a.`major`=o8.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='PROJ_GROUP') o9 on a.`proj_group`=o9.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='LOCATION') o10 on a.`work_location`=o10.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SIGN_EPMTAGMT') o11 on a.`employmt_agreemt`=o11.`value`
+			 left join (select oo1.`code`,oo1.`name` from CHINA_REGIONS  oo1  ) o12 on a.`native_place_prov`=o12.`code`
+       		 left join (select oo1.`code`,oo1.`name` from CHINA_REGIONS  oo1  ) o13 on a.`native_place_city`=o13.`code`
+		<include refid="findCondition_page" /> 
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>
+		LIMIT ${offset},${limit}
+	</select>
+	<!-- 获取学校下拉数据 -->
+	<select id="getUnivSelect" resultType="SelectVo">
+		select `id`,`name` as `text` from `UNIVERSITY`
+	</select>
+	<!-- 获取学校下的学院下拉数据 -->
+	<select id="getCollegeSelect" resultType="SelectVo" parameterType="map">
+		select `id`,`name` as `text` from `UNIV_COLLEGE` where `univ_id`=#{univ_id}
+	</select>	
+	<!-- 根据ID获取Talent信息  -->
+	<select id="getTalentById" resultMap="talentMap" parameterType="int">
+		select <include refid="Ori_Base_Column_List" /> 
+		from `INTERVIEWEE` a
+		where `id`=#{id}
+	</select>
+	<!-- 插入人才基本信息(除了简历url以及头像url) -->
+	<insert id="addTalentInfo" parameterType="TalentVo" useGeneratedKeys="true" keyProperty="id">
+		insert into `INTERVIEWEE`(`name`,`spell_name`,`gender`,`age`,`birthday`,`cardno`,`mobile`,`email`,`degree`,`univ_id`,`college_id`,`english_level`,
+		`talent_source`,`recruit_state`,`state_comment`,`create_time`,`create_person`,`update_time`,`update_person`,`username`,`password`,`univ_comment`,`position`,`position_comment`,`college_comment`,
+		`graduate_month`,`work_location`,`work_loc_comment`,`proj_group`,`proj_group_comment`,`native_place_prov`,`native_place_city`,`native_place_comment`,
+		`employmt_agreemt`,`major`,`major_comment`,`remark`,`in_company_time`,`in_proj_time`,`leave_time`)
+		values (#{name},#{spell_name},#{gender},#{age},#{birthday},#{cardno},#{mobile},#{email},#{degree},#{univ.id},#{college.id},#{english_level},
+				#{talent_source},#{recruit_state},#{state_comment},#{create_time},#{create_person},#{update_time},#{update_person}, #{username},#{password},#{univComment},#{position},#{positionComment},#{collegeComment},
+				#{graduate_month},#{work_location},#{work_loc_comment},#{proj_group},#{proj_group_comment},#{native_place_prov},#{native_place_city},#{native_place_comment},
+				#{employmt_agreemt},#{major},#{major_comment},#{remark},#{in_company_time},#{in_proj_time},#{leave_time})
+	</insert> 
+	<!-- 根据人才ID更新其头像信息  -->
+	<update id="updatePhotoInfo" parameterType="map">
+		update `INTERVIEWEE`
+		set `photo_url`=#{photo_url},update_time=#{update_time},update_person=#{update_person}
+		where `id`=#{talentId}
+	</update>
+	<!-- 根据人才ID更新其简历附件  -->
+	<update id="updateResumeInfo" parameterType="map">
+		update `INTERVIEWEE`
+		set `resume_url`=#{resume_url},update_time=#{update_time},update_person=#{update_person}
+		where `id`=#{talentId}
+	</update>
+	<!-- 根据ID查看Talent信息  -->
+	<select id="viewTalentById" resultMap="talentMap" parameterType="map">
+		select univ.`id` as `univ_id`,univ.`name` as `univ_name`,college.`id` as `college_id`,college.`name` as `college_name`,
+				<include refid="Base_Column_List" /> 
+		from `INTERVIEWEE` a left join `UNIVERSITY` univ on a.`univ_id`=univ.`id`
+			 left join `UNIV_COLLEGE` college on a.`college_id`=college.`id` 
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SEX') o1 on a.`gender`=o1.`value`                                                                                                                                                                                       
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='TAL_SOURCE') o2 on a.`talent_source`=o2.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='RC_STATE') o3 on a.`recruit_state`=o3.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='EDU_BAK') o4 on a.`degree`=o4.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='ENG_LEVEL') o5 on a.`english_level`=o5.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='POSITION') o7 on a.`position`=o7.`value`			 
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='MAJOR') o8 on a.`major`=o8.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='PROJ_GROUP') o9 on a.`proj_group`=o9.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='LOCATION') o10 on a.`work_location`=o10.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SIGN_EPMTAGMT') o11 on a.`employmt_agreemt`=o11.`value`
+			 left join (select oo1.`code`,oo1.`name` from CHINA_REGIONS  oo1  ) o12 on a.`native_place_prov`=o12.`code`
+       		 left join (select oo1.`code`,oo1.`name` from CHINA_REGIONS  oo1  ) o13 on a.`native_place_city`=o13.`code`
+		where a.`id`=#{id}
+	</select>
+	<!-- 更新人才基本信息(除了简历url以及头像url) -->
+	<update id="updateTalentInfo" parameterType="TalentVo">
+		update `INTERVIEWEE`
+		set `name`=#{name},`spell_name`=#{spell_name},`gender`=#{gender},`age`=#{age},`birthday`=#{birthday},`cardno`=#{cardno},`mobile`=#{mobile},`email`=#{email},
+			`degree`=#{degree},
+			`univ_id`=case when #{univ.id} is null then 0 when LENGTH(trim(#{univ.id}))&lt;1 then 0 else #{univ.id} end,
+			`college_id`=case when #{college.id} is null then 0 when LENGTH(trim(#{college.id}))&lt;1 then 0 else #{college.id} end,
+			`english_level`=#{english_level},
+			`talent_source`=#{talent_source},`recruit_state`=#{recruit_state},`state_comment`=#{state_comment},`update_time`=#{update_time},`update_person`=#{update_person},
+			`univ_comment`=#{univComment},`position`=#{position},`position_comment`=#{positionComment},`college_comment`=#{collegeComment},
+			`graduate_month`=#{graduate_month},`work_location`=#{work_location},`work_loc_comment`=#{work_loc_comment},`proj_group`=#{proj_group},`proj_group_comment`=#{proj_group_comment},
+			`native_place_prov`=#{native_place_prov},`native_place_city`=#{native_place_city},`native_place_comment`=#{native_place_comment},`employmt_agreemt`=#{employmt_agreemt},
+			`major`=#{major},`major_comment`=#{major_comment},`remark`=#{remark},`in_company_time`=#{in_company_time},`in_proj_time`=#{in_proj_time},`leave_time`=#{leave_time}
+		where `id`=#{id}
+		and `update_time`=#{last_update_time}
+		and `update_person`=#{last_update_person}
+	</update>
+	<update id="deleteTalentInfo" parameterType="map">
+		update `INTERVIEWEE`
+		set `del`='Y',`update_person`=#{update_person},`update_time`=#{update_time}
+		where
+		<foreach collection="ids" item="talentId" open="" close="" separator="or">  
+			id = #{talentId}
+		</foreach>  
+	</update>
+	<!--每年更新人才年龄-->
+	<update id="updateTalentAge" parameterType="map">
+		update `INTERVIEWEE` set `age` =`age`+1
+	</update>
+	
+	<!--导出人才信息-->
+	<select id="getTalentInfo" resultType="java.util.HashMap" >
+		select univ.`name` as `univ_name`,college.`name` as `college_name`,
+		a.`name`,a.`spell_name`,a.`age`,o1.`name` as `gender`,a.`birthday`,a.`cardno`,a.`mobile`,a.`email`,o4.`name` as `degree`,
+		o5.`name` as `english_level`,o2.`name` as `talent_source`,o3.`name` as `recruit_state`,a.`state_comment`,a.`resume_url`,a.`photo_url`,a.`create_time`,
+		a.`create_person`,a.`update_time`,a.`update_person`,a.`username`,a.`password`,a.`univ_comment`,o7.`name` as `position`,a.`position_comment`,a.`college_comment`,
+		a.`graduate_month`,a.`work_loc_comment`,a.`proj_group_comment`,o12.`name` as `native_place_prov`,o13.`name` as `native_place_city`,a.`native_place_comment`,
+		a.`major_comment`,a.`remark`,a.`in_company_time`,a.`in_proj_time`,a.`leave_time`,o8.`name` as `major`,o9.`name` as `proj_group`,o10.`name` as `work_location`,o11.`name` as `employmt_agreemt`
+		from `INTERVIEWEE` a left join `UNIVERSITY` univ on a.`univ_id`=univ.`id`
+			 left join `UNIV_COLLEGE` college on a.`college_id`=college.`id` 
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SEX') o1 on a.`gender`=o1.`value`                                                                                                                                                                                       
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='TAL_SOURCE') o2 on a.`talent_source`=o2.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='RC_STATE') o3 on a.`recruit_state`=o3.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='EDU_BAK') o4 on a.`degree`=o4.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='ENG_LEVEL') o5 on a.`english_level`=o5.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='POSITION') o7 on a.`position`=o7.`value`			 
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='MAJOR') o8 on a.`major`=o8.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='PROJ_GROUP') o9 on a.`proj_group`=o9.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='LOCATION') o10 on a.`work_location`=o10.`value`
+			 left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SIGN_EPMTAGMT') o11 on a.`employmt_agreemt`=o11.`value`
+			 left join (select oo1.`code`,oo1.`name` from CHINA_REGIONS  oo1  ) o12 on a.`native_place_prov`=o12.`code`
+       		 left join (select oo1.`code`,oo1.`name` from CHINA_REGIONS  oo1  ) o13 on a.`native_place_city`=o13.`code`
+       		 <include refid="findCondition_page" /> 
+	</select>
+</mapper>

@@ -1,0 +1,20 @@
+var menu0 = "Update success!";
+var menu1 = "Update failed!";
+var menu2 = "This menu is a menu";
+var menu3 = "Detailed";
+var menu4 = "Edit";
+var menu5 = "Delete";
+var menu6 = "Add sub menu";
+var menu7 = "Determine";
+var menu8 = "Cancel";
+var menu9 = "Delete success!";
+var menu99 = "Have been used, can not delete!";
+var menu10 = "Delete failed!";
+var menu11 = "The three level menu can not add a sub menu!";
+var menu12 = "Update success!";
+var menu13 = "Update failed!";
+var menu14 = "Determine to cascade delete";
+var menu15 = "Menu?";
+
+var title1 = "Menu details";
+var title2 = "Edit menu information";

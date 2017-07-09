@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<AddClass>
+		INSERT INTO `CLASS`
+		(`NO`,`NAME`,`name_en_US`,`DESCRIPTION`,`DESCRIPTION_en_US`,`STUDENT_MONITOR`,`TEACHER_MONITOR`,`DIRECTION`,`SIZE`,`SESSION`,`SESSION_EN_US`,`LOCATION`,`ENABLE`,`CREATE_TIME`,`CREATE_PERSON`,`UPDATE_TIME`,`UPDATE_PERSON`)
+		VALUES
+		(:no,:name,:name_en_US,:description,:description_en_US,
+		case when :student_monitor is null then 0 when cast( :student_monitor as char) ='null' then 0 when LENGTH(trim(:student_monitor)) &lt; 1 then 0 else :student_monitor end,
+		case when :teacher_monitor is null then 0 when cast( :teacher_monitor as char) ='null' then 0 when LENGTH(trim(:teacher_monitor)) &lt; 1 then 0 else :teacher_monitor end,
+		:direction,
+		case when :size is null then 0 when cast( :size as char) ='null' then 0 when LENGTH(trim(:size)) &lt; 1 then 0 else :size end, 
+		:session,:session_en_US,:location,:enable,:create_time,:create_person,:update_time,:update_person)
+	</AddClass>
+	<getClassPage>
+		
+		select a.`id`,a.`no`,concat(a.`session[lang]`,' - ' ,a.`name[lang]`) as `name`,f1.`name` as `direction`,
+		       f2.`name` as  `location`,f.`name` as `enable`,a.`update_person`,a.`update_time`,a.`create_person`,a.`create_time`
+		from `CLASS` a 
+		left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+		left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIRECTION' )f1 ON a.`direction`=f1.`value`
+		left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='LOCATION' )f2 ON a.`location`=f2.`value`
+		[where] [order] limit [start],[number];
+	</getClassPage>
+	<getClassPageAllCount>
+		select count(*) as ct
+		from `CLASS` a 
+		left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+		left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIRECTION' )f1 ON a.`direction`=f1.`value`
+		left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='LOCATION' )f2 ON a.`location`=f2.`value`
+		[where]
+	</getClassPageAllCount>
+	<CheckClassWhenDelete>
+		select sum(`ct`) as `CT`
+		from ( 
+		     select 'id' as `id`,count(*) as `CT` FROM `PROCESS_EVAL` where `class_id`=:id
+		     union all
+		     select 'id' as `id`,count(*) as `CT` FROM `GENERAL_MATUAL_EVAL` where `class_id`=:id
+		     union all
+		     select 'id' as `id`,count(*) as `CT` FROM `TEACH_HIST` where `class_id`=:id
+		     union all
+		     select 'id' as `id`,count(*) as `CT` FROM `TEACH_PLAN` where `class_id`=:id
+		) a 
+		group by `id`
+	</CheckClassWhenDelete>
+	<DeleteClass>
+		DELETE FROM `CLASS` WHERE id=(:id)
+	</DeleteClass>
+	<DeletePeopleInClass>
+		DELETE FROM `CLASS_STUDENT` WHERE class_id=(:id)
+	</DeletePeopleInClass>
+	<UpdateClass>
+		UPDATE `CLASS` 
+		SET `NAME`=:name,`name_en_US`=:name_en_US,`DESCRIPTION`=:description,`description_en_US`=:description_en_US,
+	   		`DIRECTION`=:direction ,`SESSION`=:session,`SESSION_EN_US`=:session_en_US,`LOCATION`=:location,`ENABLE`=:enable,
+	   		`UPDATE_TIME`=:update_time,`UPDATE_PERSON`=:update_person 
+	   	WHERE `ID`=:id
+	</UpdateClass>
+	<SelectClass>
+		SELECT `ID`,`NO`,`NAME`,`name_en_US`,`DESCRIPTION`,`description_en_US`,`STUDENT_MONITOR`,`TEACHER_MONITOR`,`DIRECTION`,`SIZE`,
+				`SESSION`,`SESSION_EN_US`,`LOCATION`,`ENABLE`,`UPDATE_TIME`,`UPDATE_PERSON`,`CREATE_TIME`,`CREATE_PERSON`
+		FROM `CLASS`   WHERE `ID`=:id
+	</SelectClass>
+	
+	<QueryPerson>
+		select a.`id`,a.`exam_num`,a.`no`,a.`name`,a.`en_name`,o1.`name` as `gender`,a.`mobile`,o2.`name` as `description`
+		from  (
+		      select a.`id`,a.`exam_num`,a.`no`,a.`name`,a.`en_name`,a.`gender`,a.`mobile`,case when b.student_id is null then 'N' else 'Y' end as `belong`
+		      from `SM_PERSON` a left join (select * from `CLASS_STUDENT` where `class_id`=:class_id) b on a.`id`=b.`student_id`
+		      ) a 
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='SEX') o1 on a.`gender`=o1.`value`  
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') o2 on a.`belong`=o2.`value` 
+		[where] [order] limit [start],[number];	
+	</QueryPerson>
+	
+	<QueryAllCountPerson>
+		select  count(*) ct
+		from  (
+		      select a.`id`,a.`exam_num`,a.`no`,a.`name`,a.`en_name`,a.`gender`,a.`mobile`,case when b.student_id is null then 'N' else 'Y' end as `belong`
+		      from `SM_PERSON` a left join (select * from `CLASS_STUDENT` where `class_id`=:class_id) b on a.`id`=b.`student_id`
+		      ) a 
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='SEX') o1 on a.`gender`=o1.`value`  
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') o2 on a.`belong`=o2.`value` 
+		[where]            
+	</QueryAllCountPerson>
+	<checkPersonNo>
+		select count(*) as `CT` from `SM_PERSON` where `no`=:monitor
+	</checkPersonNo>
+	<setSMonitorInClass>
+		UPDATE `CLASS` SET `STUDENT_MONITOR`=:monitor,update_person=:update_person,update_time=:update_time WHERE `ID`=:id
+	</setSMonitorInClass>
+	<setTMonitorInClass>
+		UPDATE `CLASS` SET `TEACHER_MONITOR`=:monitor,update_person=:update_person,update_time=:update_time WHERE `ID`=:id
+	</setTMonitorInClass>
+	<AddPersonInClass>
+		insert into `CLASS_STUDENT` (`class_id`,`student_id`) values(:class_id,:student_id)
+	</AddPersonInClass>
+	<UpdateClassSize>
+		update `CLASS` set size=(select count(distinct `student_id`) as total from `CLASS_STUDENT` where `class_id`=:class_id ) where `id`=:class_id
+	</UpdateClassSize>
+	<DeletePersonInClass>
+		delete from `CLASS_STUDENT` where `class_id`=:class_id and `student_id`=:student_id 
+	</DeletePersonInClass>
+	<QueryEveryPerson>
+		select id,role,username,password,no,name,en_name,gender,mobile,phone,email,age,birthday,education_background,
+		degree,university,college,major,cet4,cet6,gpa,description,direction,contact_address,contact_postcode,home_address,
+		home_postcode,photo,resume,enable,create_time,create_person,update_time,update_person 
+		from SM_PERSON 
+		where username=:username or mobile=:username
+	</QueryEveryPerson>
+	
+	<BatchAddPerson>
+	INSERT INTO `SM_PERSON` ( 
+			`cardtype`,`cardno`,
+			`role`, `username`, `password`, `no`, `name`, `en_name`, 
+			`gender`, `mobile`, `phone`, `email`, `age`, `birthday`,  
+			`education_background`, `degree`, `university`,  
+			`college`, `major`, `cet4`, `cet6`, `gpa`,   
+			`contact_address`, `contact_postcode`,  
+			`home_address`, `home_postcode`,  
+			`enable`, `create_time`, `create_person`,  
+			`update_time`, `update_person`, `exam_num`) VALUES ( 
+			:cardtype,:cardno,
+			:role , :username , :password , :no , :name ,  
+			:en_name , :gender , :mobile , :phone , :email ,  
+			case when :age is null then 0 when cast( :age as char) ='null' then 0 when LENGTH(trim(:age)) &lt; 1 then 0 else :age end , 
+			:birthday , :education_background , :degree , :university ,  
+			:college , :major , 
+			case when :cet4 is null then 0 when cast( :cet4 as char) ='null' then 0 when LENGTH(trim(:cet4)) &lt; 1 then 0 else :cet4 end,
+			case when :cet6 is null then 0 when cast( :cet6 as char) ='null' then 0 when LENGTH(trim(:cet6)) &lt; 1 then 0 else :cet6 end,
+			case when :gpa is null then 0 when cast( :gpa as char) ='null' then 0 when LENGTH(trim(:gpa)) &lt; 1 then 0 else :gpa end,  
+			:contact_address , :contact_postcode , :home_address ,  
+			:home_postcode , :enable , :create_time , :create_person , 
+			:update_time , :update_person, :exam_num)
+	</BatchAddPerson>
+	
+	<ExistUserName>
+		select count(*) as ct from `SM_PERSON` where username=:userName 
+	</ExistUserName>
+	<ExistMobile>
+		select count(*) as ct from `SM_PERSON` where mobile=:mobile
+	</ExistMobile>
+	<BatchAddPersonRole>
+		insert into `SM_PERSON_ROLE`(`role_id`,`user_id`)
+		select getBaseRole('3') as role_id,`id` as user_id 
+		from `SM_PERSON`
+		where `username`=:username
+	</BatchAddPersonRole>
+	<BatchRemovePersonBaseRole>
+		delete from `SM_PERSON_ROLE`
+		where (`role_id`,`user_id`) in
+		(select getBaseRole('3') as role_id,`id` as user_id 
+		from `SM_PERSON`
+		where `username`=:username)
+	</BatchRemovePersonBaseRole>
+	<BatchAddPersonInClass>
+		insert into `CLASS_STUDENT`(class_id,student_id)
+		select :class_id as class_id,`id` as student_id 
+		from `SM_PERSON`
+		where `username`=:username
+	</BatchAddPersonInClass>
+	<BatchRemovePersonFromClass>
+		delete from `CLASS_STUDENT`
+		where (class_id,student_id) in
+		(select :class_id as class_id,`id` as student_id 
+		from `SM_PERSON`
+		where `username`=:username)
+	</BatchRemovePersonFromClass>
+
+</SQL>

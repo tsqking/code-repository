@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="university">
+	<!-- Result Map-->
+	<resultMap type="com.clps.tmp.campusRecruit.univ.university.vo.UniversityVo" id="UnivResultMap">
+		<id column="id" property="id"/>
+		<result column="parent_id" property="parent_id"/>
+		<result column="name" property="name"/>
+		<result column="type" property="type"/>
+		<result column="quality" property="quality"/>
+		<result column="country" property="country"/>
+		<result column="province" property="province"/>
+		<result column="city" property="city"/>
+		<result column="detail_addr" property="detail_addr"/>
+		<result column="website" property="website"/>
+		<result column="phone" property="phone"/>
+		<result column="email" property="email"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_user" property="create_user"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_user" property="update_user"/>
+		<result column="del" property="del"/>
+	</resultMap>
+	<sql id="All_Column_List" >
+		a.`id`,a.`parent_id`,a.`name`,e.`name` as `univ_name`,c.`name` as `provinceName`,d.`name` as `cityName`, o1.`name` as `type`, o2.`name` as `quality`, a.`country`, a.`province`, a.`city`,a.`detail_addr`,a.`website`,a.`phone`,a.`email`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`
+	</sql>
+	<sql id="All_branch_Column_List" >
+		a.`id`,a.`parent_id`,a.`name`,e.`name` as `univ_name`,c.`name` as `provinceName`,d.`name` as `cityName`, o1.`name` as `type`, o2.`name` as `quality`, a.`country`, a.`province`, a.`city`,a.`detail_addr`,a.`website`,a.`phone`,a.`email`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`
+	</sql>
+	
+	<sql id="All_Column_List3" >
+		a.`id`,a.`parent_id`,a.`name`,e.`name` as `univ_name`,a.`type`,a.`quality`,a.`country`,a.`province`,a.`city`,a.`detail_addr`,a.`website`,a.`phone`,a.`email`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`
+	</sql>
+	<sql id="Base_Column_List2" >
+		`parent_id`,`name`,`type`,`quality`,`country`,`province`,`city`,`detail_addr`,`website`,`phone`,`email`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="Base_Column_List3" >
+		`name`,`type`,`quality`,`country`,`province`,`city`,`detail_addr`,`website`,`phone`,`email`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="findCondition_count">
+		<where>
+		    1=1
+			<if test="id !=null">AND id=#{name}  </if>
+			<if test="name !=null">AND a.id=#{name}  </if>
+			<if test="city !=null">AND a.city=#{city}  </if>
+			<if test="province !=null">AND a.province=#{province}  </if>
+		</where>
+	</sql>
+	<sql id="findbranchCondition_count">
+		<where>
+		    1=1
+			<if test="parent_id !=null">AND a.id=#{parent_id}  </if>
+			<if test="id !=null">AND a.parent_id=#{id}  </if>
+		</where>
+	</sql>
+	<sql id="Base_Column_List_values" >
+		#{parent_id},#{name}, #{type}, #{quality}, #{country}, #{province}, #{city}, #{detail_addr},#{website},#{phone},#{email},#{create_time},#{create_user},#{update_time},#{update_user}
+	</sql>
+	<insert id="addUniversity" parameterType="Object">
+		insert into UNIVERSITY (<include refid="Base_Column_List2"/>) values(#{parent_id},#{name}, #{type}, #{quality}, #{country}, #{province}, #{city}, #{detail_addr},#{website},#{phone},#{email},#{create_time},#{create_user},#{update_time},#{update_user})
+	</insert>
+	
+	<insert id="batchAddUniversity" parameterType="map">
+		insert into UNIVERSITY (
+		<include refid="Base_Column_List3" />
+		) values
+		<foreach collection="list" item="item" index="key" 
+			separator=",">
+			(#{item.name},#{item.type},#{item.quality},#{item.country},#{item.province},#{item.city},#{item.detail_addr},#{item.website},#{item.phone},#{item.email},#{item.create_time},#{item.create_user},#{item.update_time},#{item.update_user})
+		</foreach>
+	</insert>
+	
+	
+	<!-- 查询所有学校信息 -->
+	<select id="selectUniversity" resultType="UniversityVo" parameterType="map">
+		select <include refid="All_Column_List"/> from UNIVERSITY a
+		left join `UNIVERSITY`    e on  a.`parent_id`=e.id
+		left join `CHINA_REGIONS` c on  a.`province`=c.code
+		left join `CHINA_REGIONS` d on  a.`city`=d.code
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='UNIV_LEVEL') o1 on a.`type`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='UNIV_PROP') o2 on a.`quality`=o2.`value`
+		<include refid="findCondition_count" /> 
+		and a.parent_id=0 and a.del="N" ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>		
+		LIMIT ${offset},${limit} 
+	</select>
+	<!-- 查询所有分校信息 -->
+	<select id="selectUnivBranch" resultType="UniversityVo" parameterType="map">
+		select <include refid="All_branch_Column_List"/> from UNIVERSITY  a
+		left join `UNIVERSITY`    e on  a.`parent_id`=e.id
+		left join `CHINA_REGIONS` c on  a.`province`=c.code
+		left join `CHINA_REGIONS` d on  a.`city`=d.code
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='UNIV_LEVEL') o1 on a.`type`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='UNIV_PROP') o2 on a.`quality`=o2.`value`
+		<include refid="findbranchCondition_count" /> and a.parent_id&lt;>0 and a.del="N" ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>		
+		LIMIT ${offset},${limit} 
+	</select>
+	<!-- 查询更新学校信息 -->
+	<select id="getEditUniv" resultType="UniversityVo" parameterType="map">
+		select <include refid="All_Column_List3"/> from  UNIVERSITY a
+		left join `UNIVERSITY`  e on  a.`parent_id`=e.id
+		where  a.id=#{id} and a.del="N"
+	</select>
+	
+	<!-- 删除学校信息 -->
+	<update id="updateUniversityDel">
+		update UNIVERSITY set del="Y" where id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach> or parent_id in <foreach item="item" collection="array" open="(" separator="," close=")"> #{item} </foreach>
+	</update>
+	
+	<!-- 删除分校信息 -->
+	<update id="updateUnivBranchDel">
+		update UNIVERSITY set del="Y" where id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach>
+	</update>
+	
+	<!-- 编辑学校信息 -->
+	<update id="editUniversity" parameterType="Object">
+		update UNIVERSITY set name=#{name}, type=#{type}, quality=#{quality}, country=#{country}, province=#{province}, city=#{city}, detail_addr=#{detail_addr},website=#{website},phone=#{phone},email=#{email}
+		,update_time=#{update_time},update_user=#{update_user} where id=#{id}
+	</update>
+	<!-- 所有学校 NUM-->
+	<select id="getAllUniv" resultType="long">
+		select count(*) from UNIVERSITY a <include refid="findCondition_count" /> and a.del="N" and a.parent_id=0
+	</select>
+	<!-- 所有分校 NUM-->
+	<select id="getAllUnivBranch" resultType="long" parameterType="map">
+		select count(*) from UNIVERSITY a <include refid="findbranchCondition_count" /> and a.parent_id&lt;>0  and a.del="N"
+	</select>
+	<!-- 获取所有总校 -->
+	<select id="getMainUniv" resultType="SelectVo" parameterType="map">
+	   select id,name as `text` from  UNIVERSITY  where parent_id=#{parent_id} and del="N"
+	</select>
+	<!-- 获取所有总校 -->
+	<select id="getUniv" resultType="SelectVo" parameterType="map">
+	   select id,name as `text` from  UNIVERSITY where id=#{parent_id} and del="N"
+	</select>
+	<!-- 获取所有分校名称 -->
+	<select id="getAllUnivBranchName" resultType="SelectVo" parameterType="map">
+		select name as `text`,id from UNIVERSITY where  parent_id=#{parent_id} and del="N"
+	</select>
+	<select id="getProvince" parameterType="map" resultType="ChinaRegionVo">
+		select id,code,name,parent_id from CHINA_REGIONS where code=#{province}
+	</select>
+	<select id="getCity" parameterType="map" resultType="ChinaRegionVo">
+		select id,code,name,parent_id from CHINA_REGIONS where code=#{city}
+	</select>
+	<!--检查学校名称是否重复-->
+	<select id="getInfo" parameterType="String" resultType="Integer">
+	 select count(*) from `UNIVERSITY` where  `parent_id`=0 and `del`='N' and `name`=#{univName}
+	</select>
+	<select id="selectcheckname" resultType="UniversityVo" parameterType="String">
+		select name from `UNIVERSITY` where `parent_id`=0 and `del`='N' and `name`=#{universityName};
+	</select>
+	<!-- 获取省市区的code  -->
+	<select id="getRegionCode" parameterType="String" resultType="String">
+	    select code from `CHINA_REGIONS`  where `name`=#{sName};
+	</select>
+	<select id="getAllUnivName" resultType="String">
+		select `name` from `UNIVERSITY`
+	</select>
+</mapper>

@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="personPlan">
+    
+    <!-- 测试作业管理界面的数据表格 -->
+    <sql id="paperInfoWhere">
+        <where>
+		    a.plan_id=#{plan_id} and a.teacher_id=#{teacher_id} and a.del="N"
+			<if test="paper_type !=null">and a.paper_type=#{paper_type}  </if>
+			<if test="status !=null">and a.status=#{status}  </if>
+			<if test="paper_number !=null">and a.paper_number like concat('%',#{paper_number},'%') </if>
+			<if test="paper_start_time !=null">and (a.`paper_start_time`&gt;=#{paper_start_time_1} and a.`paper_start_time`&lt;=#{paper_start_time_2})  </if>
+			<if test="paper_end_time !=null">and (a.`paper_end_time`&gt;=#{paper_end_time_1} and a.`paper_end_time`&lt;=#{paper_end_time_2})  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getPaperCount" resultType="long" parameterType="map">
+		select count(*) from PLAN_PAPER a
+		<include refid="paperInfoWhere"/>	
+	</select>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getPaper" resultType="PlanPaperVo" parameterType="map">
+		select a.*,b.`name` `paper_name`,c.`name` `class_name`,o1.`name` `status_name`,o2.`name` `paper_type_name`
+		from PLAN_PAPER a
+		left join `PAPER` b on a.`paper_id`=b.`id`
+		left join `CLASS` c on a.`class_id`=c.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_STATUS') o1 on a.`status`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o2 on a.`paper_type`=o2.`value`
+		<include refid="paperInfoWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>		
+		LIMIT ${offset},${limit} 
+	</select>
+    
+    
+    <!-- 试卷列表界面的数据表格 -->
+    <sql id="paperListWhere">
+        <where>
+		    a.enable='T' and a.finish_flag='1' and a.del="N" and
+		    id not in (SELECT distinct(paper_id) FROM PLAN_PAPER WHERE
+							plan_id=#{plan_id} and course_id=#{course_id} and class_id=#{class_id} and del='N')
+			<if test="name !=null">and a.name like concat('%',#{name},'%')  </if>
+			<if test="use_flag !=null">and a.use_flag=#{use_flag}  </if>
+			<if test="no !=null">and a.no like concat('%',#{no},'%') </if>
+			<if test="property !=null">and a.property=#{property}  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的试卷信息 -->
+	<select id="getPaperListCount" resultType="long" parameterType="map">
+		select count(*) from PAPER a
+		<include refid="paperListWhere"/>	
+	</select>
+    <!-- 查询所有的试卷信息 -->
+	<select id="getPaperList" resultType="paper" parameterType="map">
+		select a.*,o1.`name` `use_flag_name`,o2.`name` `property_name`
+		from PAPER a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='USE_FLAG') o1 on a.`use_flag`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o2 on a.`property`=o2.`value`
+		<include refid="paperListWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+	
+    <!-- 添加新的作业信息 -->
+	<insert id="addPaperTest" parameterType="paper" useGeneratedKeys="true" keyProperty="id">
+	    INSERT INTO `PLAN_PAPER` (
+	    	`status`, `plan_id`, `course_id`, 
+	    	`class_id`, `teacher_id`, `paper_id`, 
+	    	`paper_number`, `paper_type`, `paper_start_time`, 
+	    	`paper_end_time`, `paper_long_time`, `paper_remark`, `url`, 
+	    	`del`, `create_time`, `create_person`, 
+	    	`update_time`, `update_person`) VALUES (
+	    	#{status}, #{plan_id}, #{course_id}, 
+	    	#{class_id}, #{teacher_id}, #{paper_id}, 
+	    	#{paper_number}, #{paper_type}, #{paper_start_time}, 
+	    	#{paper_end_time}, #{paper_long_time}, #{paper_remark}, #{url},
+	    	#{del}, #{create_time}, #{create_person}, 
+	    	#{update_time}, #{update_person})
+	</insert>
+	
+    <!-- 删除测试作业 -->
+	<update id="updatePaperTestDel">
+		update PLAN_PAPER set del="Y",`update_time`=#{update_time},`update_person`=#{create_person} where id in <foreach item="item" collection="idList" open="(" separator="," close=")">#{item} </foreach>
+	</update>
+    
+    <!-- 查询试卷信息 -->
+	<select id="findPaperInfo" resultType="paper" parameterType="map">
+	    select a.*,o1.`name` `use_flag_name`,o2.`name` `property_name`
+		from PAPER a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='USE_FLAG') o1 on a.`use_flag`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o2 on a.`property`=o2.`value`
+	    WHERE a.id=#{id} 
+	</select>
+    
+    <!-- 查询测试联系信息 -->
+	<select id="findPaperTestInfo" resultType="PlanPaperVo" parameterType="map">
+	    select a.*,b.`name` `paper_name`,c.`name` `class_name`,o1.`name` `status_name`,o2.`name` `paper_type_name`
+		from PLAN_PAPER a
+		left join `PAPER` b on a.`paper_id`=b.`id`
+		left join `CLASS` c on a.`class_id`=c.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_STATUS') o1 on a.`status`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o2 on a.`paper_type`=o2.`value`
+	    WHERE a.id=#{id} 
+	</select>
+    
+    <!-- 删除测试作业 -->
+	<update id="editPaperTest">
+		update PLAN_PAPER set 
+			`update_time`=#{update_time},`update_person`=#{update_person},
+			`paper_type`=#{paper_type},`paper_long_time`=#{paper_long_time},
+			`paper_start_time`=#{paper_start_time},`paper_end_time`=#{paper_end_time},
+			`paper_remark`=#{paper_remark}
+		where id=#{id}
+	</update>
+    
+    <!-- 查询班级内的所有学生id的列表 -->
+	<select id="findAllStuIds" resultType="String" parameterType="PlanPaperVo">
+	    SELECT distinct student_id FROM CLASS_STUDENT where class_id=#{class_id}
+	</select>
+    
+	<!-- 添加学生作业记录 -->
+	<insert id="addPaperHis" parameterType="PlanPaperStuHisVo" useGeneratedKeys="true" keyProperty="id">
+	    INSERT INTO `PLAN_PAPER_STU_HIS` (
+	      `plan_paper_id`, `student_id`, `status`, 
+	      `del`, `create_time`, `create_person`, 
+	      `update_time`, `update_person`) VALUES (
+	      #{plan_paper_id}, #{student_id}, #{status}, 
+	      #{del}, #{create_time}, #{create_person}, 
+	      #{update_time}, #{update_person})
+	</insert>
+	
+	<!-- 删除测试作业 -->
+	<update id="updatePaperTestStatus" parameterType="PlanPaperVo">
+		update PLAN_PAPER set 
+			`status`=#{status}
+		where id=#{id}
+	</update>
+	
+	<!-- 测试作业完成情况数据表格 -->
+    <sql id="paperHisInfoWhere">
+        <where>
+		    a.plan_paper_id=#{plan_paper_id} and a.del="N"
+			<if test="student_name !=null">and b.`name` like concat('%',#{student_name},'%')  </if>
+			<if test="status !=null">and a.status=#{status}  </if>
+			<if test="start_time !=null">and (a.`start_time`&gt;=#{start_time_1} and a.`start_time`&lt;=#{start_time_2})  </if>
+			<if test="end_time !=null">and (a.`end_time`&gt;=#{end_time_1} and a.`end_time`&lt;=#{end_time_2})  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getPaperHisCount" resultType="long" parameterType="map">
+		select count(*) from PLAN_PAPER_STU_HIS a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		<include refid="paperHisInfoWhere"/>	
+	</select>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getPaperHis" resultType="PlanPaperStuHisVo" parameterType="map">
+		select a.*,b.`name` `student_name`,c.`name` `teacher_name`,e.`id` `paper_id`,e.`name` `paper_name`,o1.`name` `status_name`
+		from PLAN_PAPER_STU_HIS a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		left join `SM_PERSON` c on a.`teacher_id`=c.`id`
+		left join `PLAN_PAPER` d on a.`plan_paper_id`=d.`id`
+		left join `PAPER` e on d.`paper_id`=e.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_FINISH_STATUS') o1 on a.`status`=o1.`value`
+		<include refid="paperHisInfoWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+    
+	
+    <!-- 学生作业列表 -->
+    <sql id="stuPaperHisInfoWhere">
+        <where>
+		    a.student_id=#{student_id} and a.del="N"
+			<if test="paper_number !=null">and d.`paper_number` like concat('%',#{paper_number},'%')  </if>
+			<if test="paper_name !=null">and e.`name` like concat('%',#{paper_name},'%')  </if>
+			<if test="paper_type !=null">and d.paper_type=#{paper_type}  </if>
+			<if test="status !=null">and a.status=#{status}  </if>
+			<if test="start_time !=null">and (a.`start_time`&gt;=#{start_time_1} and a.`start_time`&lt;=#{start_time_2})  </if>
+			<if test="end_time !=null">and (a.`end_time`&gt;=#{end_time_1} and a.`end_time`&lt;=#{end_time_2})  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getStuPaperHisCount" resultType="long" parameterType="map">
+		select count(*) from PLAN_PAPER_STU_HIS a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		left join `PLAN_PAPER` d on a.`plan_paper_id`=d.`id`
+		left join `PAPER` e on d.`paper_number`=e.`no`
+		<include refid="stuPaperHisInfoWhere"/>	
+	</select>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getStuPaperHis" resultType="PlanPaperStuHisVo" parameterType="map">
+		select a.*,b.`name` `student_name`,c.`name` `teacher_name`,
+			d.`paper_number` `paper_number`,e.`name` `paper_name`,
+			f.`name` `class_name`,g.`name` `course_name`,
+			d.`paper_start_time` `paper_start_time`,
+			d.`paper_end_time` `paper_end_time`,
+			d.`paper_long_time` `paper_long_time`,
+			o2.`name` `paper_type_name`,
+			o1.`name` `status_name`,e.id `paper_id`,d.`url`
+		from PLAN_PAPER_STU_HIS a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		left join `SM_PERSON` c on a.`teacher_id`=c.`id`
+		left join `PLAN_PAPER` d on a.`plan_paper_id`=d.`id`
+		left join `PAPER` e on d.`paper_number`=e.`no`
+		left join `CLASS` f on d.`class_id`=f.`id`
+		left join `COURSE` g on d.`course_id`=g.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_FINISH_STATUS') o1 on a.`status`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o2 on d.`paper_type`=o2.`value`
+		<include refid="stuPaperHisInfoWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+    
+	
+    <!-- 学生反馈信息查询 (教师使用)-->
+    <sql id="teaFeedBackInfoWhere">
+        <where>
+		    a.type='2' and a.class_id=#{class_id} and a.course_id=#{course_id} and a.teacher_id=#{teacher_id}
+			<if test="user_name !=null">and c.`name` like concat('%',#{user_name},'%')  </if>
+			<if test="update_time !=null">and (a.`update_time`&gt;=#{update_time_1} and a.`update_time`&lt;=#{update_time_2})  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getTeaFeedBackCount" resultType="long" parameterType="map">
+		select count(*) from GENERAL_MATUAL_EVAL a
+		left join `SM_PERSON` c on a.`student_id`=c.`id`
+		<include refid="teaFeedBackInfoWhere"/>	
+	</select>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getTeaFeedBack" resultType="EvalVo" parameterType="map">
+		select a.*,
+			b.`name` `teacher_name`,c.`name` `student_name`,
+			d.`name` `course_name`,e.`name` `class_name`
+		from GENERAL_MATUAL_EVAL a
+		left join `SM_PERSON` b on a.`teacher_id`=b.`id`
+		left join `SM_PERSON` c on a.`student_id`=c.`id`
+		left join `COURSE` d on a.`course_id`=d.`id`
+		left join `CLASS` e on a.`class_id`=e.`id`
+		<include refid="teaFeedBackInfoWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+    
+	
+	<!-- 教师反馈信息查询(学生使用) -->
+    <sql id="stuFeedBackInfoWhere">
+        <where>
+		    a.type='1' and a.class_id=#{class_id} and a.course_id=#{course_id} and a.student_id=#{student_id}
+			<if test="user_name !=null">and b.`name` like concat('%',#{user_name},'%')  </if>
+			<if test="update_time !=null">and (a.`update_time`&gt;=#{update_time_1} and a.`update_time`&lt;=#{update_time_2})  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getStuFeedBackCount" resultType="long" parameterType="map">
+		select count(*) from GENERAL_MATUAL_EVAL a
+		left join `SM_PERSON` b on a.`teacher_id`=b.`id`
+		<include refid="stuFeedBackInfoWhere"/>	
+	</select>
+    <!-- 查询所有的测试作业信息 -->
+	<select id="getStuFeedBack" resultType="EvalVo" parameterType="map">
+		select a.*,
+			b.`name` `teacher_name`,c.`name` `student_name`,
+			d.`name` `course_name`,e.`name` `class_name`
+		from GENERAL_MATUAL_EVAL a
+		left join `SM_PERSON` b on a.`teacher_id`=b.`id`
+		left join `SM_PERSON` c on a.`student_id`=c.`id`
+		left join `COURSE` d on a.`course_id`=d.`id`
+		left join `CLASS` e on a.`class_id`=e.`id`
+		<include refid="stuFeedBackInfoWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+	
+	
+    <!-- 查询教育计划详细 -->
+	<select id="getPlanDetail" resultType="PlanVo" parameterType="map">
+		select a.*,
+			b.`name` `course_id_name`,c.`name` `class_id_name`
+		from TEACH_PLAN a
+		left join `COURSE` b on a.`course_id`=b.`id`
+		left join `CLASS` c on a.`class_id`=c.`id`
+		WHERE a.`course_id`=#{course_id} and a.`class_id`=#{class_id}
+	</select>
+    
+    
+    <!-- 导出每个人的成绩-->
+	<select id="exportPaperScore" resultType="map" parameterType="map">
+		select  b.`name` `student_name`,b.`no` `student_no`,b.`id` `student_id`,
+        c.`name` `teacher_name`,
+		e.`id` `paper_id`,e.`name` `paper_name`,o1.`name` `paper_status`,
+		a.long_time,a.score total_score
+		from PLAN_PAPER_STU_HIS a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		left join `SM_PERSON` c on a.`teacher_id`=c.`id`
+		left join `PLAN_PAPER` d on a.`plan_paper_id`=d.`id`
+		left join `PAPER` e on d.`paper_id`=e.`id`
+		left join (select oo1.`name` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_FINISH_STATUS') o1 on a.`status`=o1.`value`
+		where a.plan_paper_id=#{plan_paper_id} and a.del="N"
+	</select>
+	
+	
+	<!-- 导出每个人试卷题块成绩 -->
+	<select id="exportPaperSectionScore" resultType="map" parameterType="map">
+		SELECT a.name section_name,d.question_number,concat(e.question_score,'/',c.question_score_all) get_score
+		FROM SECTION a,PAPER_SECTION b,
+			(SELECT sum(a.question_score) question_score_all,a.section_id FROM SECTION_QUESTION a
+				group by a.section_id) c,
+			(SELECT count(a.question_id) question_number,a.section_id FROM SECTION_QUESTION a
+				group by a.section_id) d,
+			(SELECT a.section_id,sum(b.score) question_score FROM SECTION_QUESTION a,ANSWER_SHEET b
+				where a.question_id=b.question_id and b.user_id=#{student_id} and b.paper_id=#{paper_id}
+				group by a.section_id) e
+		where a.id=b.section_id and c.section_id=b.section_id 
+			and c.section_id=d.section_id and c.section_id=e.section_id 
+			and b.paper_id=#{paper_id}
+		order by b.`order` asc
+	</select>
+	
+	<!-- 导出每个人试卷题目成绩 -->
+	<select id="exportPaperQuestionScore" resultType="map" parameterType="map">
+		SELECT
+			a.score,
+			b.question_score
+		FROM
+			(
+				SELECT
+					b.question_id ,
+					b.question_score ,
+					b.section_id ,
+					a.`order` `order1` ,
+					b.`order` `order2`
+				FROM
+					`paper_section` a
+				LEFT JOIN `section_question` b ON a.section_id = b.section_id
+				WHERE
+					a.paper_id = #{paper_id}
+			) b
+		LEFT JOIN(
+			SELECT
+				a.question_id ,
+				a.score
+			FROM
+				`answer_sheet` a
+			WHERE
+				a.paper_id = #{paper_id}
+			AND a.user_id = #{student_id}
+		) a ON a.question_id = b.question_id
+		LEFT JOIN `question` c on c.id = b.question_id
+		ORDER BY
+			b.order1 ASC,
+			b.order2 ASC
+	</select>
+    
+    <!-- 一键签到 -->
+	<update id="oneKeyPro" parameterType="map">
+		update PROCESS_EVAL set 
+			`sign`=#{sign},`update_time`=#{update_time},`update_person`=#{update_person}
+		where course_id=#{course_id} and class_id=#{class_id} and point_id=#{point_id}
+	</update>
+	
+	<!-- 一键评分 -->
+	<update id="oneKeyScore" parameterType="map">
+		update PROCESS_EVAL set 
+			`score`=#{score},`update_time`=#{update_time},`update_person`=#{update_person}
+		where course_id=#{course_id} and class_id=#{class_id} and point_id=#{point_id}
+	</update>
+
+	<!-- 核对人数 -->
+	<select id="checkClassStudent" resultType="map" parameterType="map">
+	    (SELECT student_id FROM CLASS_STUDENT WHERE class_id=#{class_id} and student_id not in 
+			(SELECT student_id FROM PROCESS_EVAL WHERE course_id=#{course_id} and class_id=#{class_id} and point_id=#{point_id}))
+	</select>
+	
+	<!-- 写入初始数据 -->
+	<insert id="insertNewPro" parameterType="map">
+		INSERT INTO `PROCESS_EVAL` (
+			`course_id`, `class_id`, `point_id`, 
+			`teacher_id`, `student_id`, `create_time`, 
+			`create_person`, `update_time`) 
+		VALUES (
+			#{course_id}, #{class_id}, #{point_id},
+			#{teacher_id}, #{student_id}, #{create_time},
+			#{create_person}, #{update_time})
+	</insert>
+	
+	<!-- 检查班级课程唯一  -->
+	<select id="checkCourseClassOnly" resultType="string" parameterType="PlanVo">
+	    SELECT count(*) FROM TEACH_PLAN where course_id=#{course_id} and class_id=#{class_id}
+	</select>
+	
+	<!-- 导出每个人的信息-->
+	<select id="exportPaperScore2" resultType="map" parameterType="map">
+		SELECT
+			b.`name` `student_name`,
+			b.`no` `student_no`,
+			b.mobile `mobile`,
+			c.`name` `teacher_name`,
+			e.`name` `paper_name`,
+			o1.`name` `paper_status`,
+			a.long_time,
+			a.score total_score,
+			b.`id` `student_id`,
+			e.`id` `paper_id`
+		FROM
+			PLAN_PAPER_STU_HIS a
+		LEFT JOIN `SM_PERSON` b ON a.`student_id` = b.`id`
+		LEFT JOIN `SM_PERSON` c ON a.`teacher_id` = c.`id`
+		LEFT JOIN `PLAN_PAPER` d ON a.`plan_paper_id` = d.`id`
+		LEFT JOIN `PAPER` e ON d.`paper_id` = e.`id`
+		LEFT JOIN (
+			SELECT
+				oo1.`name` AS `name`,
+				oo1.`value`
+			FROM
+				SM_OPTION oo1
+			JOIN SM_OPTION oo2 ON oo1.`parent_id` = oo2.`id`
+			WHERE
+				oo2.`value` = 'PAPER_FINISH_STATUS'
+		) o1 ON a.`status` = o1.`value`
+		WHERE
+			a.plan_paper_id = #{plan_paper_id}
+		AND a.del = "N"
+	</select>
+	
+	<!-- 导出每个人试卷题目和答案成绩 -->
+	<select id="exportPaperAnswer" resultType="map" parameterType="map">
+		SELECT
+			REPLACE(a.answer,'#$#',' - ') answer,
+			o1. NAME type_name
+		FROM
+			(
+				SELECT
+					b.question_id,
+					b.section_id,
+					a.`order` `order1`,
+					b.`order` `order2`
+				FROM
+					`paper_section` a
+				LEFT JOIN `section_question` b ON a.section_id = b.section_id
+				WHERE
+					a.paper_id = #{paper_id}
+			) b
+		LEFT JOIN (
+			SELECT
+				a.question_id,
+				a.answer
+			FROM
+				`answer_sheet` a
+			WHERE
+				a.paper_id = #{paper_id}
+			AND a.user_id = #{student_id}
+		) a ON a.question_id = b.question_id
+		LEFT JOIN `question` c ON c.id = b.question_id
+		LEFT JOIN (
+			SELECT
+				oo1.`name` AS `name`,
+				oo1.`value`
+			FROM
+				SM_OPTION oo1
+			JOIN SM_OPTION oo2 ON oo1.`parent_id` = oo2.`id`
+			WHERE
+				oo2.`value` = 'QUST_TYPE'
+		) o1 ON c.type = o1.`value`
+		ORDER BY
+			b.order1 ASC,
+			b.order2 ASC	
+	</select>
+	
+	<!-- 查询考生成绩单一  -->
+	<select id="exportTranscript" resultType="map" parameterType="map">
+	    select `id` as user_id, `name`, cardno, exam_num, exam_date, `subject`, `section_name`, total, sum( score) as part
+from(
+      select sp.id, sp.`name`,sp.cardno,sp.exam_num,substring(pp.paper_start_time,1,8) as exam_date,q.`type`, o1.name as `type_name`,`as`.score, 
+             ai.score as total,o2.name as `subject`,s.id as section_id,s.name as section_name
+      from question q left join section_question sq on q.id=sq.question_id
+           left join paper_section ps on sq.section_id=ps.section_id
+           left join section s on ps.section_id=s.id
+           left join plan_paper pp on ps.paper_id=pp.paper_id
+           left join answer_sheet `as` on pp.paper_id=`as`.paper_id and q.id=`as`.question_id
+           left join sm_person sp on `as`.user_id=sp.id
+           left join answer_info ai on `as`.paper_id=ai.paper_id and `as`.user_id=ai.user_id and `as`.user_type=ai.user_type
+           left join (select oo1.`name` as `name`,oo1.`value` from SM_OPTION oo1 join SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where oo2.`value`='QUST_TYPE') o1 on q.`type`=o1.`value`
+           left join class c on c.id=pp.class_id
+           left join (select oo1.`name` as `name`,oo1.`value` from SM_OPTION oo1 join SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where oo2.`value`='DIRECTION') o2 on c.`direction`=o2.`value`
+      where pp.id=#{plan_paper_id}
+      and `as`.user_type=1
+      and `as`.user_id in
+      <foreach collection="student_ids" index="index" item="item" open="(" close=")" separator=",">  
+	   		 #{item}
+	  </foreach>
+    ) a
+group by id, `name`, cardno, exam_num, exam_date, `section_name`, total, `subject`
+order by id
+	</select>
+	
+	<!-- 查询历史总成绩分布 -->
+	<select id="selectRateData" resultType="map" parameterType="java.lang.String">
+	select concat(cast(`0-9`/`total`*100 as decimal(5,2)),'%') as `rate1`,concat(cast(`10-19`/`total`*100 as decimal(5,2)),'%') as `rate2`,
+       concat(cast(`20-29`/`total`*100 as decimal(5,2)),'%') as `rate3`,concat(cast(`30-39`/`total`*100 as decimal(5,2)),'%') as `rate4`,
+       concat(cast(`40-49`/`total`*100 as decimal(5,2)),'%') as `rate5`,concat(cast(`50-59`/`total`*100 as decimal(5,2)),'%') as `rate6`,
+       concat(cast(`60-69`/`total`*100 as decimal(5,2)),'%') as `rate7`,concat(cast(`70-79`/`total`*100 as decimal(5,2)),'%') as `rate8`,
+       concat(cast(`80-89`/`total`*100 as decimal(5,2)),'%') as `rate9`,concat(cast(`90-99`/`total`*100 as decimal(5,2)),'%') as `rate10`,
+       concat(cast(`100-109`/`total`*100 as decimal(5,2)),'%') as `rate11`,concat(cast(`110-120`/`total`*100 as decimal(5,2)),'%') as `rate12`
+from (
+      select  sum(case when score&lt;10 then 1 else 0 end)   AS `0-9`,
+              sum(case when score&gt;=10 and score&lt;20 then 1 else 0 end)   AS `10-19`,
+              sum(case when score&gt;=20 and score&lt;30 then 1 else 0 end)   AS `20-29`,
+              sum(case when score&gt;=30 and score&lt;40 then 1 else 0 end)   AS `30-39`,
+              sum(case when score&gt;=40 and score&lt;50 then 1 else 0 end)   AS `40-49`,
+              sum(case when score&gt;=50 and score&lt;60 then 1 else 0 end)   AS `50-59`,
+              sum(case when score&gt;=60 and score&lt;70 then 1 else 0 end)   AS `60-69`,
+              sum(case when score&gt;=70 and score&lt;80 then 1 else 0 end)   AS `70-79`,
+              sum(case when score&gt;=80 and score&lt;90 then 1 else 0 end)   AS `80-89`,
+              sum(case when score&gt;=90 and score&lt;100 then 1 else 0 end)   AS `90-99`,
+              sum(case when score&gt;=100 and score&lt;110 then 1 else 0 end)   AS `100-109`,
+              sum(case when score&gt;=110 and score&lt;=120 then 1 else 0 end)   AS `110-120`,
+              sum(1) as `total`
+      from (  
+            select distinct c.direction,ai.paper_id,ai.user_id,ai.score
+            from answer_info ai left join class_student cs on ai.user_id=cs.student_id
+                 left join class c on cs.class_id=c.id
+            where 1=1
+            and ai.user_type=1
+            and ai.score is not null
+            and c.direction=#{_parameter}
+           ) a
+     ) aa
+	</select>
+</mapper>

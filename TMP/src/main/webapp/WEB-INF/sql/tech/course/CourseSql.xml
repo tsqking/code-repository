@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<downloadCourseData>
+		select o1.`name` as `category`, 
+		       GROUP_CONCAT(distinct e.`name[lang]` SEPARATOR ', ') as `sub_category`,
+		       GROUP_CONCAT(distinct d.`name[lang]` SEPARATOR ', ') as `ssub_category`,
+		       aa.`no` as `course_no`,aa.`name` as `course_name`,aa.`description[lang]` as `course_objectives`,
+		       concat_ws(' ',aa.`cost_number`,o2.`name`) as `duration`,o3.`name` as `level`,o4.`name` as `trainer`,
+		       o5.`name` as `presentation`, o6.`name` as `student_manual`,o7.`name` as `active_book`,
+		       o8.`name` as `quiz`,o9.`name` as `exercise_platform`,aa.`target_client`
+		from  `COURSE` aa  
+		      left join `COURSE_POINT` a  on a.course_id=aa.id 
+		      left join `SKILL_POINT` b on a.point_id=b.point_id 
+		      left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		      left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		      left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='CSE_TYPE') o1 on aa.`category`=o1.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='COST_UNIT') o2 on aa.`cost_unit`=o2.`value` 
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='CSE_DIFF') o3 on aa.`level`=o3.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='TRAINER_AVL') o4 on aa.`trainer_avl`=o4.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='AVL') o5 on aa.`trainer_avl`=o5.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='AVL') o6 on aa.`stu_manual_avl`=o6.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='AVL') o7 on aa.`act_book_avl`=o7.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='AVL') o8 on aa.`quiz_avl`=o8.`value`
+		      left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='AVL') o9 on aa.`exec_pf_avl`=o9.`value`
+		[where]
+		group by aa.`id` 
+	</downloadCourseData>
+	
+	<getCoursePage>
+		select distinct a.`id`,a.`no`,a.`name[lang]` as `name`,e.`name` as `property`,c.`name` as `direction`,b.`name` as `enable`,f.`name` as `lock`,a.`update_time`,a.`update_person`
+		from `COURSE` a
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='STATUS') b on a.`enable`=b.`value`                  
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='DIRECTION') c on a.`direction`=c.`value` 
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='CSE_PROPERTY') e on a.`property`=e.`value`
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') f on a.`lock`=f.`value`
+		     left join `COURSE_POINT` aa  on aa.course_id=a.id 
+		     left join `SKILL_POINT` bb on aa.point_id=bb.point_id 
+		     left join `SKILL` cc on ((bb.skill_id=cc.id and cc.`level`='3'))
+		     left join `SKILL` dd on ((cc.parent_id=dd.id and dd.`level`='2') or (bb.skill_id=dd.id and dd.`level`='2'))
+		     left join `SKILL` ee on ((dd.parent_id=ee.id and ee.`level`='1') or (bb.skill_id=ee.id and ee.`level`='1'))
+		[where] [order] limit [start],[number];
+	</getCoursePage>
+	
+	<getCoursePageAllCount>
+		select count(distinct a.`id`) as ct
+		from `COURSE` a
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='STATUS') b on a.`enable`=b.`value`                  
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='DIRECTION') c on a.`direction`=c.`value` 
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='CSE_PROPERTY') e on a.`property`=e.`value`
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') f on a.`lock`=f.`value`
+			 left join `COURSE_POINT` aa  on aa.course_id=a.id 
+		     left join `SKILL_POINT` bb on aa.point_id=bb.point_id 
+		     left join `SKILL` cc on ((bb.skill_id=cc.id and cc.`level`='3'))
+		     left join `SKILL` dd on ((cc.parent_id=dd.id and dd.`level`='2') or (bb.skill_id=dd.id and dd.`level`='2'))
+		     left join `SKILL` ee on ((dd.parent_id=ee.id and ee.`level`='1') or (bb.skill_id=ee.id and ee.`level`='1'))
+		[where];
+	</getCoursePageAllCount>
+	
+	<insertCourse>
+		insert into `COURSE`(`no`,`name`,`name_en_US`,`description`,`description_en_US`,`property`,`direction`,`function`,
+		            `function_en_US`,`enable`,`lock`,`create_time`,`create_person`,`update_time`,`update_person`,
+		            `category`,`cost_number`,`cost_unit`,`level`,`trainer_avl`,
+		            `presentation_avl`,`stu_manual_avl`,`act_book_avl`,`quiz_avl`,`exec_pf_avl`,`target_client`)
+		values(:no,:name,:name_en_US,:description,:description_en_US,:property,:direction,:function,:function_en_US,:enable,
+				:lock,:create_time,:create_person,:update_time,:update_person,
+				:category,:cost_number,:cost_unit,:level,:trainer_avl,
+				:presentation_avl,:stu_manual_avl,:act_book_avl,:quiz_avl,:exec_pf_avl,:target_client)
+	</insertCourse>
+	
+	<queryCourse>
+		select f.`id`,f.`no`,f.`name`,f.`name_en_US`,f.`description`,f.`description_en_US`,f.`property`,f.`direction`,f.`function`,f.`function_en_US`,
+		       f.`enable`,f.`lock`,f.`create_time`,f.`create_person`,f.`update_time`,f.`update_person`,
+		       f.`category`,f.`cost_number`,f.`cost_unit`,f.`level`,f.`trainer_avl`,
+		       f.`presentation_avl`,f.`stu_manual_avl`,f.`act_book_avl`,f.`quiz_avl`,f.`exec_pf_avl`,f.`target_client`,
+		       GROUP_CONCAT(distinct e.`name[lang]` SEPARATOR ', ') as `sub_category`,
+		       GROUP_CONCAT(distinct d.`name[lang]` SEPARATOR ', ') as `sub_sub_category`
+		from  `COURSE` f
+		      left join `COURSE_POINT` a  on a.course_id=f.id 
+		      left join `SKILL_POINT` b on a.point_id=b.point_id 
+		      left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		      left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		      left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		where f.`id`=:id
+	</queryCourse>
+	
+	<updateCourse>
+		update `COURSE`
+		set `name`=:name,`name_en_US`=:name_en_US,`description`=:description,`description_en_US`=:description_en_US,
+		    `property`=:property,`direction`=:direction,`function`=:function,`function_en_US`=:function_en_US,`enable`=:enable,`lock`=:lock,
+		    `update_time`=:update_time,`update_person`=:update_person,
+		    `category`=:category,`cost_number`=:cost_number,`cost_unit`=:cost_unit,`level`=:level,`trainer_avl`=:trainer_avl,`presentation_avl`=:presentation_avl,
+		    `stu_manual_avl`=:stu_manual_avl,`act_book_avl`=:act_book_avl,`quiz_avl`=:quiz_avl,`exec_pf_avl`=:exec_pf_avl,`target_client`=:target_client
+		where `id`=:id
+		and `update_time`=:last_update_time
+		and `update_person`=:last_update_person
+	</updateCourse>
+	
+	<checkTeachPlanWhenDelete>
+		select count(*) as `CT`
+		from `TEACH_PLAN`
+		where `course_id`=:id
+	</checkTeachPlanWhenDelete>
+	
+	<checkOtherWhenDelete>
+		select sum(`ct`) as `CT`
+		from ( 
+		     select 'id' as `id`,count(*) as `CT` FROM `PROCESS_EVAL` where `course_id`=:id
+		     union all
+		     select 'id' as `id`,count(*) as `CT` FROM `GENERAL_MATUAL_EVAL` where `course_id`=:id 
+		) a 
+		group by `id`
+	</checkOtherWhenDelete>
+	
+	<deleteCourse>
+		delete from `COURSE` where `id`=:id
+	</deleteCourse>
+	
+	<deleteCoursePointMapping>
+		delete from `COURSE_POINT` where `course_id`=:id
+	</deleteCoursePointMapping>
+	
+	<getSkillPage>
+		select distinct :course_id as `id`,e.`name[lang]` as `first_skill`,e.`id` as `first_skill_id`,d.`name[lang]` as `second_skill`,d.`id` as `second_skill_id`,c.`name[lang]` as `third_skill`,c.`id` as `third_skill_id`
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		where a.`id` in ( select b.`point_id` from `COURSE` a,`COURSE_POINT` b where a.`id`=b.`course_id` and a.`id`=:course_id)
+		and 1=1
+		[where]
+		[order]
+		limit [start],[number]
+	</getSkillPage>
+	
+	<getSkillPageAllCount>
+		select count(*) as ct 
+		from(
+		    select distinct :course_id as `id`,e.`name[lang]` as `first_skill`,e.`id` as `first_skill_id`,d.`name[lang]` as `second_skill`,d.`id` as `second_skill_id`,c.`name[lang]` as `third_skill`,c.`id` as `third_skill_id`
+		    from `POINT` a 
+		         left join `SKILL_POINT` b on a.id=b.point_id 
+		         left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		         left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		         left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		    where a.`id` in ( select b.`point_id` from `COURSE` a,`COURSE_POINT` b where a.`id`=b.`course_id` and a.`id`=:course_id)
+		    and 1=1
+		    [where]
+		)a
+	</getSkillPageAllCount>
+
+	<delCourseSkill>
+		delete from `COURSE_POINT`
+		where (`course_id`,`point_id`) 
+		      in (
+		        select :course_id as `course_id`,b.`id` as `point_id`
+		        from `SKILL_POINT` a 
+		        		 left join `POINT` b on a.point_id=b.id
+		             left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		             left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		             left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		        where 1=1
+		        and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id )  
+		       )
+	</delCourseSkill>
+	
+	<insertCourseSkill>
+		insert into `COURSE_POINT`(`course_id`,`point_id`)
+		select :course_id as `course_id`,b.`id` as `point_id`
+		from `SKILL_POINT` a 
+				 left join `POINT` b on a.point_id=b.id
+		     left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		where b.`enable`='T'
+		and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id )
+	</insertCourseSkill>
+	
+	<delCoursePoint>
+		delete from `COURSE_POINT`
+		where `course_id`=:course_id and `point_id`=:point_id
+	</delCoursePoint>
+	
+	<insertCoursePoint>
+		insert into `COURSE_POINT`(`course_id`,`point_id`)
+		values(:course_id,:point_id)
+	</insertCoursePoint>
+	
+	<getPointPage>
+		select a.`id`,a.`name`,a.`description`,b.`name` as `description_en_US`
+		from (
+		      select a.`id`,a.`name`,a.`description`,case when b.`course_id` is null then 'N' else 'Y' end as `has`,a.`order`
+		      from (
+		              select b.`id` ,b.`name[lang]` as `name`,b.`description[lang]` as `description`,b.`order`
+		              from  `SKILL_POINT` a
+		              		  left join `POINT` b on a.point_id=b.id
+		                    left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		                    left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		                    left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		              where 1=1 
+		              and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id ) 
+		           ) a left join (select `point_id`,`course_id` from `COURSE_POINT` where `course_id` = :course_id) b on a.`id`=b.`point_id`
+		      ) a left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') b on a.`has`=b.`value` 
+		[order] limit [start],[number];
+	</getPointPage>
+	
+	<getPointPageAllCount>
+		select count(*) as ct
+		from (
+				select b.`id` ,b.`name[lang]` as `name`,b.`description`
+				from  `SKILL_POINT` a
+						left join `POINT` b on a.point_id=b.id
+                		left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+                		left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+                		left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+				where 1=1 
+          		and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id ) 
+       		 ) a left join (select `point_id`,`course_id` from `COURSE_POINT` where `course_id` = :course_id) b on a.`id`=b.`point_id`
+	</getPointPageAllCount>
+	
+	<reviewCourse>
+	    select e.`name[lang]` as `first`,cast(e.`id` as char) as first_id,d.`name[lang]` as `second`,cast(d.`id` as char) as second_id,
+	           c.`name[lang]` as `third`,cast(c.`id` as char) as third_id,b.`name[lang]` as `point`,cast(b.`id` as char) as `point_id`
+	    from  `COURSE_POINT` f left join `SKILL_POINT` a on f.`point_id`=a.`point_id`
+	    		  left join `POINT` b on a.point_id=b.id
+	          left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+	          left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+	          left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+	    where 1=1 
+	    and f.`course_id`=:course_id
+	    order by e.`order` asc,d.`order` asc,c.`order` asc,b.`order` asc 
+	</reviewCourse>
+	
+	<getCourseOption>
+		select `id` as `id` , `name[lang]` as `text`
+		from `COURSE`
+		where 1=1
+		and `lock` like concat('%',:lock,'%')
+		and `property` like concat('%',:property,'%')
+	</getCourseOption>
+	
+	<getCourseByNo>
+		select `id`,`no`,`name`,`name_en_US`,`description`,`description_en_US`,`property`,`direction`,`function`,`function_en_US`,
+				`lock`,`enable`,`create_time`,`create_person`,`update_time`,`update_person`
+		from `COURSE`
+		where `no`=:no
+	</getCourseByNo>
+	
+	<getCourseById>
+		select `id`,`no`,`name`,`name_en_US`,`description`,`description_en_US`,`property`,`direction`,`function`,`function_en_US`,
+				`lock`,`enable`,`create_time`,`create_person`,`update_time`,`update_person`
+		from `COURSE`
+		where `id`=:id
+	</getCourseById>
+	
+	<getSubCategory>
+		select `id`,`name[lang]` as `text`
+		from  `SKILL`
+		where `level`='1'
+	</getSubCategory>
+	
+	<getSubSubCategory>
+		select `id`,`name[lang]` as `text`
+		from  `SKILL`
+		where `level`='2'
+	</getSubSubCategory>
+</SQL>

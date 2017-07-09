@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TMP系统邮件</title>
+  </head>
+  <body>
+  	#if( !$name )
+	 Dear  All ,<br><br>
+	#end
+      	您好，公司与${city}${univ_name}<!-- 
+	 -->#if( !$name )<!-- 
+	 -->${collegename}<!-- 
+	 -->#end<!-- 
+	 -->的校园招聘合作时间是${recruitTime},距离合作还有一周的时间，请关注。
+      <br/>
+      <br/>
+      <br/>
+      	<font size="2px" color="red"><i>注：邮件是TMP系统提醒邮件，请勿回复，谢谢~</i></font>
+      <br/>
+      <br/>
+      <img src='cid:clps_logo' style="width:100px;height:100px"/>
+  </body>
+</html>

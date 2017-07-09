@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="question" > 
+	<!-- Result Map-->
+	<resultMap id="QuestionResultMap" type="com.clps.tmp.question.question.vo.QuestionVo" >
+		<id column="id" property="id"/>
+		<result column="type" property="type"/>
+		<result column="so_flag" property="so_flag"/>
+		<result column="difficulty" property="difficulty"/>
+		<result column="property" property="property"/>
+		<result column="use_flag" property="use_flag"/>
+		<result column="content" property="content"/>
+		<result column="answer" property="answer"/>
+		<result column="opt1" property="opt1"/>
+		<result column="opt2" property="opt2"/>
+		<result column="opt3" property="opt3"/>
+		<result column="opt4" property="opt4"/>
+		<result column="opt5" property="opt5"/>
+		<result column="opt6" property="opt6"/>
+		<result column="analysis" property="analysis"/>
+		<result column="enable" property="enable"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_person" property="update_person"/>
+	</resultMap>
+	<resultMap id="SelectResultMap" type="com.clps.tmp.core.sm.vo.SelectVo" >
+		<result column="id" property="id"/>
+		<result column="text" property="text"/>
+	</resultMap>
+	<resultMap id="PointResultMap" type="com.clps.tmp.tech.point.vo.PointVo" >
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="name_en_US" property="name_en_US"/>
+		<result column="order" property="order"/>
+		<result column="description" property="description"/>
+		<result column="description_en_US" property="description_en_US"/>
+		<result column="third_skill_id" property="third_skill_id"/>
+		<result column="third_skill" property="third_skill"/>
+		<result column="second_skill_id" property="second_skill_id"/>
+		<result column="second_skill" property="second_skill"/>
+		<result column="first_skill_id" property="first_skill_id"/>
+		<result column="first_skill" property="first_skill"/>
+	</resultMap>
+	<!-- 所有列 -->
+	<sql id="Question_Column_List" >
+		q.`id`, f1.`ename` as `type`, f3.`ename` as `so_flag`, f5.`ename` as `difficulty`, f2.`ename` as `property`, f4.`ename` as `use_flag`,
+		 `content`, `answer`, `opt1`, `opt2`, `opt3`, `opt4`, `opt5`, `opt6`, `analysis`, f.`ename` as `enable`, q.`create_time`,
+		q.`create_person`, q.`update_time`, q.`update_person`
+	</sql>
+	<!-- 除ID外的所有列 -->
+	<sql id="Question_Column_List_1" >
+		f1.`ename` as `type`, f3.`ename` as `so_flag`, f5.`ename` as `difficulty`, f2.`ename` as `property`, f4.`ename` as `use_flag`, 
+		`content`, `answer`, `opt1`, `opt2`, `opt3`, `opt4`, `opt5`, `opt6`, `analysis`, f.`ename` as `enable`, `create_time`,
+		`create_person`, `update_time`, `update_person`
+	</sql>
+	<sql id="Question_Column_List_2" >
+		`id`,`type`, `so_flag`, `difficulty`, `property`, `use_flag`, 
+		`content`, `answer`, `opt1`, `opt2`, `opt3`, `opt4`, `opt5`, `opt6`, `analysis`, `enable`, `create_time`,
+		`create_person`, `update_time`, `update_person`
+	</sql>
+	<sql id="Question_Column_List_3" >
+		`type`, `so_flag`, `difficulty`, `property`, `use_flag`, 
+		`content`, `answer`, `opt1`, `opt2`, `opt3`, `opt4`, `opt5`, `opt6`, `analysis`, `enable`, `create_time`,
+		`create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 查询所有记录 -->
+	<select id="queryQuestion_Map" resultMap="QuestionResultMap" parameterType="Object" >
+		select distinct <include refid="Question_Column_List" /> from `QUESTION` as q
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON q.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_TYPE' ) f1 ON q.`type`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_PROP' ) f2 ON q.`property`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_SO' ) f3 ON q.`so_flag`=f3.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f4 ON q.`use_flag`=f4.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIFFICULTY' ) f5 ON q.`difficulty`=f5.`value`
+		left join `QUESTION_POINT` qp on q.`id`=qp.question_id 
+		left join `SKILL_POINT` b on qp.`point_id`=b.point_id 
+		left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		left join `QUESTION_TAG` qt on q.`id`=qt.question_id
+		left join `TAG` t on qt.`tag_id`=t.id
+		left join `POINT` p on qp.`point_id`=p.id
+		<where>
+			1=1 
+			<if test=" type!=null and type!='' ">
+			and 	q.`type` = #{type} 
+			</if>
+			<if test=" property!=null and property!='' ">
+			and 	q.`property` = #{property} 
+			</if>
+			<if test=" enable!=null and enable!='' ">
+			and 	q.`enable` = #{enable} 
+			</if>
+			<if test=" difficulty!=null and difficulty!='' ">
+			and 	q.`difficulty` = #{difficulty} 
+			</if>
+			<if test=" so_flag!=null and so_flag!='' ">
+			and 	q.`so_flag` = #{so_flag} 
+			</if>
+			<if test=" use_flag!=null and use_flag!='' ">
+			and 	q.`use_flag` = #{use_flag}  
+			</if>
+			<if test=" pointVo_name!=null and pointVo_name!='' ">
+			and 	p.`id` = #{pointVo_name}  
+			</if>
+			<if test=" tagVo_name!=null and tagVo_name!='' ">
+			and 	t.`id` = #{tagVo_name} 
+			</if>
+			<if test=" skillFirst!=null and skillFirst!='' ">
+			and 	e.`id` = #{skillFirst}  
+			</if>
+			<if test=" skillSecond!=null and skillSecond!='' ">
+			and 	d.`id` = #{skillSecond}  
+			</if>
+			<if test=" skillThird!=null and skillThird!='' ">
+			and 	c.`id` = #{skillThird} 
+			</if>
+			order by ${sortName} ${sortOrder} 
+			<if test="sortName !='update_time'">
+				,update_time desc
+			</if>			
+			limit ${offset},${limit}
+		</where>
+	</select>
+	<!-- 查询知识点 -->
+	<select id="findPointByQuestionId" parameterType="question" resultMap="PointResultMap">
+		select a.`id` as `id`,a.`name` as `name`,a.`name_en_US` as `name_en_US`,a.`order` as `order`,
+			   a.`description` as `description`,a.`description_en_US` as `description_en_US`,
+           	   c.`id` as `third_skill_id`,c.`name` as `third_skill`,d.`id` as `second_skill_id`,
+		       d.`name` as `second_skill`,e.`id` as `first_skill_id`,e.`name` as `first_skill`
+		from `POINT` a 
+			 left join `QUESTION_POINT` as qp on qp.`point_id`=a.`id`
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+        where question_id=${id}
+	</select>
+	<!-- 查询标签 -->
+	<select id="findTag" parameterType="question" resultMap="SelectResultMap">
+		select qt.`tag_id` as `id`,t.`name` as `text` from `QUESTION_TAG` as qt
+		left join `TAG` as t ON qt.`tag_id`=t.`id`
+		where question_id=${id}
+	</select>
+<!-- <select id="queryAllSkill" resultMap="SelectResultMap">
+		select cast(`id` as char) as `id`,`name` as `text` from `POINT`
+	</select> -->
+	<!-- 查询总记录数 -->
+	<select id="queryQuestionCount" parameterType="Object" resultMap="QuestionResultMap" >
+		select distinct <include refid="Question_Column_List" /> from `QUESTION` as q
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON q.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_TYPE' ) f1 ON q.`type`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_PROP' ) f2 ON q.`property`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_SO' ) f3 ON q.`so_flag`=f3.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f4 ON q.`use_flag`=f4.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIFFICULTY' ) f5 ON q.`difficulty`=f5.`value`
+		left join `QUESTION_POINT` qp on q.`id`=qp.question_id 
+		left join `SKILL_POINT` b on qp.`point_id`=b.point_id 
+		left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		left join `QUESTION_TAG` qt on q.`id`=qt.question_id
+		left join `TAG` t on qt.`tag_id`=t.id
+		left join `POINT` p on qp.`point_id`=p.id
+		<where>
+			1=1
+			<if test=" type!=null and type!='' ">
+			 and 	q.`type` = #{type}
+			</if>
+			<if test=" property!=null and property!='' ">
+			 and 	q.`property` = #{property}
+			</if>
+			<if test=" enable!=null and enable!='' ">
+			 and 	q.`enable` = #{enable} 
+			</if>
+			<if test=" difficulty!=null and difficulty!='' ">
+			 and 	q.`difficulty` = #{difficulty}  
+			</if>
+			<if test=" so_flag!=null and so_flag!='' ">
+			 and 	q.`so_flag` = #{so_flag}  
+			</if>
+			<if test=" use_flag!=null and use_flag!='' ">
+			 and 	q.`use_flag` = #{use_flag} 
+			</if>
+			<if test=" pointVo_name!=null and pointVo_name!='' ">
+			 and 	p.`id` = #{pointVo_name} 
+			</if>
+			<if test=" tagVo_name!=null and tagVo_name!='' ">
+			 and t.`id` = #{tagVo_name} 
+			</if>
+			<if test=" skillFirst!=null and skillFirst!='' ">
+			 and 	e.`id` = #{skillFirst} 
+			</if>
+			<if test=" skillSecond!=null and skillSecond!='' ">
+			 and 	d.`id` = #{skillSecond} 
+			</if>
+			<if test=" skillThird!=null and skillThird!='' ">
+			 and 	c.`id` = #{skillThird}  
+			</if>
+		</where>
+	</select>
+	<select id="findQuestion" resultType="question" parameterType="Object">
+		select <include refid="Question_Column_List_2"></include> from `QUESTION`
+		<where>
+			id = ${id}
+		</where>
+	</select>
+	<select id="findTagListByQuestion" parameterType="Object" resultMap="tag.TagResultMap">
+		select <include refid="tag.Tag_Column_List_2"/> from `QUESTION_TAG` q
+		left join `TAG` t on q.`tag_id`=t.id
+		where q.`question_id`=${id}
+	</select>
+	<!-- 新增记录 -->
+	<insert id="insertNewQuestion" parameterType="question" useGeneratedKeys="true" keyProperty="id">
+		insert into `QUESTION`(<include refid="Question_Column_List_3"/>) 
+		values(#{type},#{so_flag},#{difficulty},#{property},#{use_flag},#{content},#{answer},
+		#{opt1},#{opt2},#{opt3},#{opt4},#{opt5},#{opt6},
+		#{analysis},#{enable},#{create_time},#{create_person},#{update_time},#{update_person})
+	</insert>
+	<insert id="insertPoint" parameterType="map">
+		insert into `QUESTION_POINT`(`question_id`,`point_id`) values(${question_id},${point_id})
+	</insert>
+	<insert id="insertTag" parameterType="map">
+		insert into `QUESTION_TAG`(`question_id`,`tag_id`) values(${question_id},${tag_id})
+	</insert>
+	<!-- 更新标签状态 -->
+	<update id="updateQuestionStatusToDisable" parameterType="Object">
+		update `QUESTION` set enable='F' where id=${id}
+	</update>
+	<update id="updateQuestionStatusToEnable" parameterType="Object">
+		update `QUESTION` set enable='T' where id=${id}
+	</update>
+	<update id="updateQuestion" parameterType="question">
+		update `QUESTION` set 
+		`so_flag`=#{so_flag}, `difficulty`=#{difficulty}, `property`=#{property}, `use_flag`=#{use_flag}, `content`=#{content}, 
+		`answer`=#{answer}, `opt1`=#{opt1}, `opt2`=#{opt2}, `opt3`=#{opt3}, `opt4`=#{opt4}, `opt5`=#{opt5}, 
+		`opt6`=#{opt6}, `analysis`=#{analysis}, `enable`=#{enable}, `update_time`=#{update_time}, `update_person`=#{update_person}
+		where id=${id}
+	</update>
+	<!-- 删除题目-标签关联数据 -->
+	<delete id="deleteTag" parameterType="question">
+		delete from `QUESTION_TAG` where question_id=${id}
+	</delete>
+	<!-- 删除该题目下的所有题目-知识点关联数据 -->
+	<delete id="deletePoint" parameterType="map">
+		delete from `QUESTION_POINT` where question_id=${question_id}
+	</delete>
+	<!-- 删除某行题目-知识点关联数据记录 -->
+	<delete id="deleteOnePoint" parameterType="map">
+		delete from `QUESTION_POINT` where question_id=${question_id} and point_id=${point_id}
+	</delete>
+	<select id="findPoints" parameterType="map" resultType="map">
+		select b.`id` as `point_id`,e.name as `skill_first_name`,d.name as `skill_second_name`,c.name as `skill_third_name`,b.name as `point_name` 
+ 		from `SKILL_POINT` a 
+			 left join `POINT` b on a.point_id=b.id
+		     left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		where b.`enable`='T'
+		<if test=" point_id!=null and point_id!='' ">
+			and b.`id`=${point_id}
+		</if>
+		<if test=" point_id==null or point_id=='' ">
+			and ( e.`id`= ${skill_id} or d.`id`= ${skill_id} or c.`id`= ${skill_id} )
+		</if>
+	</select>
+	<!-- 插入图片 -->
+	<insert id="addImgs" parameterType="map">
+		INSERT INTO `QUSETION_IMAGES` 
+			(`question_id`, `type`, `opt`, 
+			`image_id`, `order`, `flag`, 
+			`del`, `create_time`, `create_person`, 
+			`update_time`, `update_person`) 
+		VALUES 
+			(#{question_id}, #{type}, #{opt},
+			 #{image_id}, ${order}, #{flag},
+			  #{del}, #{create_time}, #{create_person},
+			   #{update_time}, #{update_person})
+	</insert>
+	<!-- 清空图片 -->
+	<delete id="clearImges" parameterType="map">
+		delete from `QUSETION_IMAGES` where question_id=#{question_id}
+	</delete>
+	<!-- 删除图片 -->
+	<update id="deleteImges" parameterType="map">
+		UPDATE `QUSETION_IMAGES` SET `del`='Y' WHERE `image_id`=#{image_id}
+	</update>
+	<!-- 获取最大排序 -->
+	<select id="getMaxOder" parameterType="map" resultType="String">
+	    SELECT max(`order`) `order` FROM QUSETION_IMAGES where question_id=#{question_id} and `type`=#{type}
+	</select>
+	<!-- 获取图片 -->
+	<select id="getImges" parameterType="map" resultType="String">
+	    SELECT image_id FROM QUSETION_IMAGES
+		WHERE question_id=#{question_id} and `type`=#{type}
+		order by `order`   
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

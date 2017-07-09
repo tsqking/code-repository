@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<!-- 获取个人教学计划列表 -->
+	<get_teach_plan_table_data>
+		select distinct c.`id` as `course_id`,c.`name[lang]` as `course_id_name`,d.`id` as `class_id`,concat(d.`session[lang]`,' ', d.`name[lang]`) as `class_id_name`,
+		       d.`location` as `location_id`,e.`name` as `location`,b.`start_time`,b.`end_time`,a.`teach_plan_id`
+		from `DETAIL_PLAN` a 
+		     left join `TEACH_PLAN` b on a.`teach_plan_id`=b.`id`
+		     left join `COURSE` c on b.`course_id`=c.`id`
+		     left join `CLASS` d on b.`class_id`=d.`id`
+		     left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='LOCATION') e on d.`location`=e.`value`
+		where a.`teacher_id`=:teacher_id
+		[conditions] [order] limit [start],[number];
+	</get_teach_plan_table_data>
+	<!-- 获取个人教学计划列表数据量 -->
+	<get_teach_plan_data_count>
+		select count(*) as ct
+		from (select distinct  c.`id` as `course_id`,c.`name[lang]` as `course_id_name`,d.`id` as `class_id`,concat(d.`session[lang]`,' ', d.`name[lang]`) as `class_id_name`,
+		             d.`location` as `location_id`,e.`name` as `location`,b.`start_time`,b.`end_time`,a.`teach_plan_id`
+		      from `DETAIL_PLAN` a 
+		           left join `TEACH_PLAN` b on a.`teach_plan_id`=b.`id`
+		           left join `COURSE` c on b.`course_id`=c.`id`
+		           left join `CLASS` d on b.`class_id`=d.`id`
+		           left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='LOCATION') e on d.`location`=e.`value`
+		      where a.`teacher_id`=:teacher_id
+		            [conditions]
+		)t
+	</get_teach_plan_data_count>
+	<!-- 查询教学计划的序列化信息 -->	
+	<query_teach_plan_tree_snap>
+		SELECT `tree_snap` FROM `TEACH_PLAN` where id=:teach_plan_id;
+	</query_teach_plan_tree_snap>
+	<!-- 配合序列化信息查询查询详细信息 -->	
+	<query_detail_plan_tree_snap>
+		SELECT f.`teach_plan_id`,f.`point_id`,a.`name[lang]` as `point`,
+			f.`starttime`,f.`endtime`,f.`cost`,f.`teacher_id`,h.`[name]` `teacher_name`,f.`finish_state`,o.`name` `finish_state_name`, 
+			case when f.`teacher_id`=:teacher_id then 'Y' else 'N' end as `info`,ff.`course_id`
+		from `DETAIL_PLAN` f left join `TEACH_PLAN` ff on f.`teach_plan_id`=ff.`id`
+			left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='POINT_FINISH_STATE') o on f.`finish_state`=o.`value`
+			left join `SM_PERSON` h on f.`teacher_id`=h.id
+			left join `POINT` a on f.`point_id`=a.id
+		where f.`teach_plan_id`=:teach_plan_id and f.`point_id` in ( [point_ids] );
+	</query_detail_plan_tree_snap>
+	<!-- 配合序列化信息查询查询详细信息 -->	
+	<query_detail_plan_tree_snap_student>
+		SELECT f.`teach_plan_id`,f.`point_id`,a.`name[lang]` as `point`,
+			f.`starttime`,f.`endtime`,f.`cost`,f.`teacher_id`,h.`[name]` `teacher_name`,f.`finish_state`,o.`name` `finish_state_name`
+		from `DETAIL_PLAN` f
+			left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='POINT_FINISH_STATE') o on f.`finish_state`=o.`value`
+			left join `SM_PERSON` h on f.`teacher_id`=h.id
+			left join `POINT` a on f.`point_id`=a.id
+		where f.`teach_plan_id`=:teach_plan_id and f.`point_id` in ( [point_ids] );
+	</query_detail_plan_tree_snap_student>
+	<!-- 修改教学状态 -->	
+	<update_teach_state>
+		update `DETAIL_PLAN`
+		set `finish_state`=:finish_state
+		where `teach_plan_id`=:plan_id
+		and `point_id`=:point_id
+		and `teacher_id`=:teacher_id
+	</update_teach_state>
+	<!-- 获取过程评价列表 -->
+	<getProcEvalList>
+		select b.`id` as `user_id`,b.`name` as `user_name`,b.`en_name` as `user_en_name`,c.`sign`,
+				case when c.`score` is null then 0 else `score` end as `score`,c.`comment`,
+				case when ( c.`score` is null and c.`comment` is null and c.`sign` is null ) then 'N' else 'Y' end as `flag`
+		from (select `class_id`,`student_id` from `CLASS_STUDENT` where `class_id`=:class_id) a left join `SM_PERSON` b on a.`student_id`=b.`id`
+		     left join (select `course_id`,`class_id`,`point_id`,`teacher_id`,`student_id`,`sign`,`score`,`comment` 
+		                from `PROCESS_EVAL` 
+		                where `class_id`=:class_id and `course_id`=:course_id and `point_id`=:point_id) c on a.`student_id`=c.`student_id`
+		where 1=1
+	</getProcEvalList>
+	<!-- 保存评价 -->
+	<saveProcEval>
+		INSERT INTO `PROCESS_EVAL` (`course_id`,`class_id`,`point_id`,`teacher_id`,`student_id`,`sign`,`score`,`comment`,`create_time`,`create_person`,`update_time`,`update_person`) 
+		VALUES (:course_id,:class_id,:point_id,:teacher_id,:student_id,:sign,:score,:comment,:create_time,:create_person,:update_time,:update_person)
+		ON DUPLICATE KEY UPDATE `teacher_id`=:teacher_id,`sign`=:sign,`score`=:score,`comment`=:comment,`update_time`=:update_time,`update_person`=:update_person;
+	</saveProcEval>
+	
+	<!-- 获取个人学习计划列表 -->
+	<get_leran_plan_table_data>
+		select cse.`name[lang]` as `course_id_name`, cse.`id` as `course_id`, concat(cls.`session[lang]`,' - ',cls.`name[lang]`) as `class_id_name`,
+		       cls.`id` as `class_id`,cls.`location` as `location_id`,o.`name` as `location`,tp.`start_time`,tp.`end_time`,tp.`id` as `teach_plan_id` 
+		from (
+		      select `id`,`course_id`,`class_id`,`start_time`,`end_time`
+		      from  `TEACH_PLAN` 
+		      where `class_id` in( select distinct `class_id` from `CLASS_STUDENT` where `student_id`=:student_id )
+		     ) tp left join `COURSE` cse on tp.`course_id`=cse.`id`
+		     left join `CLASS` cls on tp.`class_id`=cls.`id`
+		     left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='LOCATION') o on cls.`location`=o.`value`
+		where 1=1
+		[conditions] [order] limit [start],[number];
+	</get_leran_plan_table_data>
+	<!-- 获取个人学习计划列表数据量 -->
+	<get_leran_plan_data_count>
+		select count(*) as `CT`
+		from (
+		      select `id`,`course_id`,`class_id`,`start_time`,`end_time`
+		      from  `TEACH_PLAN` 
+		      where `class_id` in( select distinct `class_id` from `CLASS_STUDENT` where `student_id`=:student_id )
+		     ) tp left join `COURSE` cse on tp.`course_id`=cse.`id`
+		     left join `CLASS` cls on tp.`class_id`=cls.`id`
+		     left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='LOCATION') o on cls.`location`=o.`value`
+		where 1=1
+		[conditions] 
+	</get_leran_plan_data_count>
+	<!-- 获取教师对学生的总评列表 -->
+	<getFinalEvalStuList>
+		select b.`id` as `user_id`,b.`name` as `user_name`,b.`en_name` as `user_en_name`,
+		       case when c.`score` is null then 0 else `score` end as `score`,c.`comment`,
+		       case when ( c.`score` is null and c.`comment` is null ) then 'N' else 'Y' end as `flag`
+		from (select `class_id`,`student_id` from `CLASS_STUDENT` where `class_id`=:class_id) a left join `SM_PERSON` b on a.`student_id`=b.`id`
+		     left join (select `course_id`,`class_id`,`teacher_id`,`student_id`,`score`,`comment` 
+		                from `GENERAL_MATUAL_EVAL` 
+		                where `class_id`=:class_id and `course_id`=:course_id and type='1' and `teacher_id`=:teacher_id) c on a.`student_id`=c.`student_id`
+		where 1=1
+		order by `score` desc
+	</getFinalEvalStuList>
+	<!-- 保存 最终评价 记录 -->
+	<saveFinalEval>
+		INSERT INTO `GENERAL_MATUAL_EVAL` (`course_id`,`class_id`,`teacher_id`,`student_id`,`type`,`score`,`comment`,`create_time`,`create_person`,`update_time`,`update_person`) 
+		VALUES (:course_id,:class_id,:teacher_id,:student_id,:type,:score,:comment,:create_time,:create_person,:update_time,:update_person)
+		ON DUPLICATE KEY UPDATE `score`=:score,`comment`=:comment,`update_time`=:update_time,`update_person`=:update_person;
+	</saveFinalEval>
+	<!-- 获取平时表现平均得分 -->
+	<getRefEval_avgScore>
+		select avg(`score`) as `score`
+		from   `PROCESS_EVAL` pe  where `course_id`=:course_id and `class_id`=:class_id and `teacher_id`=:teacher_id and `student_id`=:student_id
+		group by `course_id`,`class_id`,`teacher_id`,`student_id`
+	</getRefEval_avgScore>
+	<!-- 获取平时出勤详细 -->
+	<getRefEval_attend>
+		select sum(case pe.`sign` when 1 then 1 else 0 end) as `full`,
+		       sum(case pe.`sign` when 2 then 1 else 0 end) as `half`,
+		       sum(case pe.`sign` when 3 then 1 else 0 end) as `holiday`,
+		       sum(case pe.`sign` when 4 then 1 else 0 end) as `absence`,
+			   sum(1) as `record`
+		from   `PROCESS_EVAL` pe  
+		where `course_id`=:course_id and `class_id`=:class_id and `teacher_id`=:teacher_id and `student_id`=:student_id
+		group by pe.`course_id`,pe.`class_id`,pe.`teacher_id`,pe.`student_id`
+	</getRefEval_attend>
+	<!-- 获取应到数 -->
+	<getRefEval_ToBe>
+		select count(*) as `all`
+		from `DETAIL_PLAN` dp
+		where `teach_plan_id`= :teach_plan_id
+		and `teacher_id`= :teacher_id
+	</getRefEval_ToBe>
+	<!-- 根据教学计划获取授课教师 -->
+	<getTeachersByPlan>
+		select distinct p.`id` as `id`,concat(p.`name`,' - ',p.`en_name`) as `name`
+		from  `DETAIL_PLAN` dp left join `SM_PERSON` p on dp.`teacher_id`=p.`id`
+		where 1=1
+		and dp.`teach_plan_id`=:teach_plan_id
+		and p.id is not null
+	</getTeachersByPlan>
+	<!-- 获取学生评价某教师的结果 -->
+	<getStuEvalTeacherRS>
+		select `score`,`comment`
+		from `GENERAL_MATUAL_EVAL`
+		where 1=1
+		and `type`='2'
+		and `course_id`=:course_id
+		and `class_id`=:class_id
+		and `teacher_id`=:teacher_id
+		and `student_id`=:student_id
+	</getStuEvalTeacherRS>
+</SQL>

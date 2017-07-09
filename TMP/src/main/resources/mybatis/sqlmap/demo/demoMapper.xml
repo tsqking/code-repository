@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demo" > 
+	<!-- Result Map-->
+	<resultMap id="BaseResultMap" type="com.clps.tmp.demo.vo.DemoVo" >
+		<id column="id" property="id"/>
+		<result column="no" property="no"/>
+		<result column="name" property="name"/>
+		<result column="sex" property="sex"/>
+		<result column="age" property="age"/>
+		<result column="nativePlace" property="nativePlace"/>
+		<result column="enable" property="enable"/>
+	</resultMap>
+	
+	<sql id="findCondition">
+		<where>
+		    1=1
+			<if test="no !=null">AND no like concat('%',#{no},'%')  </if>
+			<if test="name !=null">AND name like concat('%',#{name},'%') </if>
+			<if test="sex !=null">AND sex=#{sex}  </if>
+			<if test="enable !=null">AND enable=#{enable}  </if>
+		</where>
+	</sql>
+	
+	<!-- 所有列 -->
+	<sql id="Base_Column_List" >
+		`id`, `no`, `name`, `sex`, `age`, `nativePlace`, `enable`
+	</sql>
+	<!-- 查询记录 -->
+	<select id="queryByName_Map" resultMap="BaseResultMap" parameterType="Object">
+		select <include refid="Base_Column_List" /> from `test_table` where `name` = #{name}
+	</select>
+	
+	<!-- 查询记录 -->
+	<select id="queryByName_Type" resultType="Demo" parameterType="Object">
+		select <include refid="Base_Column_List" /> from `test_table` where `name` = #{name}
+	</select>
+	
+	<select id="allCount" resultType="long" parameterType="map">
+		select count(*) from test_table <include refid="findCondition" />
+	</select>
+	
+	<select id="findDemoList" resultType="Demo" parameterType="map">  
+		select <include refid="Base_Column_List" /> from test_table <include refid="findCondition" /> ORDER BY ${sortName} ${sortOrder} LIMIT ${offset},${limit} 
+	</select>
+</mapper>

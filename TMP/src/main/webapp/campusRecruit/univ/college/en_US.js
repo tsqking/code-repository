@@ -1,0 +1,16 @@
+var add_new_college_title="Add New college";
+var add_fail="Add Failed！pls retry later~~";	
+var add_success="Add Success"
+var collegeUpdateWindowTitle="Update college"
+var deleteInfo="Delete college"
+var confirm="Confirm";
+var cancel="Cancel";
+var college_delete_content="Confirm to delete?";
+var success_delete="Delete Success！";
+var fail_delete_title="Failure feedback";
+var fail_delete="Delete Failed ！";
+var edit_success="Update Success！";
+var edit_fail="Update Failed！pls retry later~";
+var collegeUpdateWindowTitle="Update College";
+var upadteCollegeInfo="Update College";
+var college_update_content="Confirm to Update? ";

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tag" > 
+	<!-- Result Map-->
+	<resultMap id="TagResultMap" type="com.clps.tmp.question.tag.vo.TagVo" >
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="description" property="description"/>
+		<result column="user_count" property="user_count"/>
+		<result column="enable" property="enable"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+	</resultMap>
+	<!-- 所有列 -->
+	<sql id="Tag_Column_List" >
+		`id`, `name`, `description`, `user_count`, f.`ename` as `enable`, `create_person`, `create_time`
+	</sql>
+	<!-- 除ID外的所有列 -->
+	<sql id="Tag_Column_List_1" >
+		`name`, `description`, `user_count`, `enable`, `create_person`, `create_time`
+	</sql>
+	<!-- 查询所有记录 -->
+	<select id="queryTag_Map" resultMap="TagResultMap" parameterType="map" >
+		select <include refid="Tag_Column_List" /> from `TAG` 
+		left join (select o1.`name` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON `enable`=f.`value`
+		<where>
+			<if test=" name!=null and name!='' ">
+				`name` = #{name} and 
+			</if>
+			<if test=" enable!=null and enable!='' ">
+				`enable` = #{enable} and 
+			</if>
+			<if test=" 1==1 ">
+				1=1 order by ${order} ${way} limit ${start},${page}
+			</if>
+		</where>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="queryTagCount" resultType="Object">
+		select count(`id`) from `TAG`
+	</select>
+	<!-- 新增记录 -->
+	<insert id="insertNewTag" parameterType="tag" useGeneratedKeys="true" keyProperty="id">
+		insert into `TAG`(<include refid="Tag_Column_List_1"/>) 
+		values(#{name},#{description},#{user_count},#{enable},#{create_person},#{create_time})
+	</insert>
+	<!-- 更新标签状态 -->
+	<update id="updateTagStatusDisable" parameterType="Object">
+		update `TAG` set enable='F' where id=${id}
+	</update>
+	<update id="updateTagStatusEnable" parameterType="Object">
+		update `TAG` set enable='T' where id=${id}
+	</update>
+</mapper>

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<getTeacherpoolPage>
+		select distinct a.`no`,a.`role`,a.`nbr`,a.`teacType`,a.`name`,a.`mobile`,a.`age`,a.`email`,a.`direction`
+      	from(
+		select a.`no`,a.`role`,a.`id` as `nbr`,a.`type` as teacType,a.`[name]` as `name`,a.`mobile`,a.`age`,a.`email`,h.`name` as `direction`,h.name as `direction_name`,c.`name` as `knowledge`,c.`id` as `konwledge_id`,g.`id` as `first_skill_id` ,g.`name` as `first_skill`,f.`id` as `second_skill_id`, f.`name` as `second_skill`,e.`name` as `third_skill_id`,e.`name` as `third_skill`
+          from `SM_PERSON` a 
+          left join `TEACHER_POINT` b on a.id=b.teacher_id
+          left join `POINT` c on (b.point_id=c.id and c.`enable`='T')
+           left join `SKILL_POINT` d on c.id=d.point_id 
+		     left join `SKILL` e on ((d.skill_id=e.id and e.`level`='3' and e.`enable`='T'))
+		     left join `SKILL` f on ((e.parent_id=f.id and f.`level`='2' and f.`enable`='T') or (d.skill_id=f.id and f.`level`='2' and f.`enable`='T'))
+		     left join `SKILL` g on ((f.parent_id=g.id and g.`level`='1' and g.`enable`='T') or (d.skill_id=g.id and g.`level`='1' and g.`enable`='T'))
+		         	left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='DIRECTION') h on a.`direction`=h.`value`
+
+		     [where] 
+		     and a.`role`='2'
+		 ) a
+		     [order] limit [start],[number];
+
+	</getTeacherpoolPage>
+	
+	<getTeacherpoolPageAllCount>
+		select count(*) from
+(	select distinct a.`no`,a.`nbr`,a.`type`,a.`name`,a.`mobile`,a.`age`,a.`email`,a.`direction`
+      	from( select a.`no` ,a.`id` as `nbr`,a.`type`,a.`name`,a.`mobile`,a.`age`,a.`email`,a.`direction`,c.`name` as `knowledge`,c.`id` as `konwledge_id`,g.`id` as `first_skill_id` ,g.`name` as `first_skill`,f.`id` as `second_skill_id`, f.`name` as `second_skill`,e.`name` as `third_skill_id`,e.`name` as `third_skill`
+          from `SM_PERSON` a 
+          left join `TEACHER_POINT` b on a.id=b.teacher_id
+          left join `POINT` c on (b.point_id=c.id and c.`enable`='T')
+           left join `SKILL_POINT` d on c.id=d.point_id 
+		     left join `SKILL` e on ((d.skill_id=e.id and e.`level`='3' and e.`enable`='T'))
+		     left join `SKILL` f on ((e.parent_id=f.id and f.`level`='2' and f.`enable`='T') or (d.skill_id=f.id and f.`level`='2' and f.`enable`='T'))
+		     left join `SKILL` g on ((f.parent_id=g.id and g.`level`='1' and g.`enable`='T') or (d.skill_id=g.id and g.`level`='1' and g.`enable`='T')) 
+		     [where]
+		     and a.`role`='2' ) a ) temp
+	</getTeacherpoolPageAllCount>
+	<insertTeacher>
+	INSERT INTO `SM_PERSON` (`no`,`role`, `type`,`username`,`cardno`,`cardtype`, `password`, `major`,`name`, `en_name`, `gender`, `mobile`, `phone`, `email`, `age`,   `birthday`, `education_background`,
+	`degree`,`description`, `direction`, `contact_address`, `home_address`, 
+	`enable`,`create_time`,`create_person`,`update_time`,`update_person`, `photo`,`university`) 
+	values(:no,:role,:teacType,:username,:cardNbr,:cardType,:password,:major,:name,:en_name,:gender,:mobile,:phone,:email,
+	case when :age is null then 0 when cast( :age as char) ='null' then 0 when LENGTH(trim(:age)) &lt; 1 then 0 else :age end,
+	:birthday,:education_background,:degree,
+	:description,:direction,:contact_address,:home_address,:enable,:create_time,:create_person,  
+	:update_time,:update_person,:photo,:university)
+	</insertTeacher>
+	
+	<getUserId>
+		select `id` from `SM_PERSON` where `create_person`=:create_person and `create_time`=:create_time and `username`=:username
+	</getUserId>
+	
+	<insertTeacherRole>
+		insert into `SM_PERSON_ROLE`(`role_id`,`user_id`)
+		values(getBaseRole('2'),:user_id);
+	</insertTeacherRole>
+	
+	<deleteTeacher>
+		delete from `SM_PERSON` where `id`=:nbr
+	</deleteTeacher>
+	
+	<getTeacherByNbr>
+		select a.`id` as `nbr`,a.`role`,a.`username`,a.`cardno` as `cardNbr`,a.`cardtype` as `cardType`, a.`password`,a.`description`,a.`direction`,h.name as `direction_name`,a.`contact_address`,
+ 		a.`no`,a.`name`,a.`en_name`,a.`gender`, a.`mobile`,a.`home_address`,a.`major`,a.`university`,
+ 		a.`phone`,a.`email`,a.`age`,a.`birthday`,a.`education_background`,g.name as `education_background_name`, 
+ 		a.`degree`,f.name as `degree_name`,a.type as `teacType`, i.`name` as `cardType_name`,e.name as `teacType_name`,a.`enable` ,b.name as `enable_name`,c.`name` as `role_name`,d.`name` as `gender_name`,`create_time`,`create_person`,`update_time`,`update_person`                                                         
+		from `SM_PERSON` a
+ 	  	left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='STATUS') b on a.`enable`=b.`value` 
+		left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='USER_TYPE') c on a.`role`=c.`value` 
+		left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='SEX') d on a.`gender`=d.`value` 
+    	left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='TEACHER_TYPE') e on a.`type`=e.`value` 
+    	left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='DEGREE') f on a.`degree`=f.`value`
+    	left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='EDU_BAK') g on a.`education_background`=g.`value`
+    	left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='DIRECTION') h on a.`direction`=h.`value`
+    	left join (select o1.`name` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='CARD_TYPE') i on a.`cardtype`=i.`value`
+		where `id`=:nbr
+	</getTeacherByNbr>
+	
+	<updateTeacher>
+		UPDATE `SM_PERSON` SET  `role`='2', `username`=:username,`type`=:teacType, `password`=:password, `name`=:name, `en_name`=:en_name,
+       		`gender`=:gender, `mobile`=:mobile, `phone`=:phone, `email`=:email, `age`=:age,`major`=:major,`university`=:university,
+			`birthday`=:birthday, `education_background`=:education_background, `degree`=:degree, 
+			`description`=:description,`direction`=:direction, `contact_address`=:contact_address, 
+			`home_address`=:home_address, `enable`=:enable, `update_time`=:update_time, `update_person`=:update_person 
+		WHERE `id`=:nbr
+	</updateTeacher>
+	
+	<getHistory>
+		select distinct g1.`name[lang]` as `courseName`,e1.`name[lang]` as first_skill,d1.`name[lang]` as second_skill,c1.`name[lang]` as third_skill,f1.`name[lang]` as `knowledge`,
+		       concat(h1.`session[lang]`,' - ',h1.`name[lang]`) as `className`,a.`starttime` as `start_time`,a.`endtime` as `end_time`,a.`confirmtime`,o1.`name` as `address`
+		from `TEACH_HIST` a 
+		     left join `SKILL_POINT` b1 on a.point_id=b1.point_id 
+		     left join `SKILL` c1 on ((b1.skill_id=c1.id and c1.`level`='3' and c1.`enable`='T'))
+		     left join `SKILL` d1 on ((c1.parent_id=d1.id and d1.`level`='2' and d1.`enable`='T') or (b1.skill_id=d1.id and d1.`level`='2' and d1.`enable`='T'))
+		     left join `SKILL` e1 on ((d1.parent_id=e1.id and e1.`level`='1' and e1.`enable`='T') or (b1.skill_id=e1.id and e1.`level`='1' and e1.`enable`='T'))
+		     left join `POINT` f1 on a.point_id=f1.`id`
+		     left join `DETAIL_PLAN` p on a.`point_id`=p.`point_id`
+		     left join `COURSE` g1 on a.`course_id`=g1.`id`
+		     left join `CLASS` h1 on a.`class_id`=h1.`id`
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='LOCATION') o1 on a.`address`=o1.`value` 
+		where p.`teacher_id` = :teacher_id
+		[order] limit [start],[number];
+	</getHistory>
+	<getHistoryAllCount>
+		select count(*) as `CT`
+		from `TEACH_HIST` a 
+		     left join `SKILL_POINT` b1 on a.point_id=b1.point_id 
+		     left join `SKILL` c1 on ((b1.skill_id=c1.id and c1.`level`='3' and c1.`enable`='T'))
+		     left join `SKILL` d1 on ((c1.parent_id=d1.id and d1.`level`='2' and d1.`enable`='T') or (b1.skill_id=d1.id and d1.`level`='2' and d1.`enable`='T'))
+		     left join `SKILL` e1 on ((d1.parent_id=e1.id and e1.`level`='1' and e1.`enable`='T') or (b1.skill_id=e1.id and e1.`level`='1' and e1.`enable`='T'))
+		     left join `POINT` f1 on a.point_id=f1.`id`
+		     left join `DETAIL_PLAN` p on a.`point_id`=p.`point_id`
+		     left join `COURSE` g1 on a.`course_id`=g1.`id`
+		     left join `CLASS` h1 on a.`class_id`=h1.`id`
+		     left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='LOCATION') o1 on a.`address`=o1.`value` 
+		where p.`teacher_id` = :teacher_id
+	</getHistoryAllCount>
+	
+	
+	<getSkillPage>
+		select distinct :nbr as `id`,e.`name[lang]` as `first_skill`,e.`id` as `first_skill_id`,d.`name[lang]` as `second_skill`,d.`id` as `second_skill_id`,c.`name[lang]` as `third_skill`,c.`id` as `third_skill_id`
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3' and c.`enable`='T'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2' and d.`enable`='T') or (b.skill_id=d.id and d.`level`='2' and d.`enable`='T'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1' and e.`enable`='T') or (b.skill_id=e.id and e.`level`='1' and e.`enable`='T'))
+		where a.`id` in ( select b.`point_id` from `SM_PERSON` a,`TEACHER_POINT` b where a.`id`=b.`teacher_id` and a.`id`=:nbr)
+		and a.`enable`='T'
+		[where]
+		[order]
+		limit [start],[number]
+	</getSkillPage>
+	
+	<getSkillPageAllCount>
+		select count(*) 
+		from(
+		    select distinct :nbr as `id`,e.`name[lang]` as `first_skill`,e.`id` as `first_skill_id`,d.`name[lang]` as `second_skill`,d.`id` as `second_skill_id`,c.`name[lang]` as `third_skill`,c.`id` as `third_skill_id`
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3' and c.`enable`='T'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2' and d.`enable`='T') or (b.skill_id=d.id and d.`level`='2' and d.`enable`='T'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1' and e.`enable`='T') or (b.skill_id=e.id and e.`level`='1' and e.`enable`='T'))
+		where a.`id` in ( select b.`point_id` from `SM_PERSON` a,`TEACHER_POINT` b where a.`id`=b.`teacher_id` and a.`id`=:nbr)
+		and a.`enable`='T'
+		    [where]	
+		)a
+	</getSkillPageAllCount>
+	
+	<delTeacherSkill>
+		delete from `TEACHER_POINT`
+		where (`teacher_id`,`point_id`) 
+		      in (
+					select :nbr as `teacher_id`,b.`id` as `point_id` 
+					from `SKILL_POINT` a 
+							 left join `POINT` b on a.point_id=b.id
+					     left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+					     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+					     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+					where b.`enable`='T'
+					and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id )
+		       )
+	</delTeacherSkill>
+	<insertTeacherSkill>
+		insert into `TEACHER_POINT`(`teacher_id`,`point_id`,`manage`)
+		select :nbr as `teacher_id`,b.`id` as `point_id`, :grant as `manage`
+		from `SKILL_POINT` a 
+				 left join `POINT` b on a.point_id=b.id
+		     left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		where b.`enable`='T'
+		and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id )
+	</insertTeacherSkill>
+	
+	<insertSkillPoint>
+		insert into `TEACHER_POINT`(`teacher_id`,`point_id`,`manage`)
+		values(:nbr,:point_id,:grant)
+	</insertSkillPoint>
+	
+	<!--
+	<getPointPage>
+			select a.`id`,a.`name[lang]` as `name`,a.`description`,b.`name` as `description_en_US`
+			from (
+				  select a.`id`,a.`name`,a.`description`,case when b.`teacher_id` is null then 'N' else 'Y' end as `has`,a.`order`
+				  from (
+						  select b.`id` ,b.`name[lang]` as `name`,b.`description`,b.`order`
+						  from  `SKILL_POINT` a
+									left join `POINT` b on a.point_id=b.id
+								left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+								left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+								left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+						  where b.`enable`='T'
+						  and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id ) 
+					   ) a left join (select `point_id`,`teacher_id` from `TEACHER_POINT` where `teacher_id` = :nbr) b on a.`id`=b.`point_id`
+				  ) a left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') b on a.`has`=b.`value` 
+			[order] limit [start],[number];
+		</getPointPage>-->
+	<getPointPage>
+		select a.`id`,a.`name` as `name`,a.`description`,b.`name` as `description_en_US`,c.`name` as `manage`
+		from (
+		      select a.`id`,a.`name`,a.`description`,case when b.`teacher_id` is null then 'N' else 'Y' end as `has`,a.`order`,b.`manage` as `manage`
+		      from (
+		              select distinct  b.`id` ,b.`name[lang]` as `name`,b.`description[lang]` as `description`,b.`order`
+		              from  `SKILL_POINT` a                    
+		              		  left join `POINT` b on a.point_id=b.id
+		                    left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		                    left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		                    left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		                    where 1=1
+                         and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id ) 
+		              and b.`enable`='T'
+		            
+		           ) a left join (select `point_id`,`teacher_id`,`manage` from `TEACHER_POINT` where `teacher_id` =:nbr) b on a.`id`=b.`point_id`
+		      ) a left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') b on a.`has`=b.`value` 
+         left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='WHETHER') c on a.`manage`=c.`value` 
+         
+         [order] limit [start],[number];
+    </getPointPage>
+          
+	<getPointPageAllCount>
+		select count(*) 
+		from (      
+		select distinct  b.`id` ,b.`name` as `name`,b.`description`,b.`order`
+		              from  `SKILL_POINT` a                    
+		              		  left join `POINT` b on a.point_id=b.id
+		                    left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		                    left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		                    left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		                    where 1=1
+                         and ( e.`id`= :skill_id or d.`id`= :skill_id or c.`id`= :skill_id ) 
+		              and b.`enable`='T'
+		            
+		           ) a left join (select `point_id`,`teacher_id`,`manage` from `TEACHER_POINT` where `teacher_id` =:nbr) b on a.`id`=b.`point_id`
+	</getPointPageAllCount>
+	
+	<delTeacherPoint>
+		delete from `TEACHER_POINT`
+		where `teacher_id`=:nbr and `point_id`=:point_id
+	</delTeacherPoint>
+	
+	<insertTeacherPoint>
+		insert into `TEACHER_POINT`(`teacher_id`,`point_id`)
+		values(:nbr,:point_id)
+	</insertTeacherPoint>
+	
+	<reviewTeacher>
+	    select e.`name` as `first`,cast(e.`id` as char) as first_id,d.`name` as `second`,cast(d.`id` as char) as second_id,
+	           c.`name` as `third`,cast(c.`id` as char) as third_id,b.`name` as `point`,cast(b.`id` as char) as `point_id`
+	    from  `TEACHER_POINT` f left join `SKILL_POINT` a on f.`point_id`=a.`point_id`
+	    		  left join `POINT` b on a.point_id=b.id
+	          left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+	          left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+	          left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+	    where b.`enable`='T'
+	    and f.`teacher_id`=:nbr
+	    order by e.`order` asc,d.`order` asc,c.`order` asc,b.`order` asc 
+	</reviewTeacher>
+	
+	<queryTeacherPhoto>
+			SELECT `photo` FROM SM_PERSON WHERE `id`=:nbr;
+	</queryTeacherPhoto>
+	
+	<updateTeacherPhoto>
+	UPDATE `SM_PERSON` SET `photo`=:photo WHERE `id`=:nbr;
+	</updateTeacherPhoto>
+	
+	<queryDataOnly>
+		SELECT count(*) as `number` FROM SM_PERSON [where];
+	</queryDataOnly>
+	
+	<updateTeacherManage>
+		update `TEACHER_POINT` set `manage`='Y' where `teacher_id`=:nbr ;
+	</updateTeacherManage>	
+	
+	<revokeManage>
+		update `TEACHER_POINT` set `manage`='N' where `teacher_id`=:nbr and `point_id`=:pointId;	
+	</revokeManage>
+	
+	<addManage>
+		update `TEACHER_POINT` set `manage`='Y' where `teacher_id`=:nbr and `point_id`=:pointId;
+	</addManage>
+</SQL>

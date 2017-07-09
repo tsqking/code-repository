@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="coop">
+	<!-- Result Map-->
+	<resultMap type="com.clps.tmp.campusRecruit.univ.coop.vo.CoopVo" id="CoopResultMap">
+		<id column="id" property="id"/>
+		<result column="coop_time" property="coop_time"/>
+		<result column="company_name" property="company_name"/>
+		<result column="univ_id" property="univ_id"/>
+		<result column="univ_branch_id" property="univ_branch_id"/>
+		<result column="college_id" property="college_id"/>
+		<result column="province" property="province"/>
+		<result column="city" property="city"/>
+		<result column="country" property="country"/>
+		<result column="status" property="status"/>
+		<result column="style" property="style"/>
+		<result column="recruit_email" property="recruit_email"/>
+		<result column="recruit_time" property="recruit_time"/>
+		<result column="remark" property="remark"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_user" property="create_user"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_user" property="update_user"/>
+		<result column="del" property="del"/>
+	</resultMap>
+	
+	<resultMap type="CoopVo" id="result" extends="CoopResultMap">  
+        <collection property="coopAttns" javaType="ArrayList" column="attn_id" ofType="CoopAttnVo">  
+        	 <id column="Attn_id" property="Attn_id"/>
+        </collection>
+    </resultMap>  
+	
+	<sql id="All_Column_List" >
+		a.`id`,a.`coop_time`,a.`company_name`,c.`name` as `provinceName`,d.`name` as `cityName`,b.`name` as `univ_name`,e.`name` as `univ_branch_name`,f.`name` as `college_name`,a.`univ_id`, a.`univ_branch_id`, a.`college_id`, a.`province`,a.`country`,a.`city`,
+	    o1.`name` as `state`,
+	    o2.`name` as`style`,
+	    a.`recruit_email` as`recruit_email`,
+        a.`recruit_time`,a.`remark`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`</sql>
+	<sql id="All_Column_List2" >
+		`id`,`coop_time`,`company_name`,`univ_id`, `univ_branch_id`, `college_id`, `province`,`country`,`city`,`status`,`style`,`recruit_email`,`recruit_time`,`remark`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="Base_Column_List2" >
+		`coop_time`,`company_name`,`univ_id`, `univ_branch_id`, `college_id`, `province`,`country`,`city`,`status`,`style`,`recruit_email`,`recruit_time`,`remark`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="findCondition_count">
+		<where>
+		    1=1
+			<if test="companyName !=null">AND a.id=#{companyName}  </if>
+			<if test="city !=null">AND a.city=#{city}  </if>
+			<if test="province !=null">AND a.province=#{province}  </if>
+			<if test="name !=null">AND a.univ_id=#{name}  </if>
+			<if test="status !=null">AND a.status=#{status}  </if>
+			<if test="style !=null">AND a.style=#{style}  </if>
+			<if test="recruit_email !=null">AND a.recruit_email=#{recruit_email}  </if>
+			<if test="coopTime !=null">AND (a.coop_time &gt; ${start}  and a.coop_time &lt; ${end} )</if>
+		</where>
+	</sql>
+	<insert id="addCoopInfo" parameterType="CoopVo" useGeneratedKeys="true" keyProperty="id">
+		insert into UNIV_COOP (<include refid="Base_Column_List2"/>) values(#{coop_time},#{company_name}, #{univ_id}, #{univ_branch_id}, #{college_id}, #{province}, #{country}, #{city},#{status},#{style},#{recruit_email},#{recruit_time},#{remark},#{create_time},#{create_user},#{update_time},#{update_user})
+	</insert>
+	<!-- 查询所有学校信息 -->
+	<select id="selectCoop" resultType="CoopVo" parameterType="map">
+		select <include refid="All_Column_List"/>
+		from UNIV_COOP a
+		left join `CHINA_REGIONS` c on a.`province`=c.code
+		left join `CHINA_REGIONS` d on a.`city`=d.code
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+		left join `UNIVERSITY` e on a.`univ_branch_id`=e.`id`
+		left join `UNIV_COLLEGE` f on a.`college_id`=f.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+		oo2.`value`='COOP_STATE') o1 on a.`status`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where oo2.`value`='COOP_WAY')
+		o2 on a.`style`=o2.`value`
+		<include refid="findCondition_count" /> 
+		and  a.del="N" ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>		
+		LIMIT ${offset},${limit} 
+	</select>
+	<!-- 查询更新合作信息 -->
+	<select id="getEditCoop" resultType="CoopVo" parameterType="map">
+		select 	a.`id`,a.`coop_time`,a.`company_name`,a.`univ_id`, a.`univ_branch_id`, a.`college_id`, a.`province`,
+		a.`country`,a.`city`,a.`status`,a.`style`,a.`recruit_email`,a.`recruit_time`,a.`remark`,a.`create_time`,
+		a.`create_user`,a.`update_time`,a.`update_user`,
+		o1.`name` `status_name`,o2.`name` `style_name`,
+		o3.`name` as `univ_name`,
+		o4.`name` as `univ_branch_name`,
+		o5.`name` as `college_name`
+ 		from  UNIV_COOP a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+		oo2.`value`='COOP_STATE') o1 on a.`status`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where oo2.`value`='COOP_WAY')
+		o2 on a.`style`=o2.`value`
+		left join UNIVERSITY o3 on a.`univ_id`=o3.`id`
+		left join UNIVERSITY o4 on a.`univ_branch_id`=o4.`id`
+        left join UNIV_COLLEGE o5 on a.`college_id`=o5.`id`
+		where  a.id=#{id} and a.del="N"
+	</select>
+	
+	<!-- 删除合作信息 -->
+	<update id="updateCoopDel">
+		update UNIV_COOP set del="Y" where id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach>
+	</update>
+	
+	<!-- 编辑合作信息 -->
+	<update id="editCoop" parameterType="Object">
+		update UNIV_COOP set coop_time=#{coop_time}, company_name=#{company_name}, univ_id=#{univ_id}, univ_branch_id=#{univ_branch_id}, college_id=#{college_id}, city=#{city}, country=#{country},province=#{province},status=#{status},style=#{style}
+		,recruit_email=#{recruit_email},recruit_time=#{recruit_time},remark=#{remark},update_time=#{update_time},update_user=#{update_user} where id=#{id}
+	</update>
+	<!-- 所有合作信息 NUM-->
+	<select id="getAllCoop" resultType="long">
+		select count(*) from UNIV_COOP a <include refid="findCondition_count" /> and a.del="N" 
+	</select>
+	<!-- 所有合作信息 NUM-->
+	<select id="getCompanyName" resultType="SelectVo">
+		select id,company_name as text from UNIV_COOP  where del="N" 
+	</select>
+	<!-- 查询更新合作信息by id -->
+	<select id="getViewCoop" resultType="CoopVo" parameterType="map">
+		select <include refid="All_Column_List"/>
+		from UNIV_COOP a
+		left join `CHINA_REGIONS` c on a.`province`=c.code
+		left join `CHINA_REGIONS` d on a.`city`=d.code
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+		left join `UNIVERSITY` e on a.`univ_branch_id`=e.`id`
+		left join `UNIV_COLLEGE` f on a.`college_id`=f.`id`
+		left join (select oo1.`name` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+		oo2.`value`='COOP_STATE') o1 on a.`status`=o1.`value`
+		left join (select oo1.`name` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where oo2.`value`='COOP_WAY')
+		o2 on a.`style`=o2.`value`
+		where a.id=#{id} and a.del="N"
+	</select>
+	
+	<!-- 查询合作变更历史 -->
+	<select id="getCoopHis" resultType="CoopHisVo" parameterType="map">
+	<![CDATA[
+		SELECT a.*,o1.`name` `status_name` FROM UNIV_COOP_HISTORY a 
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+		SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+		oo2.`value`='COOP_STATE') o1 on a.`status`=o1.`value`
+		WHERE del = 'N' and coop_id=#{id} order by time asc
+	]]>	
+	</select>
+	
+	<!-- 查询合作变更历史 by id-->
+	<select id="getCoopHisById" resultType="CoopHisVo" parameterType="map">
+	<![CDATA[
+		SELECT * FROM UNIV_COOP_HISTORY WHERE del = 'N' and id=#{id}
+	]]>	
+	</select>
+	
+	<!-- 合作添加变更历史 -->
+	<select id="addCoopHis" parameterType="CoopHisVo" >
+	<![CDATA[
+		INSERT INTO `UNIV_COOP_HISTORY` 
+		(`coop_id`, `time`, `status`, `contacts`, `remark`, 
+		`create_time`, `create_user`, `update_time`, 
+		`update_user`, `del`) 
+		VALUES (#{coop_id}, #{time}, #{status}, #{contacts}, #{remark}, 
+		 #{create_time}, #{create_user}, #{update_time}, 
+		 #{update_user}, #{del})
+	]]>	
+	</select>
+	
+	<!-- 合作更新变更历史 -->
+	<select id="updateCoopHis" parameterType="CoopHisVo" >
+	<![CDATA[
+		UPDATE `UNIV_COOP_HISTORY` SET `time`=#{time}, `remark`=#{remark}, `status`=#{status}, `contacts`=#{contacts}, `update_time`=#{update_time}, `update_user`=#{update_user} 
+		WHERE `id`=#{id}
+	]]>	
+	</select>
+	
+	<!-- 删除合作状态变更历史信息 -->
+	<update id="updateCoopHisDel">
+		update UNIV_COOP_HISTORY set del="Y" where coop_id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item}</foreach>
+	</update>
+	
+	<!-- 更新合作信息中的最新信息 -->
+	<update id="updateCoopLastInfo" parameterType="CoopVo">
+		UPDATE `UNIV_COOP` SET `status`=#{status}, `remark`=#{remark}, `update_time`=#{update_time}, `update_user`=#{update_user} 
+		WHERE `id`=#{id}
+	</update>
+	
+	<!-- 查询是否为最新的信息 -->
+	<select id="checkLastInfo" resultType="String" parameterType="CoopHisVo">
+	<![CDATA[
+		SELECT count(*) FROM UNIV_COOP_HISTORY where time>#{time} and coop_id=#{coop_id} and del='N'
+	]]>	
+	</select>
+	
+	<!-- 获取定时任务（发送邮件）校园招聘的信息-->
+	<select id="getRecruitInfo" resultType="CoopVo" parameterType="map"> 
+		select b.`name` as `univ_name`,
+		c.`name` as `provinceName` ,
+		d.`name` as `cityName`,
+		e.`name` as `univ_branch_name`,
+		f.`name` as `college_name`,
+		a.`recruit_time`,
+		a.`recruit_email` as `recruit_email`,
+		a.`update_user`
+		from UNIV_COOP a 
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`   left join `UNIVERSITY` e on a.`univ_branch_id`=e.`id` 
+		left join `CHINA_REGIONS` c on a.`province`=c.code   left join `CHINA_REGIONS` d on a.`city`=d.code      
+		left join `UNIV_COLLEGE` f on a.`college_id`=f.`id`
+		where  a.style=5 and a.`recruit_time` !='' 
+		and a.`recruit_time` between #{startTime} and #{endTime}
+	</select>
+	
+	<!-- 获取联系人信息列表 -->
+	<select id="getCoopAttn" resultType="AttnVo" parameterType="map"> 
+	<![CDATA[
+		SELECT a.*,o1.`name` `gender_name`
+		FROM UNIV_ATTN a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='SEX') o1 on a.`gender`=o1.`value`
+		WHERE del='N' and id in (SELECT attn_id FROM UNIV_COOP_ATTN WHERE coop_id=#{coopId})
+	]]>
+	</select>
+	
+	<!-- 获取联系人信息列表 -->
+	<select id="getCoopAttnByIds" resultType="AttnVo" parameterType="map"> 
+		SELECT a.*,o1.`name` `gender_name`
+		FROM UNIV_ATTN a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='SEX') o1 on a.`gender`=o1.`value`
+		WHERE del='N' and id in <foreach item="item" collection="contacts" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+	
+	<!-- 获取合作的甲方信息 -->
+	<select id="getCoopSchoolInfo" resultType="CoopVo" parameterType="map"> 
+		SELECT univ_id,univ_branch_id,college_id FROM UNIV_COOP WHERE id=#{id}
+	</select>
+	
+	<!-- 获取合作的甲方信息的联系人信息 -->
+	<select id="getCoopSchoolContactsInfo" resultType="AttnVo" parameterType="map"> 
+		SELECT a.*,o1.`name` `gender_name` FROM UNIV_ATTN a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='SEX') o1 on a.`gender`=o1.`value`
+		<where>
+			1=1
+			<if test="univ_id !=null">AND a.univ_id=#{univ_id}</if>
+			<if test="univ_branch_id !=null">AND a.univ_branch_id=#{univ_branch_id}</if>
+			<if test="college_id !=null">AND a.college_id=#{college_id}</if>
+		</where>		
+	</select>
+	
+	<!-- 获取合作的详细信息 -->
+	<select id="getCoopInfo" resultType="CoopVo" parameterType="map"> 
+		SELECT * FROM UNIV_COOP WHERE del='N' and id=#{id}	
+	</select>
+	
+	<!-- 获取合作的联系人id的列表 -->
+	<select id="getCoopAttnIds" resultType="String" parameterType="map"> 
+		SELECT distinct attn_id FROM UNIV_COOP_ATTN WHERE coop_id=#{id}	
+	</select>
+	
+	<!-- 删除合作联系人关联表中的信息 -->
+	<delete id="deleteAttnInfo" parameterType="map">
+	    DELETE FROM `UNIV_COOP_ATTN` WHERE `coop_id`=#{id}
+	</delete>
+	
+	<!-- 添加合作联系人关联表中的信息 -->
+	<insert id="addAttnInfo" parameterType="map">
+	    INSERT INTO `UNIV_COOP_ATTN` (`coop_id`, `attn_id`) VALUES (#{coopId},#{attnId})
+	</insert>
+	
+	<!-- 删除合作历史记录 -->
+	<update id="deleteCoopHis" parameterType="map">
+	    update UNIV_COOP_HISTORY set del="Y" where id=#{id}
+	</update>
+	
+	<!-- 获取合作历史最新的记录 -->
+	<select id="getCoopHisLast" resultType="CoopHisVo" parameterType="map"> 
+		SELECT * FROM UNIV_COOP_HISTORY WHERE coop_id=#{id} and del='N' order by time desc limit 0,1
+	</select>
+
+</mapper>

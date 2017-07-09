@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="paperUi">
+    
+    <!-- 查询题块by试卷id&学生id -->
+	<select id="getSection" resultType="SectionVo" parameterType="map">
+		SELECT a.*,c.question_score_all,d.question_number,e.question_score 
+		FROM SECTION a,PAPER_SECTION b,
+			(SELECT sum(a.question_score) question_score_all,a.section_id FROM SECTION_QUESTION a
+				group by a.section_id) c,
+			(SELECT count(a.question_id) question_number,a.section_id FROM SECTION_QUESTION a
+				group by a.section_id) d,
+			(SELECT a.section_id,sum(b.score) question_score FROM SECTION_QUESTION a,ANSWER_SHEET b
+				where a.question_id=b.question_id and b.user_id=#{user_id} and b.paper_id=#{paper_id}
+				group by a.section_id) e
+		where a.id=b.section_id and c.section_id=b.section_id 
+			and c.section_id=d.section_id and c.section_id=e.section_id 
+			and b.paper_id=#{paper_id}
+		order by b.`order` asc
+	</select>
+    
+    <!-- 查询题目(带答案)by题块id -->
+	<select id="getQuestion" resultType="QuestionVo" parameterType="map">
+		SELECT a.*,b.question_score FROM QUESTION a,SECTION_QUESTION b
+			where a.id=b.question_id and b.section_id=#{section_id}
+			order by b.`order` asc
+	</select>
+    
+    <!-- 查询学生答案by试卷和学生id -->
+	<select id="getAnswerSheet" resultType="AnswerSheetVo" parameterType="map">
+		SELECT * FROM ANSWER_SHEET where paper_id=#{paper_id} and user_id=#{user_id}
+	</select>
+	
+	<!-- 更新学生答案 -->
+	<update id="updateAnswerSheet" parameterType="AnswerSheetVo">
+		update ANSWER_SHEET set score=#{score},`judge_person`=#{judge_person},`judge_time`=#{judge_time} 
+		where paper_id=#{paper_id} and user_id=#{user_id} and question_id=#{question_id}
+	</update>
+	<!-- 更新学生答案2-备注 -->
+	<update id="updateAnswerSheet2" parameterType="AnswerSheetVo">
+		update ANSWER_SHEET set remark=#{remark} 
+		where paper_id=#{paper_id} and user_id=#{user_id} and question_id=#{question_id}
+	</update>
+    
+    <!-- 查询学生答案信息 -->
+	<select id="getAnswerInfo" resultType="AnswerInfoVo" parameterType="map">
+		SELECT a.*,o1.name user_type_name,o2.name finish_flag_name,b.all_score, 
+			c.name paper_id_name,d.name user_id_name
+		FROM ANSWER_INFO a
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='CANDIDATE_TYPE') o1 on a.`user_type`=o1.`value`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='FINISH_ANSWER') o2 on a.`finish_flag`=o2.`value`
+		left join (select sum(question_score) all_score,b.paper_id from SECTION_QUESTION a,PAPER_SECTION b
+			where a.section_id=b.section_id 
+			group by b.paper_id) b on b.paper_id =#{paper_id}
+		left join PAPER c on c.id=#{paper_id}
+        left join SM_PERSON d on d.id=#{user_id}
+		where a.paper_id=#{paper_id} and a.user_id=#{user_id}
+	</select>
+    
+    <!-- 更新学生答案信息-写入总分 -->
+	<update id="updateAnswerInfo" parameterType="map">
+		update ANSWER_INFO set score=(SELECT sum(score) sum FROM ANSWER_SHEET where paper_id=#{paper_id} and user_id=#{user_id}),
+			`judge_person`=#{judge_person},`judge_time`=#{judge_time} 
+		where paper_id=#{paper_id} and user_id=#{user_id}
+	</update>
+	
+	<!-- 同步更新作业/测试历史表 -->
+	<update id="updatePlanPaperHis" parameterType="map">
+		update PLAN_PAPER_STU_HIS set score=(SELECT sum(score) sum FROM ANSWER_SHEET where paper_id=#{paper_id} and user_id=#{student_id}),
+			`teacher_id`=#{teacher_id},`check_time`=#{check_time},`status`='2'
+		where id=#{id}
+	</update>
+    
+    <!-- 查询批改进度 -->
+	<select id="getCheckCount" resultType="AnswerInfoVo" parameterType="map">
+		SELECT b.count ,a.count_all
+		FROM 
+			(SELECT count(*) count_all FROM ANSWER_SHEET where paper_id=#{paper_id} and user_id=#{user_id}) a,
+			(SELECT count(*) count FROM ANSWER_SHEET where judge_person is not null and paper_id=#{paper_id} and user_id=#{user_id}) b
+	</select>
+    
+    <!-- 获取题目和答案(学生和标准答案)列表 -->
+	<select id="getSectionQuestionList" resultType="AnswerSheetVo" parameterType="map">
+		SELECT a.*,b.question_score all_score 
+		FROM 
+			(SELECT 
+				a.section_id,e.name section_name,e.instruction section_instruction,b.question_id,
+				c.`type`,c.content,c.answer true_answer,c.opt1,c.opt2,c.opt3,c.opt4,c.opt5,c.opt6,c.analysis,
+				d.answer,d.judge_person,d.score,d.remark,c.so_flag,
+				o1.name `type_name`
+			FROM PAPER_SECTION a,SECTION_QUESTION b
+				left join QUESTION c on c.id=b.question_id
+				left join SECTION e on e.id=b.section_id
+				left join (SELECT * FROM ANSWER_SHEET WHERE paper_id=#{paper_id} and user_id=#{user_id}) d on d.question_id=b.question_id
+				left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+					SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+					oo2.`value`='QUST_TYPE') o1 on c.`type`=o1.`value`
+			where a.section_id=b.section_id and a.paper_id=#{paper_id} 
+			order by a.`order` asc,b.`order` asc) a,SECTION_QUESTION b
+		where a.section_id=b.section_id and a.question_id=b.question_id
+	</select>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+</mapper>

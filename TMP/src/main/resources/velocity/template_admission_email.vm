@@ -1,0 +1,26 @@
+##author: David
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>【金融IT人才测评（FITT）】${name}准考证</title>
+  </head>
+  <body>
+      ${name},<br><br>
+      	您好，欢迎参加金融IT考试测评！<br>
+		附件中是您的准考证，请自行打印，打印时使用普通的A4纸即可，注意保持正反面干净整洁，不要涂写刻画。<br>
+		您可持此证在规定时间，规定地点参加规定考试。<br>
+		考试时间以北京时间为准。<br>
+		参加考试须凭《准考证》以及有效身份证件原件按照规定时间进入考场，自觉接受身份验证核查、安全检查和随身物品检查等，并对号入座。<br>
+		考生须严格遵守考场规则。<br>
+		准考证号码可用于考后查询成绩使用。<br>
+		建议提前熟悉考场地址和交通路线，避免耽误考试。<br>
+      <br/>
+      <br/>
+      <br/>
+     	 复旦大学软件学院<br>
+     	 金融IT人才标准研究中心
+  </body>
+</html>

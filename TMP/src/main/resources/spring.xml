@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"  
+	xsi:schemaLocation="    
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd  
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd  
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd"
+	default-autowire="byName" default-lazy-init="false">
+
+	<!-- task任务扫描注解 -->
+	<task:annotation-driven />
+	<!-- 自动加载构建bean -->
+	<context:component-scan base-package="com.clps.tmp"/>
+	
+    <bean class="com.clps.tmp.core.common.util.config.EncryptablePropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:config/config.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+    
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${jdbc.driver}" />
+		<!-- 生产：172.19.226.217:3306 -->
+		<!-- 测试：58.246.137.126:60007-->
+		<property name="jdbcUrl" value="jdbc:mysql://${jdbc.host}:${jdbc.port}/${jdbc.dbname}?useUnicode=true&amp;characterEncoding=UTF-8&amp;allowMultiQueries=true" />
+		<property name="user" value="${ENCRY_jdbc.username}" />
+		<property name="password" value="${ENCRY_jdbc.password}" />
+		<property name="minPoolSize" value="${jdbc.minPoolSize}" />
+		<property name="maxPoolSize" value="${jdbc.maxPoolSize}" />
+		<property name="initialPoolSize" value="${jdbc.initialPoolSize}" />
+		<property name="maxIdleTime" value="${jdbc.maxIdleTime}" />
+		<property name="acquireIncrement" value="${jdbc.acquireIncrement}" />
+		<property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}" />
+	</bean>
+	<!-- ****************************Spring JDBC Start**************************** -->
+	<!-- 配置事务管理器 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">   
+		<property name="dataSource" ref="dataSource"/>   
+	</bean>
+
+	<!-- 事务性策略配置，使用的事务管理器引用自 txManager -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<!-- 事务属性 -->
+		<tx:attributes>
+			<!-- 获得异常就rollback -->
+			<tx:method name="save*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="insert*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>  
+			<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>  
+			<tx:method name="remove*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>  
+			<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="edit*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="change*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="set*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="merge*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>    
+			<!-- 以下方法的connection是只读的 -->
+			<tx:method name="select*" read-only="true"/> 
+			<tx:method name="get*" read-only="true"/> 
+			<tx:method name="find*" read-only="true"/>  
+			<tx:method name="query*" read-only="true"/>  
+			<tx:method name="load*" read-only="true"/>  
+		</tx:attributes>
+	</tx:advice> 
+	
+	<!-- 声明事务管理 -->
+	<aop:config>
+		<aop:pointcut id="point1" expression="execution(* com.clps.tmp.**.service.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="point1" />
+	</aop:config>
+	<!-- <aop:config>
+		<aop:pointcut id="point2" expression="execution(* com.clps.tmp.tech.*.service.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="point2" />
+	</aop:config>
+	<aop:config>
+		<aop:pointcut id="point3" expression="execution(* com.clps.tmp.core.*.service.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="point3" />
+	</aop:config> -->
+	<!-- ****************************Spring JDBC End**************************** -->
+	
+	<!-- ****************************MyBatis Start**************************** -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"></property>
+		<property name="mapperLocations" value="classpath:mybatis/sqlmap/**/*.xml" />
+	</bean>
+	
+	<bean id="mbDao" class="com.clps.tmp.core.common.dao.impl.MBDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- ****************************MyBatis End**************************** -->
+	
+	<bean id="dao" class="com.clps.tmp.core.common.dao.impl.DaoImpl">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="cacheBeanPostProcessor" class="com.clps.tmp.core.common.util.config.CacheBeanPostProcessor"/>
+	<!-- 获取应用上下文 -->
+	<bean id="springContextUtil" class="com.clps.tmp.core.common.util.config.SpringContextUtil" />
+	
+	<!-- ****************************Email Start**************************** -->
+	<!-- 邮件配置 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.host}" />
+		<property name="port" value="${mail.port}" />
+		<property name="username" value="${mail.username}" />
+		<property name="password" value="${ENCRY_mail.password}" />
+		<property name="defaultEncoding" value="UTF-8"></property>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+				<prop key="mail.smtp.timeout">${mail.smtp.timeout}</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 模板velocity配置 -->
+	<bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+	    <property name="overrideLogging" value="false" />
+	    <property name="velocityProperties">
+	        <props>
+	            <prop key="resource.loader">file</prop>
+	            <prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+	            <prop key="file.resource.loader.cache">false</prop>
+	            <prop key="file.resource.loader.modificationCheckInterval">3</prop>
+	            <prop key="input.encoding">UTF-8</prop>
+	            <prop key="output.encoding">UTF-8</prop>
+	        </props>
+	    </property>
+	</bean>
+	<!-- 异步线程执行器 -->
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="10" />
+		<property name="maxPoolSize" value="30" />
+	</bean>
+	<!-- ****************************Email End**************************** -->
+
+	<!-- ****************************Redis Start**************************** -->
+	<!-- redis切片方式(使用ShardedJedis) -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal"  value="${redis.maxActive}" />
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<property name="maxWaitMillis" value="${redis.maxWait}" />
+		<property name="testOnBorrow" value="${redis.testOnBorrow}" />
+		<property name="testOnReturn" value="${redis.testOnReturn}" />
+	</bean>
+	<bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
+		<constructor-arg index="0" ref="jedisPoolConfig" />
+		<constructor-arg index="1">
+			<list>
+				<bean class="redis.clients.jedis.JedisShardInfo">
+					<constructor-arg name="host" value="${redis1.host}" />
+					<constructor-arg name="port" value="${redis1.port}" />
+					<constructor-arg name="timeout" value="${redis.timeout}" />
+					<property name="password" value="${ENCRY_redis.password}"/>
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+	<bean id="redisUtil" class="com.clps.tmp.core.common.util.RedisUtil" />
+	<!-- ****************************Redis Start**************************** -->
+</beans>  

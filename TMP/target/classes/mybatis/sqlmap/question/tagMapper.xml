@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tag" > 
+	<!-- Result Map-->
+	<resultMap id="TagResultMap" type="com.clps.tmp.question.tag.vo.TagVo" >
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="description" property="description"/>
+		<result column="user_count" property="user_count"/>
+		<result column="enable" property="enable"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+	</resultMap>
+	<resultMap id="SelectResultMap" type="com.clps.tmp.core.sm.vo.SelectVo" >
+		<result column="id" property="id"/>
+		<result column="name" property="name"/>
+	</resultMap>
+	<!-- 所有列 -->
+	<sql id="Tag_Column_List" >
+		`id`, `name`, `description`, `user_count`, f.`ename` as `enable`, `create_person`, `create_time`
+	</sql>
+	<!-- 除ID外的所有列 -->
+	<sql id="Tag_Column_List_1" >
+		`name`, `description`, `user_count`, `enable`, `create_person`, `create_time`
+	</sql>
+	<sql id="Tag_Column_List_2" >
+		`id`,`name`, `description`, `user_count`, `enable`, `create_person`, `create_time`
+	</sql>
+	<!-- 查询所有记录 -->
+	<select id="queryTag_Map" resultMap="TagResultMap" parameterType="map" >
+		select <include refid="Tag_Column_List" /> from `TAG` 
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON `enable`=f.`value`
+		<where>
+			1=1 
+			<if test=" name!=null and name!='' ">
+			 	and	`name` like concat('%',#{name},'%')
+			</if>
+			<if test=" enable!=null and enable!='' ">
+				 and `enable` = #{enable}  
+			</if>
+			order by ${sortName} ${sortOrder} 
+			<if test="sortName !='create_time'">
+				,create_time desc
+			</if>			
+			limit ${offset},${limit}
+		</where>
+	</select>
+	
+	<select id="queryAllTag" resultMap="SelectResultMap">
+		select cast(`id` as char) as `id`,`name` as `text` from `TAG` where `enable`='T'
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="queryTagCount" resultType="Object">
+		select count(`id`) from `TAG`
+		<where>
+			1=1 
+			<if test=" enable!=null and enable!='' ">
+			 and 	`enable` = #{enable}
+			</if>
+			<if test=" name!=null and name!='' ">
+			 and 	`name` like concat('%',#{name},'%') 
+			</if>
+		</where>
+	</select>
+	<!-- 新增记录 -->
+	<insert id="insertNewTag" parameterType="tag" useGeneratedKeys="true" keyProperty="id">
+		insert into `TAG`(<include refid="Tag_Column_List_1"/>) 
+		values(#{name},#{description},#{user_count},#{enable},#{create_person},#{create_time})
+	</insert>
+	<!-- 更新标签状态 -->
+	<update id="updateTagStatusDisable" parameterType="Object">
+		update `TAG` set enable='F' where id=${id} and user_count=0
+	</update>
+	<update id="updateTagStatusEnable" parameterType="Object">
+		update `TAG` set enable='T' where id=${id}
+	</update>
+	<!-- 标签使用次数增减 -->
+	<update id="updateUse_countUp" parameterType="Object">
+		update `TAG` set user_count=user_count+1 where id=${tag_id}
+	</update>
+	<update id="updateUse_countDown" parameterType="Object">
+		update `TAG` set user_count=user_count-1 where id=${id}
+	</update>
+	<!-- 根据Name查询标签 -->
+	<select id="getTagByName" resultMap="TagResultMap" parameterType="Object">
+		select `id`, `name`, `description`, `user_count`, `enable`, `create_person`, `create_time` from `TAG` where `name`=#{name}
+	</select>
+</mapper>

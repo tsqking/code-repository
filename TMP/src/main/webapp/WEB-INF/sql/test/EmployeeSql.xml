@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+     
+     <AddEmployee>
+        insert into `test_table` 
+        (`NO`,`NAME`,`SEX`,`AGE`,`NATIVEPLACE`,`ENABLE`)
+		VALUES
+		(:no,:name,:sex,:age,:nativePlace,:enable)
+     </AddEmployee>
+     
+     <getCount>
+		select count(*) ct from `test_table` 		 
+	</getCount>
+	
+     <queryEmployee>
+		select * from `test_table` limit [start],[number]
+	</queryEmployee>
+	<editEmployee>
+	    	select * from `test_table` where `ID`=:id
+	</editEmployee>
+    <deleteEmployee>
+         delete from  `test_table`   where `ID`=:id
+    </deleteEmployee>
+   
+   <UpdateEmployee>
+	   	 UPDATE `test_table` SET `NO`=:no,`NAME`=:name,`SEX`=:sex,`AGE`=:age,`NATIVEPLACE`=:nativePlace,
+	   	`ENABLE`=:enable WHERE `ID`=:id
+   </UpdateEmployee>
+   <seachsql>
+        select * from `test_table` where `NO`=:no or `NAME`=:name and `SEX`=:sex and `ENABLE`=:enable
+   </seachsql>
+</SQL>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="coopAttn">
+	<!-- Result Map -->
+	<resultMap type="com.clps.tmp.campusRecruit.univ.coop.vo.CoopAttnVo"
+		id="CoopAttnResultMap">
+		<result column="coop_id" property="coop_id" />
+		<result column="attn_id" property="attn_id" />
+		<association property="coop"
+			javaType="com.clps.tmp.campusRecruit.univ.coop.vo.CoopVo">
+			<id column="id" property="id" />
+		</association>
+	</resultMap>
+	<!-- 基本信息列 -->
+	<sql id="Base_Column_List">
+		a.`coop_id`,a.`attn_id`
+	</sql>
+	<sql id="All_Column_List">
+		a.`coop_id`,a.`attn_id`
+	</sql>
+	<sql id="Base_Column_List2">
+		`coop_id`,`attn_id`
+	</sql>
+
+	<sql id="findCondition_count">
+		<where>
+			1=1
+			<if test="college_id !=null">AND a.college_id=#{college_id}   </if>
+			<if test="univ_branch_id !=null">AND a.univ_branch_id=#{univ_branch_id}   </if>
+			<if test="univ_id !=null">AND a.univ_id=#{univ_id}   </if>
+			<if test="univName !=null">AND a.univ_id=#{univName}   </if>
+		</where>
+	</sql>
+
+	<insert id="addCoopAttnInfo" parameterType="map">
+		insert into UNIV_COOP_ATTN (
+		<include refid="Base_Column_List2" />
+		) values
+		<foreach collection="attn_ids" item="item" index="index"
+			separator=",">
+			(#{coop_id},#{item})
+		</foreach>
+	</insert>
+
+	<!-- 删除合作信息 联系人 -->
+	<delete id="deleteCoopAttn" parameterType="map">
+		delete from UNIV_COOP_ATTN where coop_id in
+		<foreach item="item" collection="array" open="(" separator=","
+			close=")">#{item} </foreach>
+	</delete>
+
+	<!-- 更新合作信息 联系人 -->
+	<delete id="upadteCoopAttn">
+		delete from UNIV_COOP_ATTN where attn_id not in
+		<foreach item="item" collection="array" open="(" separator=","
+			close=")">#{item} </foreach>
+	</delete>
+	<!-- 更新时删除合作信息 联系人 -->
+	<delete id="upadteAttn" parameterType="map">
+		delete from UNIV_COOP_ATTN
+		where coop_id=#{id}
+	</delete>
+
+	<!-- 获取联系人信息 -->
+	<select id="selectAttn" resultType="AttnVo" parameterType="map">
+		select distinct a.`id`,a.`name`,a.`mobile`,a.`phone`,a.`email`,a.`position`,
+		CASE WHEN b.attn_id IS NOT NULL THEN 'true' ELSE 'false' END AS status 
+		from UNIV_ATTN a 
+		left join `UNIV_COOP_ATTN` b on a.`id`=b.`attn_id`  
+		WHERE b.`coop_id`=#{coop_id} ORDER BY ${sortName}
+	</select>
+
+	<!-- 获取联系人信息 -->
+	<select id="getAttnNum" resultType="long" parameterType="map">
+		select
+		count(*)
+		from UNIV_ATTN where id in( select attn_id from UNIV_COOP_ATTN where
+		coop_id=#{coop_id}) and del="N"
+	</select>
+	
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userExamNum">
+
+	<!-- 查询出该组最大的准考证号 
+		使用order by 排序处理准考证号最大值
+		SELECT SUBSTRING(c_sp.exam_num,17) as exam_num from(select 
+		distinct c.direction,sp.exam_num,sp.gender from class_student cs left join 
+		class c on cs.class_id=c.id left join sm_person sp on cs.student_id=sp.id 
+		)c_sp where c_sp.direction='Mainframe' AND c_sp.gender='1' order by (exam_num+0) 
+		desc; -->
+	<select id="getUserExamNumMax" resultType="String"
+		parameterType="map">
+		SELECT MAX(SUBSTRING(c_sp.exam_num,17)) FROM(
+		SELECT
+		DISTINCT
+		c.direction,sp.exam_num,sp.gender
+		FROM class_student cs
+		LEFT
+		JOIN class
+		c ON cs.class_id=c.id
+		LEFT JOIN sm_person sp ON
+		cs.student_id=sp.id
+		)c_sp WHERE c_sp.direction=#{test_type} AND
+		c_sp.gender=#{gender};
+	</select>
+
+
+
+	<!-- 更新准考证号 -->
+	<update id="updateExamNum" parameterType="Map">
+		update sm_person set
+		exam_num=#{exam_num},
+		update_time=#{update_time},
+		update_person=#{update_person}
+		where mobile=#{mobile}
+	</update>
+
+
+
+
+	<!-- 批量添加准考证号 -->
+	<!-- <insert id="batchAddUserExamNum" parameterType="java.util.List"> <selectKey 
+		resultType="long" keyProperty="id" order="AFTER"> SELECT LAST_INSERT_ID() 
+		</selectKey> INSERT INTO sm_person( exam_num,username,role,enable,create_time,create_person, 
+		update_time,update_person ) VALUES <foreach collection="list" item="item" 
+		index="index" separator=","> (#{item.exam_num},#{item.username},#{item.role},#{item.enable},#{item.create_time},#{item.create_person} 
+		,#{item.update_time},#{item.update_person}) </foreach> </insert> -->
+		
+		<insert id="addUserAndExamNum" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+	    INSERT INTO `SM_PERSON` (
+	    	`cardtype`,`cardno`,`no`,
+			`role`, `username`, `password`, `name`, `en_name`, 
+			`gender`, `mobile`,  `email`, 
+			`enable`, `create_time`, `create_person`,  
+			`update_time`, `update_person`, `exam_num`,`student_source`) VALUES (
+	    	#{cardtype}, #{cardno},#{no}, #{role}, 
+	    	#{username}, #{password}, #{name}, 
+	    	#{en_name}, #{gender}, #{mobile}, 
+	    	#{email}, 'T', #{create_time}, #{create_person}, 
+	    	#{update_time}, #{update_person},#{exam_num},#{affiliation})
+	</insert>
+<!-- 	<update id="updateExamNum" parameterType="map"> -->
+<!-- 		update `SM_PERSON` set `exam_num` =#{exam_num} where mobile=#{mobile} -->
+<!-- 	</update> -->
+	<select id="userExists" resultType="int" parameterType="map">
+		select count(1) from  SM_PERSON a where  a.mobile=#{mobile}
+	</select>
+
+	<delete id="delUserInClass" parameterType="map">
+		delete from `CLASS_STUDENT`
+		where class_id=#{class_id}
+		and student_id in
+		(select `id` as student_id 
+		from `SM_PERSON`
+		where `username`=#{username})
+	</delete>
+
+	<insert id="addUserInClass" parameterType="map">
+		insert into `CLASS_STUDENT`(class_id,student_id)
+		values(#{class_id},#{student_id})
+	</insert>
+
+	<select id="usernameToId" resultType="int" parameterType="map">
+		select id from  SM_PERSON a where  a.username=#{username}
+	</select>
+
+	<update id="updateUserSize" parameterType="map">
+		update `CLASS` set size=(select count(distinct `student_id`) as total from `CLASS_STUDENT` where `class_id`=#{class_id}) where `id`=#{class_id}
+	</update>
+
+
+
+
+
+
+
+
+</mapper>

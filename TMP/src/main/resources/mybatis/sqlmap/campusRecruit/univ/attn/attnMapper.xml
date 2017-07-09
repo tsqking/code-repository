@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="attn">
+	<!-- Result Map-->
+	<resultMap type="com.clps.tmp.campusRecruit.univ.attn.vo.AttnVo" id="AttnResultMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="gender" property="gender"/>
+		<result column="mobile" property="mobile"/>
+		<result column="phone" property="phone"/>
+		<result column="email" property="email"/>
+		<result column="position" property="position"/>
+		<result column="univ_name" property="univ_name"/>
+		<result column="univ_id" property="univ_id"/>
+		<result column="univ_branch_name" property="univ_branch_name"/>
+		<result column="univ_branch_id" property="univ_branch_id"/>
+		<result column="college_name" property="college_name"/>
+		<result column="college_id" property="college_id"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_user" property="create_user"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_user" property="update_user"/>
+		<result column="del" property="del"/>
+	</resultMap>
+	<!-- 基本信息列 -->
+	<sql id="Base_Column_List" >
+		`name`,`gender`,`mobile`,`phone`,`email`,`position`,`univ_id`,`univ_branch_id`,`college_id`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="All_Column_List" >
+		a.`id`,a.`name`,o1.`name` as`gender`,b.`name` as `univ_name`,c.`name` as `univ_branch_name`,d.`name` as `college_name`,a.`mobile`,a.`phone`,a.`email`,a.`position`,a.`univ_id`,a.`univ_branch_id`,a.`college_id`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`
+	</sql>
+	<sql id="All_Column_List2" >
+		`id`,`name`,`gender`,`mobile`,`phone`,`email`,`position`,`univ_id`,`univ_branch_id`,`college_id`,`create_time`,`create_user`,`update_time`,`update_user`,`del`
+	</sql>
+	<sql id="findCondition_count">
+		<where>
+		    1=1
+		    <if test="univName !=null">AND a.univ_id=#{univName}   </if>
+		    <if test="univ_branch_id !=null">AND a.univ_branch_id=#{univ_branch_id}   </if>
+		    <if test="college_id !=null">AND a.college_id=#{college_id}   </if>
+			<if test="attnVoName !=null">AND a.id=#{attnVoName}  </if>
+		</where>
+	</sql>
+	<insert id="addAttn" parameterType="AttnVo">
+		insert into UNIV_ATTN(<include refid="Base_Column_List"/>) values(#{name},#{gender},#{mobile},#{phone},#{email},#{position},#{univ_id},#{univ_branch_id},#{college_id},#{create_time},#{create_user},#{update_time},#{update_user})
+	</insert>
+	<!-- 查询所有联系人信息 -->
+	<select id="selectAttn" resultType="AttnVo" parameterType="map">
+		select <include refid="All_Column_List"/> from UNIV_ATTN a 
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+        left join `UNIVERSITY` c on a.`univ_branch_id`=c.`id`
+        left join `UNIV_COLLEGE` d on a.`college_id`=d.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SEX') o1 on a.`gender`=o1.`value`
+		<include refid="findCondition_count" /> 
+		and a.del="N" ORDER BY ${sortName} ${sortOrder}
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>
+		LIMIT ${offset},${limit} 
+	</select>
+	<!-- 添加合作信息 查询所有联系人信息 -->
+	<select id="selectAllAttn" resultType="AttnVo" parameterType="map">
+		select <include refid="All_Column_List"/> from UNIV_ATTN a 
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+        left join `UNIVERSITY` c on a.`univ_branch_id`=c.`id`
+        left join `UNIV_COLLEGE` d on a.`college_id`=d.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SEX') o1 on a.`gender`=o1.`value`
+		<include refid="findCondition_count" /> 
+		and a.del="N" ORDER BY ${sortName} ${sortOrder}
+	</select>
+	<!-- 查询更新联系人信息 -->
+	<select id="getEditAttn" resultType="AttnVo" parameterType="map">
+		select <include refid="All_Column_List2"/> from  UNIV_ATTN a where  a.id=#{id} and a.del="N"
+	</select>
+	<!-- 删除学院信息 -->
+	<delete id="deleteAttn" parameterType="map">
+		delete from UNIV_ATTN where id=#{id} 
+	</delete>
+	<update id="updateAttnDel">
+		update UNIV_ATTN set del="Y" where id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach>
+	</update>
+	<!-- 初始化信息名称下拉框 -->
+	<select id="getAllUniv" resultType="SelectVo">
+		select id,name as text from UNIVERSITY where parent_id=0 and del="N"
+	</select>
+	<!-- 初始化学校 分校信息名称下拉框 -->
+	<select id="getAllMainUniv" resultType="SelectVo">
+		select id,name as text from UNIVERSITY where del="N" and parent_id=#{parent_id}
+	</select>
+	<!-- 初始化学院信息名称下拉框 -->
+	<select id="getCollege" resultType="SelectVo">
+		select id,name as text from UNIV_COLLEGE where del="N" and univ_id=#{parent_id}
+	</select>
+	<!-- 编辑联系人信息 -->
+	<update id="editAttn" parameterType="Object">
+		update UNIV_ATTN set name=#{name},gender=#{gender},mobile=#{mobile},phone=#{phone},email=#{email},position=#{position},univ_id=#{univ_id},univ_branch_id=#{univ_branch_id},college_id=#{college_id},create_time=#{create_time},create_user=#{create_user},update_time=#{update_time},update_user=#{update_user} where id=#{id}
+	</update>
+	<!-- 所有联系人NUM-->
+	<select id="getAllAttn" resultType="long">
+		select count(*) from UNIV_ATTN a <include refid="findCondition_count" /> and a.del="N"
+	</select>
+	<!-- 初始化联系人信息名称下拉框 -->
+	<select id="getAttoList" resultType="SelectVo">
+		select id,name as text from UNIV_ATTN where del="N"
+	</select>
+	
+	<!-- 根据姓名查询联系人 -->
+	<select id="getAttnByName" parameterType="map" resultType="AttnVo">
+		SELECT a.*,b.name univ_name,c.name univ_branch_name,d.name college_name,o1.name gender_name FROM UNIV_ATTN a
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+		left join `UNIVERSITY` c on a.`univ_branch_id`=c.`id`
+		left join `UNIV_COLLEGE` d on a.`college_id`=d.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='SEX') o1 on a.`gender`=o1.`value`
+		WHERE a.name=#{name} and a.del='N'
+	</select>
+</mapper>

@@ -1,0 +1,13 @@
+var add_new_employee_title="添加新员工";
+var add_fail="添加员工失败！请稍后重试~";	
+var add_success="添加员工成功"
+var employeeUpdateWindowTitle="更新员工信息"
+var deleteInfo="删除员工信息"
+var confirm="确认";
+var cancel="取消";
+var employee_delete_content="确认删除吗?";
+var success_delete="删除成功！删除数据条数：";
+var fail_delete_title="失败反馈";
+var fail_delete="删除失败！";
+var edit_success="成功更新数据！";
+var edit_fail="更新失败！请稍后重试~";

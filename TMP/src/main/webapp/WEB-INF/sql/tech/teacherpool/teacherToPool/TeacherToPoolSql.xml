@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<!-- 获取特定知识点的教师列表 -->
+	<getTeachersBySpecialPoint>
+		select b.`nbr`,b.`name`,b.`en_name`,b.`no`,b.`gender`,b.`email`,b.`mobile`, a.`name` as `description`
+    	from (
+      		select b.`id` as `nbr`,b.`name`,b.`en_name`,b.`no`,c.`name` as `gender`,b.`email`,b.`mobile`,checkTeacherFree(b.`id`,:starttime,:endtime) as `description`
+      		from  (select distinct * from `TEACHER_POINT` where `point_id`=:point_id) a left join `SM_PERSON` b on a.`teacher_id`=b.`id` 
+                left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='SEX') c on b.`gender`=c.`value` 
+          	)b left join (select o1.`name[lang]` as `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='FREE') a on b.`description`=a.`value` 
+		[where] [order] limit [start],[number];
+	</getTeachersBySpecialPoint>
+	<!-- 获取特定知识点的教师列表数据总数 -->
+	<getTeachersBySpecialPointCount>
+		select count(*) as `ct`
+		from  (select distinct * from `TEACHER_POINT` where `point_id`=:point_id) a left join `SM_PERSON` b on a.`teacher_id`=b.`id` 
+		[where]
+	</getTeachersBySpecialPointCount>
+	<!-- 记录教学历史 -->
+		<!-- 插入记录之前，先remove，防止数据冗余 -->
+	<removeSameTeachHist>
+		delete from `TEACH_HIST` where `teacher_id`=:teacher_id and `class_id`=:class_id and `point_id`=:point_id and `course_id`=:course_id
+	</removeSameTeachHist>
+		<!-- 插入记录 -->
+	<insertTeachHist>
+		insert into `TEACH_HIST`(`teacher_id`,`class_id`,`point_id`,`starttime`,`endtime`,`address`,`confirmtime`,`confirmperson`,`course_id`)
+		values(:teacher_id,:class_id,:point_id,:starttime,:endtime,:address,:confirmtime,:confirmperson,:course_id)
+	</insertTeachHist>
+</SQL>

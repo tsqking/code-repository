@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- 配置不拦截请求，这里不会用到，因为在web.xml中配置了后缀的才会被struts过滤的 -->
+	<constant name="struts.action.excludePattern" value="^ws://.+$,/ws/.*,/ws"></constant>
+	
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+	<!-- 请求后缀常量配置 -->
+	<constant name="struts.action.extension" value="do,action" />
+	
+	<!-- 国际化全局资源文件 名-->
+	<constant name="struts.custom.i18n.resources" value="base"></constant>
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+
+	<!-- 设置文件上传中整个请求内容允许的最大字节数 -->
+	<constant name="struts.multipart.maxSize" value="83886080"/><!--20M*4 上传组件中会对每个文件进行限制，每个文件最多20M-->
+	
+	<!-- 设置Convention插件是否从jar包中搜索Action类 [可选] 默认值为true -->
+	<constant name="struts.convention.action.disableJarScanning" value="true" />
+	<!-- 设置Convention插件文件协议类型 -->
+	<constant name="struts.convention.action.fileProtocols" value="jar,wsjar" />
+	<!-- 设置Convention插件需要搜索的jar包 -->
+	<!-- 
+	<constant name="struts.convention.action.includeJars" value=".*?/TMP.FU-Core*.*?jar(!/)?" />
+	-->
+	<!-- 该常量指定包作为根包来搜索Action类 -->
+	<!-- Convention插件除了扫描默认的action,actions,struts,struts2，还会扫描该常量指定的一个或多个包 -->
+	<!-- Convention会试图从指定包中发现Action类 -->
+	<constant name="struts.convention.action.packages" value="com.clps.tmp.core.sm.action" />
+
+	<!-- 开发模式 ,可以打印出更详细的错误信息-->
+	<constant name="struts.devMode" value="true" />
+	<!-- 设置当struts.xml文件改动时，是否重新加载 -->
+	<constant name="struts.convention.classes.reload" value="true" />
+	
+	<!-- 指定页面位置 -->
+	<constant name="struts.convention.result.path" value="/WEB-INF/page" />
+	
+	<package name="publicPackage" extends="json-default">
+		<interceptors>
+			<!-- 异常拦截器 -->
+			<interceptor name="exceptionInterceptor" class="com.clps.tmp.core.sm.interceptor.ExceptionInterceptor"></interceptor>
+			
+			<interceptor-stack name="userStack">
+				<interceptor-ref name="exceptionInterceptor"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="userStack"></default-interceptor-ref> 
+		
+		<global-results>
+			<result name="denied">/error.jsp</result>
+			<result name="exception" type="json">
+				<param name="root">exceptionResult</param>
+			</result>
+		</global-results>
+	</package>
+</struts>

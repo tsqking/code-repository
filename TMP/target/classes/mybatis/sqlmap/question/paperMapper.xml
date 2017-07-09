@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="paper" > 
+	
+	<!-- Result Map-->
+	<resultMap id="PaperResultMap" type="com.clps.tmp.question.paper.vo.PaperVo" >
+		<id column="id" property="id"/>
+		<result column="no" property="no"/>
+		<result column="name" property="name"/>
+		<result column="use_flag" property="use_flag"/>
+		<result column="property" property="property"/>
+		<result column="description" property="description"/>
+		<result column="instruction" property="instruction"/>
+		<result column="total_item" property="total_item"/>
+		<result column="total_time" property="total_time"/>
+		<result column="finish_flag" property="finish_flag"/>
+		<result column="url" property="url"/>
+		<result column="enable" property="enable"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_person" property="update_person"/>
+		<result column="total_score" property="total_score"/>
+		<result column="leave_limit" property="leave_limit"/>
+	</resultMap>
+	<resultMap id="SectionResultMap" type="com.clps.tmp.question.paper.vo.SectionVo" >
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="instruction" property="instruction"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_person" property="update_person"/>
+	</resultMap>
+	<!-- 所有列 -->
+	<sql id="Paper_Column_List" >
+		`id`,`no`, `name`, f2.`ename` as `use_flag`, f1.`ename` as `property`, `description`, `instruction`, `total_item`, `leave_limit`, `total_score`,
+		`total_time`, f3.`ename` as `finish_flag`, `url`, f.`ename` as `enable`, `create_time`, `create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 除ID，所有列 -->
+	<sql id="Paper_Column_List_1" >
+		`no`, `name`, f2.`ename` as `use_flag`, f1.`ename` as `property`, `description`, `instruction`, `total_item`, `leave_limit`, `total_score`,
+		`total_time`, `finish_flag`, `url`, f.`ename` as `enable`, `create_time`, `create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 所有列 -->
+	<sql id="Paper_Column_List_2">
+		`id`,`no`, `name`, `use_flag`, `property`, `description`, `instruction`, `total_item`, `total_time`, `leave_limit`, `total_score`,
+		`finish_flag`, `url`, `enable`, `create_time`, `create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 除ID，所有列 -->
+	<sql id="Paper_Column_List_3">
+		`no`, `name`, `use_flag`, `property`, `description`, `instruction`, `total_item`, `total_time`,  `leave_limit`, `total_score`,
+		`finish_flag`, `url`, `enable`, `create_time`, `create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 部分的所有列 -->
+	<sql id="Section_Column_List">
+		`id`,`name`,`instruction`,`create_time`, `create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 部分的除ID外的所有列 -->
+	<sql id="Section_Column_List_1">
+		`name`,`instruction`,`create_time`, `create_person`, `update_time`, `update_person`
+	</sql>
+	<!-- 查询所有记录 -->
+	<select id="queryPaperMap" resultMap="PaperResultMap" parameterType="Object" >
+		select distinct <include refid="Paper_Column_List" /> from `PAPER` as p
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON p.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='PAPER_PROP' ) f1 ON p.`property`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f2 ON p.`use_flag`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='PAPER_INIT_DONE' ) f3 ON p.`finish_flag`=f3.`value`
+		<where>
+			1=1 and `del`='N' 
+			<if test=" name!=null and name!='' ">
+			 and 	p.`name` like concat('%',#{name},'%')
+			</if>
+			<if test=" no!=null and no!='' ">
+			 and 	p.`no` like concat('%',#{no},'%')
+			</if>
+			<if test=" enable!=null and enable!='' ">
+			 and 	p.`enable` = #{enable} 
+			</if>
+			<if test=" use_flag!=null and use_flag!='' ">
+			 and 	p.`use_flag` = #{use_flag} 
+			</if>
+			order by ${sortName} ${sortOrder} 
+			<if test="sortName !='update_time'">
+				,update_time desc
+			</if>			
+			limit ${offset},${limit}
+		</where>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="queryPaperCount" resultMap="PaperResultMap" parameterType="Object" >
+		select distinct <include refid="Paper_Column_List" /> from `PAPER` as p
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON p.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='PAPER_PROP' ) f1 ON p.`property`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f2 ON p.`use_flag`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='PAPER_INIT_DONE' ) f3 ON p.`finish_flag`=f3.`value`
+		<where>
+			1=1 and `del`='N'
+			<if test=" name!=null and name!='' ">
+			 and 	p.`name` like concat('%',#{name},'%')
+			</if>
+			<if test=" no!=null and no!='' ">
+			 and 	p.`no` like concat('%',#{no},'%')
+			</if>
+			<if test=" enable!=null and enable!='' ">
+			 and 	p.`enable` = #{enable}  
+			</if>
+			<if test=" use_flag!=null and use_flag!='' ">
+			 and 	p.`use_flag` = #{use_flag}  
+			</if>
+		</where>
+	</select>
+	<!-- 根据ID，查询某张试卷信息 -->
+	<select id="selectOne" parameterType="paper" resultMap="PaperResultMap">
+		select <include refid="Paper_Column_List_2"/> from `PAPER` where id=${id}
+	</select>
+	
+	<!-- 根据No，查询某张试卷信息 -->
+	<select id="selectOneByNo" parameterType="String" resultType="paper">
+		select <include refid="Paper_Column_List_2"/> from `PAPER` where no=#{no}
+	</select>
+	
+	
+	<!-- 新增试卷 -->
+	<insert id="InsertOrUpdatePaper" parameterType="paper" useGeneratedKeys="true" keyProperty="id">
+	  <if test="id > 0 ">
+	    update `PAPER` 
+	    set name=#{name},use_flag=#{use_flag},property=#{property},description=#{description},instruction=#{instruction},total_item=#{total_item},
+	    	total_time=#{total_time},finish_flag=#{finish_flag},url=#{url},enable=#{enable},update_time=#{update_time},update_person=#{update_person}
+	    where id = #{id}
+	  </if>
+	  <if test="id==null or id==0 ">
+	    insert into `PAPER`(<include refid="Paper_Column_List_3"/>)
+		values(#{no},#{name},#{use_flag},#{property},#{description},#{instruction},#{total_item},#{total_time},#{leave_limit},#{total_score},
+				#{finish_flag},#{url},#{enable},#{create_time},#{create_person},#{update_time},#{update_person})
+	  </if>
+	</insert>
+	<update id="updatePaperStatus" parameterType="paper">
+		update `PAPER`
+		set `total_time`=#{total_time},`total_item`=#{total_item},`total_score`=#{total_score},`leave_limit`=#{leave_limit},
+			name=#{name},finish_flag='1',update_time=#{update_time},update_person=#{update_person},
+			use_flag=#{use_flag},property=#{property},description=#{description},instruction=#{instruction}
+		where id=${id}
+	</update>
+	<select id="validatePaperStatus" parameterType="paper" resultType="Object">
+		select `finish_flag` from `PAPER` where id=${id}
+	</select>
+	<!-- 新增部分 --> 
+	<insert id="insertSection" parameterType="section" useGeneratedKeys="true" keyProperty="id">
+		<if test="id > 0 ">
+		  update `SECTION` 
+		  set name=#{name},instruction=#{instruction},update_time=#{update_time},update_person=#{update_person}
+		  where id = #{id}
+		</if>
+		<if test="id==null or id==0">
+		  insert into `SECTION`(<include refid="Section_Column_List_1"/>)
+		  values(#{name},#{instruction},#{create_time},#{create_person},#{update_time},#{update_person})
+		</if>
+	</insert>
+	<!-- 新增PAPER_SECTION记录 -->
+	<select id="selectRecord" parameterType="map" resultType="Object">
+		select count(*) from `PAPER_SECTION` where paper_id=${paper_id} and section_id=${section_id}
+	</select>
+	<insert id="insertPaperSection" parameterType="map">
+	    insert into `PAPER_SECTION`(`paper_id`,`section_id`,`order`)
+	    values(#{paper_id},#{section_id},#{order})
+	</insert>
+	
+	<!-- 新增SECTION_QUESTION记录 -->
+	<insert id="insertSectionQuestion" parameterType="map">
+	    insert into `SECTION_QUESTION`(`section_id`,`question_id`,`question_score`,`order`)
+	    values(#{section_id},#{question_id},#{question_score},#{order})
+	</insert>
+	<!-- 删除SECTION_QUESTION记录 -->
+	<delete id="deleteQuestion" parameterType="map">
+		delete from `SECTION_QUESTION` where `section_id`=${section_id} and `question_id`=${question_id}
+	</delete>
+	<!-- 根据试卷查询试卷的部分信息 -->
+	<select id="findSectionCount" resultType="Object" parameterType="map">
+		select count(*) from `PAPER_SECTION` where paper_id=${id}
+	</select>
+	<!-- 查询试卷信息以及包含的题目信息 -->
+	<select id="findPaperInfo" parameterType="map" resultType="map">
+		select sq.`question_id`,p.`name` as `paper_name`,p.`instruction` as `paper_instruction`,`total_item`,`total_time`,`total_score`,`question_score`,s.`name` as `section_name`,
+			s.`id` as `section_id`,ps.`order` as `section_order`,
+			sq.`order` as `question_order`,q.`type` as `question_type`,q.`content` as `content`,q.`answer` as `answer`,`opt1`,`opt2`,`opt3`,`opt4`,`opt5`,`opt6`
+		from `PAPER` as p
+		left join `PAPER_SECTION` as ps on ps.`paper_id`=p.`id`
+		left join `SECTION_QUESTION` as sq on sq.`section_id`=ps.`section_id`
+		left join `SECTION` as s on s.`id`=sq.`section_id`
+		left join `QUESTION` as q on q.`id`=sq.`question_id`
+		where p.`id`=${paper_id}
+		order by section_order asc,question_order asc
+	</select>
+	<!-- 根据部分查询该部分的部分信息 -->
+	<select id="selectSection" resultType="section" parameterType="Object">
+		select <include refid="Section_Column_List"/>
+		from `PAPER_SECTION` as ps
+		left join `SECTION` as s on s.`id`=ps.`section_id` 
+		<where>
+			1=1 
+			<if test="paper_id!=null and paper_id!='' ">
+				and paper_id=${paper_id} 
+			</if>
+			<if test="order!=null and order!='' ">
+				and `order`=${order}
+			</if>
+		</where>
+	</select>
+	<!-- 删除paper_section -->
+	<delete id="deletePaperSection" parameterType="section">
+		delete from `PAPER_SECTION` where section_id=${id}
+	</delete>
+	<!-- 查询该section对应的paper_section中的数据排序信息 -->
+	<select id="selectPaperSection" parameterType="map" resultType="map">
+		select `paper_id`,`order` from `PAPER_SECTION` where paper_id=${paper_id}
+	</select>
+	<!-- 更新排序信息 -->
+	<update id="updateSectionOrder" parameterType="map">
+		update `PAPER_SECTION` 
+		set `order`=`order`-1
+		where `paper_id`=${paper_id} and `order`=#{order}
+	</update>
+	<!-- 删除该Section对应的题目内容 -->
+	<delete id="deleteSectionQuestion" parameterType="section">
+		delete from `SECTION_QUESTION` where section_id=${id}
+	</delete>
+	<!-- 删除section -->
+	<delete id="deleteSection" parameterType="section">
+		delete from `SECTION` where id=${id}
+	</delete>
+	<!-- 查询该部分的题目信息 -->
+	<select id="selectQuestion" resultType="com.clps.tmp.question.paper.vo.SectionQuestionVo" parameterType="Object">
+		select <include refid="question.Question_Column_List"/>,`question_score`,`order`
+		from `SECTION_QUESTION` as sq
+		left join `QUESTION` as q on q.`id`=sq.`question_id`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON q.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_TYPE' ) f1 ON q.`type`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_PROP' ) f2 ON q.`property`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_SO' ) f3 ON q.`so_flag`=f3.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f4 ON q.`use_flag`=f4.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIFFICULTY' ) f5 ON q.`difficulty`=f5.`value`
+		<where>
+			section_id=${section_id}
+		</where>
+	</select>
+	<update id="deletePaper" parameterType="paper">
+		update `PAPER` 
+		set `del`='Y'
+		where id=${id}
+	</update>
+	<select id="findPaperSections" parameterType="map" resultType="map">
+		select `section_id`,`order` from `PAPER_SECTION` where `paper_id`=${paper_id} 
+	</select>
+	
+	<!-- 查询这张试卷已选择的题目 -->
+	<select id="findPaperQuestion" parameterType="paper" resultType="map">
+		select `question_id` from `SECTION_QUESTION` as sq
+		left join `PAPER_SECTION` as ps on ps.`section_id`=sq.`section_id` 
+		where ps.`paper_id`=${id}
+	</select>
+	<!-- 查询该试卷未选择的题目信息 -->
+	<select id="queryQuestion_Map" resultMap="question.QuestionResultMap" parameterType="Object" >
+		select distinct <include refid="question.Question_Column_List" /> from `QUESTION` as q
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON q.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_TYPE' ) f1 ON q.`type`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_PROP' ) f2 ON q.`property`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_SO' ) f3 ON q.`so_flag`=f3.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f4 ON q.`use_flag`=f4.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIFFICULTY' ) f5 ON q.`difficulty`=f5.`value`
+		left join `QUESTION_POINT` qp on q.`id`=qp.question_id 
+		left join `SKILL_POINT` b on qp.`point_id`=b.point_id 
+		left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		left join `QUESTION_TAG` qt on q.`id`=qt.question_id
+		left join `TAG` t on qt.`tag_id`=t.id
+		left join `POINT` p on qp.`point_id`=p.id
+		<where>
+			1=1 
+			<if test=" type!=null and type!='' ">
+				and 	q.`type` = #{type} 
+			</if>
+			<if test=" property!=null and property!='' ">
+				and 	q.`property` = #{property}
+			</if>
+			<if test=" enable!=null and enable!='' ">
+				and 	q.`enable` = #{enable} 
+			</if>
+			<if test=" difficulty!=null and difficulty!='' ">
+				and 	q.`difficulty` = #{difficulty} 
+			</if>
+			<if test=" so_flag!=null and so_flag!='' ">
+				and 	q.`so_flag` = #{so_flag} 
+			</if>
+			<if test=" use_flag!=null and use_flag!='' ">
+				and 	q.`use_flag` = #{use_flag} 
+			</if>
+			<if test=" pointVo_name!=null and pointVo_name!='' ">
+				and 	p.`id` = #{pointVo_name} 
+			</if>
+			<if test=" tagVo_name!=null and tagVo_name!='' ">
+				and 	t.`id` = #{tagVo_name} 
+			</if>
+			<if test=" skillFirst!=null and skillFirst!='' ">
+				and 	e.`id` = #{skillFirst} 
+			</if>
+			<if test=" skillSecond!=null and skillSecond!='' ">
+				and 	d.`id` = #{skillSecond} 
+			</if>
+			<if test=" skillThird!=null and skillThird!='' ">
+				and 	c.`id` = #{skillThird}  
+			</if>
+			<if test=" 1==1 ">
+				and 	q.`id` not in 
+				<foreach collection="Ids" index="index" item="id" open="(" close=")" separator=",">  
+			   		 #{id}  
+			    </foreach> 
+			    order by ${sortName} ${sortOrder} 
+				<if test="sortName !='update_time'">
+					,update_time desc
+				</if>			    
+			    limit ${offset},${limit}
+			</if>
+		</where>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="queryQuestionCount" parameterType="Object" resultMap="question.QuestionResultMap" >
+		select distinct <include refid="question.Question_Column_List" /> from `QUESTION` as q
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON q.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_TYPE' ) f1 ON q.`type`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_PROP' ) f2 ON q.`property`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='QUST_SO' ) f3 ON q.`so_flag`=f3.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f4 ON q.`use_flag`=f4.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='DIFFICULTY' ) f5 ON q.`difficulty`=f5.`value`
+		left join `QUESTION_POINT` qp on q.`id`=qp.question_id 
+		left join `SKILL_POINT` b on qp.`point_id`=b.point_id 
+		left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		left join `QUESTION_TAG` qt on q.`id`=qt.question_id
+		left join `TAG` t on qt.`tag_id`=t.id
+		left join `POINT` p on qp.`point_id`=p.id
+		<where>
+			1=1 
+			<if test=" type!=null and type!='' ">
+			and 	q.`type` = #{type} 
+			</if>
+			<if test=" property!=null and property!='' ">
+			 and 	q.`property` = #{property}
+			</if>
+			<if test=" enable!=null and enable!='' ">
+			and 	q.`enable` = #{enable} 
+			</if>
+			<if test=" difficulty!=null and difficulty!='' ">
+			and 	q.`difficulty` = #{difficulty} 
+			</if>
+			<if test=" so_flag!=null and so_flag!='' ">
+			and 	q.`so_flag` = #{so_flag} 
+			</if>
+			<if test=" use_flag!=null and use_flag!='' ">
+			and 	q.`use_flag` = #{use_flag} 
+			</if>
+			<if test=" pointVo_name!=null and pointVo_name!='' ">
+			and 	p.`id` = #{pointVo_name} 
+			</if>
+			<if test=" tagVo_name!=null and tagVo_name!='' ">
+			and 	t.`id` = #{tagVo_name} 
+			</if>
+			<if test=" skillFirst!=null and skillFirst!='' ">
+			and 	e.`id` = #{skillFirst}  
+			</if>
+			<if test=" skillSecond!=null and skillSecond!='' ">
+			and 	d.`id` = #{skillSecond} 
+			</if>
+			<if test=" skillThird!=null and skillThird!='' ">
+			and 	c.`id` = #{skillThird} 
+			</if>
+			<if test=" 1==1 ">
+				and  q.`id` not in 
+				<foreach collection="Ids" index="index" item="id" open="(" close=")" separator=",">  
+			   		 #{id}  
+			    </foreach> 
+			</if>
+		</where>
+	</select>
+	<!-- 更新试卷一些公共信息 -->
+	<update id="updateTotalInfo" parameterType="paper">
+		update `PAPER` 
+		set `total_time`=#{total_time},`total_item`=#{total_item},`total_score`=#{total_score},`leave_limit`=#{leave_limit},
+			update_time=#{update_time},update_person=#{update_person}
+		where `id`=${id}
+	</update>
+	<!-- 更新排序信息 -->
+	<update id="updatePaperInfo" parameterType="paper">
+		update `PAPER` 
+		set `total_time`=#{total_time},update_time=#{update_time},update_person=#{update_person},`leave_limit`=#{leave_limit},
+			`total_item`=#{total_item},`total_score`=#{total_score},
+			use_flag=#{use_flag},property=#{property},description=#{description},instruction=#{instruction}
+		where `id`=${id}
+	</update>
+	<!-- 查询试卷属性信息 -->
+	<select id="findPaperProperty" resultMap="PaperResultMap" parameterType="paper">
+		select distinct <include refid="Paper_Column_List" /> from `PAPER` as p
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' ) f ON p.`enable`=f.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='PAPER_PROP' ) f1 ON p.`property`=f1.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='USE_FLAG' ) f2 ON p.`use_flag`=f2.`value`
+		left join (select o1.`name${lang}` as `ename`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='PAPER_INIT_DONE' ) f3 ON p.`finish_flag`=f3.`value`
+		<where>
+			p.`id` = ${id}
+		</where>
+	</select>
+	<!-- 更新试卷启禁用标志 -->
+	<update id="changeEnableState" parameterType="paper">
+		update `PAPER` 
+		set `enable`=#{enable},update_time=#{update_time},update_person=#{update_person}
+		where `id`=${id}
+	</update>
+	
+	
+	
+	<!-- 查询原来试卷的题块 -->
+	<select id="selectOldSection" resultType="Map" parameterType="String">
+		SELECT paper_id,section_id,`order` FROM `paper_section` WHERE `paper_id` = #{paper_id}
+	</select>
+	<!-- 查询原来题块的信息 -->
+	<select id="selectOldSectionInfo" resultType="Map" parameterType="String">
+		SELECT id,name,instruction,create_time,create_person,update_time,update_person FROM `section` WHERE id = #{section_id}
+	</select>
+	<!-- 查询原来题块的题目 -->
+	<select id="selectOldQuestion" resultType="Map" parameterType="String">
+		SELECT section_id,question_id,question_score,`order` FROM `section_question` where section_id = #{section_id}
+	</select>
+	<!-- 新增题块记录 -->
+	<insert id="insertNewSection" parameterType="map">
+	    INSERT INTO `paper_section` 
+		(`paper_id`, `section_id`, `order`) VALUES 
+	    (#{paper_id}, #{section_id}, #{order})
+	</insert>
+	<!-- 新增题块信息 -->
+	<insert id="insertNewSectionInfo" parameterType="map" useGeneratedKeys="true" keyProperty="id" >
+	    INSERT INTO `section` 
+	    	(`name`, `instruction`, `create_time`, 
+	    	`create_person`, `update_time`, 
+	    	`update_person`) VALUES 
+	    (#{name}, #{instruction}, #{create_time}, #{create_person}, #{update_time}, #{update_person})
+	</insert>
+	<!-- 新增题目记录 -->
+	<insert id="insertNewQuestion" parameterType="map">
+	   INSERT INTO `section_question` 
+			(`section_id`, `question_id`, `question_score`, `order`) VALUES 
+    		(#{section_id}, #{question_id}, #{question_score}, #{order})
+	</insert>
+	
+	
+</mapper>

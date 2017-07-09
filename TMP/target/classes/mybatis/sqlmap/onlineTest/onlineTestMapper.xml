@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="onlineTest" >
+
+	<!-- Result Map-->
+	<resultMap id="OnlinTestResultMap" type="com.clps.tmp.exam.onlineTest.vo.OnlineTestVo">
+		<id column="id" property="id"/>
+		<result column="type" property="type"/>
+		<result column="so_flag" property="so_flag"/>
+		<result column="difficulty" property="difficulty"/>
+		<result column="property" property="property"/>
+		<result column="use_flag" property="use_flag"/>
+		<result column="content" property="content"/>
+		<result column="answer" property="answer"/>
+		<result column="opt1" property="opt1"/>
+		<result column="opt2" property="opt2"/>
+		<result column="opt3" property="opt3"/>
+		<result column="opt4" property="opt4"/>
+		<result column="opt5" property="opt5"/>
+		<result column="opt6" property="opt6"/>
+		<result column="analysis" property="analysis"/>
+		<result column="enable" property="enable"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_person" property="create_person"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_person" property="update_person"/>
+		<association property="pv" javaType="paper"  >
+			<id property="id" column="id"/>
+			<result property="no" column="no"/>
+			<result property="name" column="name"/>
+			<result property="total_item" column="total_item"/>
+			<result property="total_time" column="total_time"/>
+			<result property="instruction" column="instruction"/>
+			<result property="leave_limit" column="leave_limit"/>
+			<result property="property" column="property"/>
+		</association>
+		<association property="ppv" javaType="PlanPaperVo"  >
+			<id property="id" column="id"/>
+			<result property="id" column="id"/>
+			<result property="plan_id" column="plan_id"/>
+			<result property="paper_id" column="paper_id"/>
+			<result property="paper_number" column="paper_number"/>
+			<result property="paper_type" column="paper_type"/>
+			<result property="paper_start_time" column="paper_start_time"/>
+			<result property="paper_end_time" column="paper_end_time"/>
+			<result property="paper_long_time" column="paper_long_time"/>
+		</association>
+	</resultMap>
+	<!-- 查询试卷信息-->
+	<select id="getPaperInfo" resultMap="OnlinTestResultMap" parameterType="map">
+		select p.name as name,
+		p.instruction as instruction,
+		p.id,
+		p.total_item,
+		p.leave_limit,
+		pp.paper_type as pproperty,
+		case when total_time=-1 then 0 else total_time end  as total_time 
+		from PAPER p,plan_paper pp 
+		<where>
+			1=1
+			and p.no=pp.paper_number
+			and pp.del='N'
+			<if test=" paperNo!=null and paperNo!='' ">and  p.`no` =#{paperNo}</if>
+			<if test=" paperId!=null and paperId!='' ">and  p.`id` = #{paperId}</if>
+			and pp.plan_id=#{planId} 
+		</where>
+	</select>
+	<!-- 
+	<select id="getPaperInfo" resultMap="OnlinTestResultMap" parameterType="map">
+		select name,
+		instruction,
+		id,
+		total_item,
+		leave_limit,
+		property,
+		case when total_time=-1 then 0 else total_time end  as total_time from PAPER p
+		<where>
+			1=1
+			<if test=" paperNo!=null and paperNo!='' ">and  p.`no` =#{paperNo}</if>
+			<if test=" paperId!=null and paperId!='' ">and  p.`id` = #{paperId}</if>
+		</where>
+	</select>
+	-->
+	<!-- -->
+	<select id="getSubjects" resultMap="OnlinTestResultMap" parameterType="com.clps.tmp.exam.onlineTest.vo.OnlineTestVo">
+		select q.*  from  QUESTION q ,SECTION s,
+		SECTION_QUESTION sq,PAPER p,
+		PAPER_SECTION ps
+		where  q.id=sq.question_id
+		and  s.id=sq.section_id and
+		p.id=ps.paper_id and s.id=ps.section_id
+		and ps.order=1 and p.id=#{paperId} and sq.order=1
+	</select>
+	<select id="getQusetionIdList" parameterType="com.clps.tmp.exam.onlineTest.vo.OnlineTestVo" resultType="Integer">
+		select q.`id` from QUESTION q,SECTION s,SECTION_QUESTION sq,PAPER p,PAPER_SECTION ps
+		where q.`id`=sq.`question_id`
+		and  s.`id`=sq.`section_id` and p.`id`=ps.`paper_id`
+		and s.`id`=ps.`section_id`
+		and p.`no`=#{paperNbr} order by ps.`order` ,sq.`order`
+	</select>
+	<!--根据试卷ID查询试卷no-->
+	<select id="getPapernoById" parameterType="com.clps.tmp.exam.onlineTest.vo.OnlineTestVo" resultType="String">
+		select `no`
+		from PAPER p where p.`id`=#{paperId}
+	</select>
+	<!--判断试卷是否创建完成-->
+	<select id="getFinishFlag" parameterType="com.clps.tmp.exam.onlineTest.vo.OnlineTestVo" resultType="String">
+		select `finish_flag`
+		from PAPER p where p.`id`=#{paperId}
+		or p.`no`=#{paperNo}
+	</select>
+	<!-- 插入题目答案信息 -->
+	<insert id="addQustAnswer" parameterType="List">
+		insert into `ANSWER_SHEET`(`paper_id`,`question_id`,`user_id`,`user_type`,`answer`,`answer_time`)
+		values
+		<foreach collection="list" item="item" index="key" separator=",">
+			(#{item.paperId},#{item.qustId},#{item.userId},1,#{item.qustAnswer},#{item.answerTime})
+		</foreach>
+	</insert>
+	<!--判断是否有已做过的试卷（查询题目数量）-->
+	<select id="findAnswerSheet" parameterType="map" resultType="Integer">
+		select count(*) from `ANSWER_SHEET`  where `paper_id`=#{paperId} and `user_id`=#{userId}
+	</select>
+	<!--删除已做过的试卷答案信息-->
+	<delete id="deleteAnswerSheet" parameterType="map">
+		delete from `ANSWER_SHEET`  where `paper_id`=#{paperId} and `user_id`=#{userId}
+	</delete>
+	<!--试卷信息存入数据库 -->
+	<insert id="addPaperInfo" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		insert into `ANSWER_INFO`(`paper_id`,`user_id`,`user_type`,`leave_limit`,`finish_flag`,`start_time`,`end_time`,`cost_time`)
+		values (#{paperId},#{userId},1,#{leavelimit},"1",#{startTime},#{endTime},#{costTime})
+	</insert>
+	<!-- 判断是否有已存在的试卷信息-->
+	<select id="checkPaperInfo" parameterType="map" resultType="Integer">
+		select count(*) from `ANSWER_INFO`  where `paper_id`=#{paperId} and `user_id`=#{userId}
+	</select>
+	<!--删除已存在的试卷信息 -->
+	<delete id="deletePaperInfo" parameterType="map">
+		delete from `ANSWER_INFO`  where `paper_id`=#{paperId} and `user_id`=#{userId}
+	</delete>
+	<!--判断是否可以再次答卷 (按照考生答题时间和试卷总时间)-->
+	<select id="allowExam" parameterType="map" resultType="String">
+		select start_time from `ANSWER_INFO`  where `paper_id`=#{paperId} and `user_id`=#{userId}
+	</select>
+	<!--判断考生是否可以参加此试卷的考试（一张试卷一个考生只能作答一次）-->
+	<select id="getCountForExam" parameterType="map" resultType="String">
+		select count(*) from `ANSWER_INFO`  where `paper_id`=#{paperId} and `user_id`=#{userId}
+	</select>
+	<!--获取试卷信息（计划测试对应表）-->
+	<select id="getPlanPaperInfo" parameterType="map" resultType="PlanPaperVo">
+		select * from `PLAN_PAPER` p  where `paper_number`=#{paperNo} and `plan_id`=#{planId} and p.del="N"
+	</select>
+	<!--更新状态历史表-->
+	<update id="editPlanPaperHis" parameterType="map">
+		update  `PLAN_PAPER_STU_HIS` set `status`=1,`start_time`=#{startTime},`end_time`=#{endTime},`long_time`=#{longTime}
+		where plan_paper_id=#{planPaperId} and student_id=#{userId}
+	</update>
+</mapper>

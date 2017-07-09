@@ -1,0 +1,13 @@
+var add_new_employee_title="Add New Employee";
+var add_fail="Add Failed！pls retry later~~";	
+var add_success="Add Success"
+var employeeUpdateWindowTitle="Update Employee Date"
+var deleteInfo="Delete Employee"
+var confirm="Confirm";
+var cancel="Cancel";
+var employee_delete_content="Confirm to delete?";
+var success_delete="Delete Success！Number：";
+var fail_delete_title="Failure feedback";
+var fail_delete="Delete Failed ！";
+var edit_success="Update Success！";
+var edit_fail="Update Failed！pls retry later~";

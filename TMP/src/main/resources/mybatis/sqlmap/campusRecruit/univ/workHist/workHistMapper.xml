@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="workHist">
+	<!-- Result Map-->
+	<resultMap type="com.clps.tmp.campusRecruit.univ.workhist.vo.WorkHistVo" id="workHistResultMap">
+		<id column="id" property="id"/>
+		<result column="op_time" property="op_time"/>
+		<result column="op_user_name" property="op_user_name"/>
+		<result column="univ_id" property="univ_id"/>
+		<result column="univ_branch_id" property="univ_branch_id"/>
+		<result column="college_id" property="college_id"/>
+		<result column="work_content" property="work_content"/>
+		<result column="op_status" property="op_status"/>
+		<result column="remark" property="remark"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_user" property="create_user"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_user" property="update_user"/>
+		<result column="del" property="del"/>
+	</resultMap>
+	<sql id="All_Column_List" >
+		a.`id`,a.`op_time`,o1.`name` as `op_status`,b.`name` as `univ_name`,c.`name` as `univ_branch_name`,d.`name` as `college_name`,a.`op_user_name`, a.`univ_id`, a.`univ_branch_id`, a.`college_id`,a.`work_content`,a.`remark`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`
+	</sql>
+	<sql id="All_Column_List2" >
+		`id`,`op_time`,`op_user_name`, `univ_id`, `univ_branch_id`, `college_id`,`work_content`,`op_status`,`remark`,`create_time`,`create_user`,`update_time`,`update_user`,`del`
+	</sql>
+	<sql id="Base_Column_List2" >
+		`op_time`,`op_user_name`, `univ_id`, `univ_branch_id`, `college_id`,`work_content`,`op_status`,`remark`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="findCondition_count">
+		<where>
+		    1=1
+			<if test="univ_id !=null">AND a.univ_id=#{univ_id}  </if>
+			<if test="univ_branch_id !=null">AND a.univ_branch_id=#{univ_branch_id}  </if>
+			<if test="op_status !=null">AND a.op_status=#{op_status}  </if>
+			<if test="opeationTime !=null">AND (a.op_time &gt; ${start}  and a.op_time &lt; ${end} )</if>
+		</where>
+	</sql>
+	<insert id="addWorkHist" parameterType="Object">
+		insert into UNIV_WORK_HIST (<include refid="Base_Column_List2"/>) values(#{op_time},#{op_user_name}, #{univ_id}, #{univ_branch_id}, #{college_id}, #{work_content}, #{op_status}, #{remark},#{create_time},#{create_user},#{update_time},#{update_user})
+	</insert>
+	<!-- 查询所有工作历史信息 -->
+	<select id="selectworkHist" resultType="WorkHistVo" parameterType="map">
+		select <include refid="All_Column_List"/> from UNIV_WORK_HIST a
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+        left join `UNIVERSITY` c on a.`univ_branch_id`=c.`id`
+        left join `UNIV_COLLEGE` d on a.`college_id`=d.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='OP_STATE') o1 on a.`op_status`=o1.`value`
+		<include refid="findCondition_count" /> 
+		and  a.del="N" ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>
+		LIMIT ${offset},${limit} 
+	</select>
+	
+	<!-- 查询更新工作历史信息 -->
+	<select id="getEditWorkHist" resultType="WorkHistVo" parameterType="map">
+		select <include refid="All_Column_List2"/> from  UNIV_WORK_HIST 
+		where  id=#{id} and del="N"
+	</select>
+	<!-- 查询更新工作历史信息 by id-->
+	<select id="getViewWorkHist" resultType="WorkHistVo" parameterType="map">
+		select <include refid="All_Column_List"/> from  UNIV_WORK_HIST a
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+        left join `UNIVERSITY` c on a.`univ_branch_id`=c.`id`
+        left join `UNIV_COLLEGE` d on a.`college_id`=d.`id`
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION  oo1 join  SM_OPTION  oo2  on oo1.`parent_id`=oo2.`id` where  oo2.`value`='OP_STATE') o1 on a.`op_status`=o1.`value`
+		where  a.id=#{id} and a.del="N"
+	</select>
+	<!-- 删除工作历史信息 -->
+	<update id="updateWorkHistDel">
+		update UNIV_WORK_HIST set del="Y" where id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach>
+	</update>
+	
+	<!-- 编辑工作历史信息 -->
+	<update id="editWorkHist" parameterType="Object">
+		update UNIV_WORK_HIST set op_time=#{op_time}, op_user_name=#{op_user_name}, univ_id=#{univ_id}, univ_branch_id=#{univ_branch_id}, college_id=#{college_id}, work_content=#{work_content}, op_status=#{op_status},remark=#{remark},update_time=#{update_time},update_user=#{update_user} where id=#{id}
+	</update>
+	<!-- 所有工作历史信息NUM-->
+	<select id="getAllWorkHist" resultType="long" parameterType="map">
+		select count(*) from UNIV_WORK_HIST a <include refid="findCondition_count" /> and del="N"
+	</select>
+	<!-- 查询学校信息 -->
+	<select id="getUniv" resultType="UniversityVo" parameterType="map">
+		select b.`name` as `univ_name`,c.`name` as `univ_branch_name`,d.`name` as `college_name`
+       from `UNIV_WORK_HIST` a
+     left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+     left join `UNIVERSITY` c on a.`univ_branch_id`=c.`id`
+     left join `UNIV_COLLEGE` d on a.`college_id`=d.`id`
+	</select>
+</mapper>

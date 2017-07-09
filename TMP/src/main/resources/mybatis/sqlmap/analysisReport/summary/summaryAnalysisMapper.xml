@@ -1,0 +1,921 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 郑重提示：千万不要在本页面格式化 -->
+<mapper namespace="summary">
+
+	<!-- 人数查询开始 -->
+	<!-- 查询男女生人数，平均考试年龄 -->
+	<select id="queryHead" resultType="HeadVo" parameterType="Map">
+		SELECT
+		IFNULL(sum(gender = 1),0)
+		AS
+		maleNum,
+		sum(gender = 2) AS femaleNum,
+		AVG(age)
+		AS
+		examAvgAge,
+		direction AS examSub
+		FROM
+		(
+		SELECT
+		sp.gender,
+		sp.age,
+		c.direction
+		FROM
+		answer_info ai
+		LEFT JOIN
+		class_student cs ON
+		ai.user_id =
+		cs.student_id
+		LEFT JOIN
+		class c
+		ON
+		cs.class_id = c.id
+		LEFT
+		JOIN sm_person
+		sp
+		ON cs.student_id =
+		sp.id
+		LEFT
+		JOIN plan_paper pp ON
+		c.id = pp.class_id
+		WHERE
+		1 = 1
+		AND age != 0
+		<if test="subject !=null and subject !=''">
+			<if test="subject =='Mainframe'">
+				AND c.direction IN('MF','Mainframe')
+			</if>
+			<if test="subject =='Testing'">
+				AND c.direction = '5'
+			</if>
+			<if test="subject !='Mainframe' and subject !='Testing'">
+				AND c.direction = #{subject}
+			</if>
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询所有报名人数 -->
+	<select id="queryApplyCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(COUNT(*),0) AS applyCount
+		FROM
+		(
+			SELECT DISTINCT
+			cs.*
+			FROM
+			class_student cs
+			LEFT JOIN class c ON cs.class_id = c.id
+			LEFT JOIN sm_person sp ON cs.student_id = sp.id
+			LEFT JOIN answer_info ai ON ai.user_id = sp.id
+			WHERE
+			1 = 1
+				<if test="subject !=null and subject !=''">
+					<if test="subject =='Mainframe'">
+						AND c.direction IN('MF','Mainframe')
+					</if>
+					<if test="subject =='Testing'">
+						AND c.direction = '5'
+					</if>
+					<if test="subject !='Mainframe' and subject !='Testing'">
+						AND c.direction = #{subject}
+					</if>
+				</if>
+				<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+				<if test="end_time!=null and end_time!='' ">and
+					ai.end_time<![CDATA[<]]>#{end_time}
+				</if>
+		) a
+	</select>
+
+	<!-- 查出所有参加考试的总人数 -->
+	<select id="queryAttendCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(COUNT(*), 0) As attentCount
+		FROM
+		(
+			SELECT DISTINCT
+			ai.*
+			FROM
+			answer_info ai
+			LEFT JOIN class_student cs ON ai.user_id = cs.student_id
+			LEFT JOIN class c ON cs.class_id = c.id
+			LEFT JOIN sm_person sp ON cs.student_id = sp.id
+			LEFT JOIN plan_paper pp ON c.id = pp.class_id
+			WHERE
+			1 = 1
+			<if test="subject !=null and subject !=''">
+				<if test="subject =='Mainframe'">
+					AND c.direction IN('MF','Mainframe')
+				</if>
+				<if test="subject =='Testing'">
+					AND c.direction = '5'
+				</if>
+				<if test="subject !='Mainframe' and subject !='Testing'">
+					AND c.direction = #{subject}
+				</if>
+			</if>
+			<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+			<if test="end_time!=null and end_time!='' ">and
+				ai.end_time<![CDATA[<]]>#{end_time}
+			</if>
+		) a
+	</select>
+
+	<!-- 选择题开始 -->
+	<!-- 查出选择题题目数 -->
+	<select id="queryChioseCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(count(1),0)
+		AS chioseQuesCount
+		FROM
+		(
+		SELECT DISTINCT
+		q.*
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON ai.paper_id = ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT JOIN section s ON
+		ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'Multiple Choice',
+		'Multiple Choice.'
+		)
+		<if test="subject !=null and subject !=''">AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查出选择题总分值 -->
+	<select id="queryChioseTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(question_score),0)
+		AS chioseTotalScore
+		FROM
+		(
+		SELECT
+		DISTINCT
+		sq.*, p.id
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON
+		ai.paper_id
+		= ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT
+		JOIN section s
+		ON ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON
+		sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'Multiple Choice',
+		'Multiple Choice.'
+		)
+		<if test="subject !=null and subject !=''">AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询所有学生选择题总分数 -->
+	<select id="queryStuChioseTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(score),0)
+		as stuChioseTotalScore
+		FROM
+		(
+		SELECT DISTINCT
+		ans.*
+		FROM
+		answer_sheet ans
+		WHERE
+		1=1
+		<if test="subject !=null and subject !=''">
+			AND
+			paper_id IN (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p.
+			NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ans.answer_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ans.answer_time<![CDATA[<]]>#{end_time}
+		</if>
+		AND
+		ans.question_id IN (
+		SELECT DISTINCT
+		q.id
+		FROM
+		question q
+		LEFT JOIN
+		section_question sq ON q.id = sq.question_id
+		LEFT JOIN section s ON
+		sq.section_id = s.id
+		WHERE
+		s. NAME IN (
+		'Multiple Choice',
+		'Multiple Choice.'
+		)
+		)
+		) a
+	</select>
+
+	<!-- 填空题开始 -->
+	<!-- 查出填空题题目数 -->
+	<select id="queryFillCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(count(1),0)
+		AS fillQuesCount
+		FROM
+		(
+		SELECT DISTINCT
+		q.*
+		FROM
+		answer_info
+		ai
+		LEFT JOIN paper_section ps ON ai.paper_id = ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT JOIN section s ON
+		ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'Fill in the Blanks',
+		'Fill in the Blanks. '
+		)
+		<if test="subject !=null and subject !=''">AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询填空题总分值 -->
+	<select id="queryFillTotalScore" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(sum(question_score),0)
+		AS fillTotalScore
+		FROM
+		(
+		SELECT
+		DISTINCT
+		sq.*,
+		p.id
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON
+		ai.paper_id =
+		ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT
+		JOIN section s
+		ON ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON
+		sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'Fill in the Blanks',
+		'Fill in the Blanks. '
+		)
+		<if test="subject !=null and subject !=''">AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询所有学生填空题总分数 -->
+	<select id="queryStuFillTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(score),0)
+		AS stuFillTotalScore
+		FROM
+		(
+		SELECT DISTINCT
+		ans.*
+		FROM
+		answer_sheet ans
+		WHERE
+		1 = 1
+		<if test="subject !=null and subject !=''">
+			AND paper_id IN (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ans.answer_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ans.answer_time<![CDATA[<]]>#{end_time}
+		</if>
+		AND ans.question_id IN (
+		SELECT DISTINCT
+		q.id
+		FROM
+		question q
+		LEFT JOIN
+		section_question sq ON q.id = sq.question_id
+		LEFT JOIN section s ON
+		sq.section_id = s.id
+		WHERE
+		s. NAME IN (
+		'Fill in the Blanks. ',
+		'Fill in the Blanks'
+		)
+		)
+		) a
+	</select>
+
+	<!-- 编程题开始 -->
+	<!-- 查询编程题总题目数 -->
+	<select id="queryProgramCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(count(1),0)
+		AS programQuesCount
+		FROM
+		(
+		SELECT DISTINCT
+		q.*
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON ai.paper_id =
+		ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT JOIN section s
+		ON
+		ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'Programming',
+		'Programming.'
+		)
+		<if test="subject !=null and subject !=''">AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询编程题总分值 -->
+	<select id="queryProgramTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(question_score),0)
+		as programTotalScore
+		FROM
+		(
+		SELECT
+		DISTINCT
+		sq.*
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON
+		ai.paper_id =
+		ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT
+		JOIN section s
+		ON ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON
+		sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'Programming',
+		'Programming.'
+		)
+		<if test="subject !=null and subject !=''">AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!--查询所有学生编程题总分数 -->
+	<select id="queryStuProgramTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(score),0)
+		AS stuProgramTotalScore
+		FROM
+		(
+		SELECT
+		DISTINCT
+		ans.*
+		FROM
+		answer_sheet ans
+		WHERE
+		1=1
+		<if test="subject !=null and subject !=''">
+			AND
+			paper_id IN (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p.
+			NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ans.answer_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ans.answer_time<![CDATA[<]]>#{end_time}
+		</if>
+		AND
+		ans.question_id IN (
+		SELECT DISTINCT
+		q.id
+		FROM
+		question q
+		LEFT JOIN
+		section_question sq ON q.id = sq.question_id
+		LEFT
+		JOIN section s ON
+		sq.section_id = s.id
+		WHERE
+		s. NAME IN (
+		'Programming',
+		'Programming.'
+		)
+		)
+		) a
+	</select>
+
+	<!-- 是非题开始 -->
+	<!-- 查询是非题总题目数 -->
+	<select id="queryTfCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(count(1),0)
+		AS tfQuesCount
+		FROM
+		(
+		SELECT DISTINCT
+		q.*
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON ai.paper_id = ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT JOIN section s ON
+		ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'TRUE or FALSE',
+		'TRUE or FALSE.'
+		)
+		<if test="subject !=null and subject !=''">
+			AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询是非题总分值 -->
+	<select id="queryTfTotalScore" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(sum(question_score),0)
+		AS tfTotalScore
+		FROM
+		(
+		SELECT DISTINCT
+		sq.*, p.id
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON ai.paper_id
+		= ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT JOIN section s
+		ON ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN (
+		'TRUE or FALSE',
+		'TRUE or FALSE.'
+		)
+		<if test="subject !=null and subject !=''">
+			AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+
+	<!-- 查询所有学生是非题总得分 -->
+	<select id="queryStuTfTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(score),0)
+		as stuTfTotalScore
+		FROM
+		(
+		SELECT DISTINCT
+		ans.*
+		FROM
+		answer_sheet ans
+		WHERE
+		1=1
+		<if test="subject !=null and subject !=''">
+			AND
+			paper_id IN (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p.
+			NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ans.answer_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ans.answer_time<![CDATA[<]]>#{end_time}
+		</if>
+		AND
+		ans.question_id IN (
+		SELECT DISTINCT
+		q.id
+		FROM
+		question q
+		LEFT JOIN
+		section_question sq ON q.id = sq.question_id
+		LEFT JOIN section s ON
+		sq.section_id = s.id
+		WHERE
+		s. NAME IN (
+		'TRUE or FALSE',
+		'TRUE or FALSE.'
+		)
+		)
+		) a
+	</select>
+
+	<!-- 简答题开始 -->
+	<!-- 查询简答题题目数量 -->
+	<select id="queryShortCount" parameterType="Map" resultType="Long">
+		SELECT
+		IFNULL(count(1),0)
+		AS shortQuesCount
+		FROM
+		(
+		SELECT DISTINCT
+		q.*
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON ai.paper_id = ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT JOIN section s ON
+		ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN(CONCAT('Q',<![CDATA['&amp;']]>,'A.'),CONCAT('Q',<![CDATA['&amp;']]>,'A'))
+		<if test="subject !=null and subject !=''">
+			AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询简答题总分值 -->
+	<select id="queryShortTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(question_score),0)
+		AS shortTotalScore
+		FROM
+		(
+		SELECT
+		DISTINCT
+		sq.*, p.id
+		FROM
+		answer_info ai
+		LEFT JOIN paper_section ps ON
+		ai.paper_id
+		= ps.paper_id
+		LEFT JOIN
+		paper p ON ps.paper_id = p.id
+		LEFT
+		JOIN section s
+		ON ps.section_id =
+		s.id
+		LEFT JOIN section_question sq ON
+		sq.section_id =
+		s.id
+		LEFT JOIN
+		question q ON sq.question_id = q.id
+		WHERE
+		s. NAME IN(CONCAT('Q',<![CDATA['&amp;']]>,'A.'),CONCAT('Q',<![CDATA['&amp;']]>,'A'))
+		<if test="subject !=null and subject !=''">
+			AND p.id = (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p. NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			LIMIT 1
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+	</select>
+
+	<!-- 查询所有学生简答题总得分 -->
+	<select id="queryStuShortTotalScore" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(score),0)
+		as shortTfTotalScore
+		FROM
+		(
+		SELECT DISTINCT
+		ans.*
+		FROM
+		answer_sheet ans
+		WHERE
+		1=1
+		<if test="subject !=null and subject !=''">
+			AND
+			paper_id IN (
+			SELECT
+			id
+			FROM
+			paper p
+			WHERE
+			p.
+			NAME LIKE
+			concat(concat('%',#{subject}),'%')
+			GROUP BY
+			p. NAME
+			)
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ans.answer_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ans.answer_time<![CDATA[<]]>#{end_time}
+		</if>
+		AND
+		ans.question_id IN (
+		SELECT DISTINCT
+		q.id
+		FROM
+		question q
+		LEFT JOIN
+		section_question sq ON q.id = sq.question_id
+		LEFT JOIN section s ON
+		sq.section_id = s.id
+		WHERE
+		s. NAME IN (CONCAT('Q',<![CDATA['&amp;']]>,'A.'),CONCAT('Q',<![CDATA['&amp;']]>,'A'))
+		)
+		) a
+	</select>
+	
+	<!-- 查询学生总考试时间 -->
+	<select id="queryStuExamTime" parameterType="Map"
+		resultType="Long">
+		SELECT
+		IFNULL(sum(exam_time), 0) AS examTime
+		FROM
+		(
+		SELECT DISTINCT
+			ai.paper_id,
+			ai.user_id,
+			ai.score,
+			c.direction,
+			ai.cost_time,
+			TIME_TO_SEC(ai.cost_time) AS exam_time
+		FROM
+			answer_info ai
+		LEFT JOIN class_student cs ON ai.user_id = cs.student_id
+		LEFT JOIN class c ON cs.class_id = c.id
+		LEFT JOIN sm_person sp ON cs.student_id = sp.id
+		LEFT JOIN plan_paper pp ON c.id = pp.class_id
+		WHERE
+		1=1
+		<if test="subject !=null and subject !=''">
+			<if test="subject =='Mainframe'">
+			AND c.direction IN('MF','Mainframe')
+			</if>
+			<if test="subject =='Testing'">
+			AND c.direction = '5'
+			</if>
+			<if test="subject !='Mainframe' and subject !='Testing'">
+			AND c.direction = #{subject}
+			</if>
+		</if>
+		<if test="start_time!=null and start_time!='' ">and ai.start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			ai.end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a	
+	</select>
+
+</mapper>

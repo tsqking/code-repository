@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="college">
+	<!-- Result Map-->
+	<resultMap type="com.clps.tmp.campusRecruit.univ.college.vo.CollegeVo" id="CollegeResultMap">
+		<id column="id" property="id"/>
+		<result column="univ_id" property="univ_id"/>
+		<result column="name" property="name"/>
+		<result column="create_time" property="create_time"/>
+		<result column="create_user" property="create_user"/>
+		<result column="update_time" property="update_time"/>
+		<result column="update_user" property="update_user"/>
+		<result column="del" property="del"/>
+	</resultMap>
+	<!-- 添加学校信息 -->
+	<!-- 基本信息列 -->
+	<sql id="Base_Column_List" >
+		`univ_id`,`name`,`create_time`,`create_user`,`update_time`,`update_user`
+	</sql>
+	<sql id="All_Column_List" >
+		a.`id`,a.`univ_id`,b.`name` as `univ_name`,a.`name`,a.`create_time`,a.`create_user`,a.`update_time`,a.`update_user`
+	</sql>
+	<sql id="findCondition_count">
+		<where>
+		    1=1
+		    <if test="id !=null">AND a.id=#{id}  </if>
+			<if test="univ_id !=null">AND a.univ_id=#{univ_id}  </if>
+		</where>
+	</sql>
+	<insert id="addCollege" parameterType="CollegeVo">
+		insert into UNIV_COLLEGE(<include refid="Base_Column_List"/>) values(#{univ_id},#{name},#{create_time},#{create_user},#{update_time},#{update_user})
+	</insert>
+	<!-- 查询所有学院信息 -->
+	<select id="selectCollege" resultType="CollegeVo" parameterType="map">
+		select <include refid="All_Column_List"/> from UNIV_COLLEGE a 
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+		<include refid="findCondition_count" /> 
+		and a.del="N" ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,update_time desc
+		</if>		
+		LIMIT ${offset},${limit} 
+	</select>
+	<!-- 查询更新学院信息 -->
+	<select id="getEditCollege" resultType="CollegeVo" parameterType="map">
+		select <include refid="All_Column_List"/> from  UNIV_COLLEGE a 
+		left join `UNIVERSITY` b on a.`univ_id`=b.`id`
+		where  a.id=#{id} and a.del="N"
+	</select>
+	<!-- 删除学院信息 -->
+	<update id="updateCollegeDel">
+		update UNIV_COLLEGE set del="Y" where id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach> or univ_id in <foreach item="item" collection="array" open="(" separator="," close=")">#{item} </foreach>
+	</update>
+	
+	<!-- 编辑学院信息 -->
+	<update id="editCollege" parameterType="Object">
+		update UNIV_COLLEGE set name=#{name},update_time=#{update_time},update_user=#{update_user} where id=#{id} and del="N"
+	</update>
+	<!-- 所有学院 NUM-->
+	<select id="getAllCollege" resultType="long">
+		select count(*) from UNIV_COLLEGE a <include refid="findCondition_count" /> and a.del="N"
+	</select>
+	<!-- 获取所有学院 -->
+	<select id="getCollegeName" resultType="SelectVo" parameterType="map">
+	   select id,name as text from  UNIV_COLLEGE where univ_id=#{univ_id} and del="N"
+	</select>
+	
+</mapper>

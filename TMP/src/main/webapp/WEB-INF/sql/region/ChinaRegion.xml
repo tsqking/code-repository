@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<delete>
+		DELETE FROM `CHINA_REGIONS`
+	</delete>
+	<insert>
+		INSERT INTO `CHINA_REGIONS` (`CODE`,`PARENT_ID`,`NAME`)
+		VALUES 
+		(:code,:parentId,:name)
+	</insert>
+	<selectAll>
+	    select * FROM `CHINA_REGIONS`
+	</selectAll>
+	<selectprovince>
+		SELECT `CODE` as `id`,`NAME` as `text`
+		FROM `CHINA_REGIONS`
+		WHERE 1=1
+		and (case :code when  310000 then `code` when  500000 then `code`  when  110000 then `code` when  120000 then `code`  else `parent_id` end)=:code
+	</selectprovince>
+	<getAllCodeName>
+		SELECT `CODE`,`NAME`
+		FROM `CHINA_REGIONS`
+	</getAllCodeName>
+</SQL>

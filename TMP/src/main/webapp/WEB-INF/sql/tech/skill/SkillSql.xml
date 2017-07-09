@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<AddSkill>
+		INSERT INTO `SKILL`
+		(`ORDER`,`NAME`,`name_en_US`,`TYPE`,`PARENT_ID`,`DESCRIPTION`,`description_en_US`,`LEVEL`,`ENABLE`,`CREATE_TIME`,`CREATE_PERSON`,`UPDATE_TIME`,`UPDATE_PERSON`)
+		VALUES
+		(:order,:name,:name_en_US,:type,:parentId,:descript,:descript_en_US,:level,:enable,:create_time,:create_person,:update_time,:update_person)
+	</AddSkill>
+
+	<FindSkill>
+    	SELECT
+		distinct f.`ID`,f.`ORDER`,f.`NAME[lang]` as `NAME`,t.`name` as `TYPE`,ff.`name[lang]` as `PARENT_NAME`,f.`DESCRIPTION[lang]` as `DESCRIPTION`,tt.`name` as `LEVEL`,e.`name`
+		as `ENABLE`,f.`UPDATE_TIME`,f.`UPDATE_PERSON`
+		FROM `SKILL` f
+    	left join `SKILL` ff on f.`parent_id`=ff.id
+		LEFT JOIN (select o1.`name[lang]` as `name`,o1.`value` as value from SM_OPTION o1 join SM_OPTION o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )e ON f.`ENABLE`=e.`value`
+ 	  	LEFT JOIN (select o1.`name[lang]` as `name`,o1.`value` as value from SM_OPTION o1 join SM_OPTION o2 on o1.`parent_id`=o2.`id` where o2.`value`='SKILL_TYPE' )t ON f.`type`=t.`value`
+ 	  	LEFT JOIN (select o1.`name[lang]` as `name`,o1.`value` as value from SM_OPTION o1 join SM_OPTION o2 on o1.`parent_id`=o2.`id` where o2.`value`='SKILL_LEVEL' )tt ON f.`level`=tt.`value`
+		where f.`ID` in(
+		      SELECT ID
+		      from (
+		           select c.ID as `grand_id`,b.ID as `parent_id`,a.ID
+		           from `SKILL` a
+		                LEFT JOIN `SKILL` b on a.PARENT_ID=b.ID 
+                    LEFT JOIN `SKILL` c on b.PARENT_ID=c.ID
+          )a
+		      [where] 
+		)
+		[order] limit [start],[number]
+	</FindSkill>
+
+	<FindSkillAccount>
+		SELECT COUNT(*)
+		FROM `SKILL` WHERE `ID` in(
+		SELECT ID
+		from (
+		select c.ID as
+		`grand_id`,b.ID as `parent_id`,a.ID
+		from `SKILL` a
+		LEFT JOIN `SKILL` b
+		on a.PARENT_ID=b.ID LEFT JOIN `SKILL` c
+		on
+		b.PARENT_ID=c.ID
+		)a
+		[where]
+		)
+	</FindSkillAccount>
+
+	<FindMenuOption>
+		SELECT `ID`,`name[lang]` as `TEXT` 
+		FROM `SKILL` 
+		WHERE 1=1
+		and `PARENT_ID`=:parentId
+		and `enable`='T'
+		order by `order` asc
+	</FindMenuOption>
+
+	<checkMappingWhenDelete>
+		select a.`point_id`,b.`name[lang]` as `name`
+		from `SKILL_POINT` a left join `POINT` b on a.`point_id`=b.`id`
+		where a.`skill_id` in(
+				select id
+				from (
+		        		select c.id as `grand_id`,b.id as `parent_id`,a.id
+		        		from `SKILL` a left join `SKILL`
+		        		b on a.parent_id=b.id left join `SKILL` c
+		        		on b.parent_id=c.id
+		    		  ) a
+				where grand_id=(:id) or parent_id=(:id) or id=(:id)   
+		) 
+	</checkMappingWhenDelete>
+	
+	<DeleteSkill>
+		DELETE FROM `SKILL` WHERE id in(
+		select id
+		from (
+		select c.id
+		as `grand_id`,b.id as `parent_id`,a.id
+		from `SKILL` a left join `SKILL`
+		b on a.parent_id=b.id left join `SKILL` c
+		on b.parent_id=c.id
+		)a
+		where
+		grand_id=(:id) or parent_id=(:id) or id=(:id)
+		)
+	</DeleteSkill>
+
+	<SelectSkill>
+		SELECT
+		a.`ID`,a.`ORDER`,a.`NAME`,a.`name_en_US`,a.`TYPE`,a.`PARENT_ID`,b.`name[lang]` as `PARENT_NAME`,a.`DESCRIPTION`,a.`description_en_US`,a.`LEVEL`,a.`ENABLE`,a.`UPDATE_TIME`,a.`UPDATE_PERSON`
+		FROM `SKILL` a left join `SKILL` b on a.`parent_id`=b.`id` WHERE a.`ID`=:id
+	</SelectSkill>
+	
+	<UpdateSkill>
+	   	 UPDATE `SKILL` SET `ORDER`=:order,`NAME`=:name,`name_en_US`=:name_en_US,`TYPE`=:type,`PARENT_ID`=:parentId,
+	   	`DESCRIPTION`=:descript,`description_en_US`=:descript_en_US,`LEVEL`=:level,`ENABLE`=:enable,`UPDATE_TIME`=:update_time,`UPDATE_PERSON`=:update_person WHERE `ID`=:id
+	</UpdateSkill>
+</SQL>

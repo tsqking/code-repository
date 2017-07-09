@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<params>
+	<!-- 文件类型 -->
+	<!-- jpg,jpg/jpeg,gif,png,ico,ico,txt,zip,rar,7z,ppt,ppt,pptx,pdf,doc,docx,xls,xlsx -->
+	<!-- application/x-jpg,image/jpeg,image/gif,image/png,image/x-icon,image/vnd.microsoft.icon,text/plain,application/zip,application/octet-stream,application/x-7z-compressed,application/x-ppt,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet -->
+	
+	<!-- jpg,jpg/jpeg,png,txt,zip,rar,7z,ppt,ppt,pptx,pdf,doc,docx,xls,xlsx -->
+	<!-- application/x-jpg,image/jpeg,image/gif,image/png,text/plain,application/zip,application/octet-stream,application/x-7z-compressed,application/x-ppt,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet -->
+	
+	<!-- pdf,xls,xlsx -->
+	<!-- application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheetx -->
+	
+	<!-- jpg,jpg/jpeg,gif,png,txt,zip,rar,7z,ppt,ppt,pptx,pdf,doc,docx,xls,xlsx -->
+	<allowFileType>application/x-jpg,image/jpeg,image/gif,image/png,text/plain,application/zip,application/octet-stream,application/x-7z-compressed,application/x-ppt,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</allowFileType>
+	<!-- 文件上传大小限制 ,单位为M-->
+	<allowSize>20</allowSize>
+	<!-- 文件存储根路径，文件存储路径顺序为 模块/功能/年/月/日 -->
+	<!-- 复旦：/home/fudan/TMP_File -->
+	<filePath>/home/fudan/TMP_File</filePath>
+	<!-- 是否根据模块划分存储路径，默认为true -->
+	<isModule>true</isModule>
+	<!-- 是否根据功能划分存储路径，默认为true -->
+	<isFunction>true</isFunction>
+	<!-- 是否根据Year划分存储路径，默认为true -->
+	<isYear>true</isYear>
+	<!-- 是否根据Month划分存储路径,默认为true -->
+	<isMonth>true</isMonth>
+	<!-- 是否根据Day划分存储路径，默认为false -->
+	<isDay>true</isDay>
+	<!-- 遇到同名文件是否覆盖，默认覆盖，不覆盖则生成新文件名：XXXXX_year||month||day_hour||minute||second.xxx -->
+	<isRecover>false</isRecover>
+</params>

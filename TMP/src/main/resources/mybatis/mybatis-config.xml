@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="logPrefix" value="com.clps.tmp.core.common.dao.impl."/>
+    </settings>
+    <typeAliases>
+		<!-- demo -->
+    	<typeAlias alias="Demo" type="com.clps.tmp.demo.vo.DemoVo" />
+    	
+    	<!-- 系统公用 -->
+    	<typeAlias alias="OptionVo" type="com.clps.tmp.core.sm.vo.OptionVo" />
+    	<typeAlias alias="SelectVo" type="com.clps.tmp.core.sm.vo.SelectVo" />
+    	
+    	<!-- Wellen 学校信息 -->
+    	<typeAlias alias="UniversityVo" type="com.clps.tmp.campusRecruit.univ.university.vo.UniversityVo" />
+    	<typeAlias alias="WorkHistVo" type="com.clps.tmp.campusRecruit.univ.workhist.vo.WorkHistVo" />
+    	<typeAlias alias="CoopVo" type="com.clps.tmp.campusRecruit.univ.coop.vo.CoopVo" />
+    	<typeAlias alias="CoopHisVo" type="com.clps.tmp.campusRecruit.univ.coop.vo.CoopHisVo" />
+    	<typeAlias alias="CollegeVo" type="com.clps.tmp.campusRecruit.univ.college.vo.CollegeVo" />
+    	<typeAlias alias="AttnVo" type="com.clps.tmp.campusRecruit.univ.attn.vo.AttnVo" />
+    	<typeAlias alias="ChinaRegionVo" type="com.clps.tmp.common.region.vo.ChinaRegionVo" />
+    	<typeAlias alias="CoopAttnVo" type="com.clps.tmp.campusRecruit.univ.coop.vo.CoopAttnVo" />
+    	<!-- Jevon 题库管理 -->
+    	<typeAlias alias="tag" type="com.clps.tmp.question.tag.vo.TagVo"/>
+    	<typeAlias alias="question" type="com.clps.tmp.question.question.vo.QuestionVo"/>
+    	<typeAlias alias="paper" type="com.clps.tmp.question.paper.vo.PaperVo"/>
+    	<typeAlias alias="section" type="com.clps.tmp.question.paper.vo.SectionVo"/>
+    
+    	<!-- Seven 人才信息库 -->
+    	<typeAlias alias="TalentVo" type="com.clps.tmp.campusRecruit.other.talentPool.vo.TalentVo" />
+    	
+    	<!-- David 在线考试 -->
+    	<typeAlias alias="onlineTest" type="com.clps.tmp.exam.onlineTest.vo.OnlineTestVo" />
+    	
+    	<!-- 教学计划 -->
+    	<typeAlias alias="PlanPaperVo" type="com.clps.tmp.tech.plan.vo.PlanPaperVo" />
+    	<typeAlias alias="PlanPaperStuHisVo" type="com.clps.tmp.tech.plan.vo.PlanPaperStuHisVo" />
+    	<typeAlias alias="EvalVo" type="com.clps.tmp.tech.plan.vo.EvalVo" />
+    	<typeAlias alias="PlanVo" type="com.clps.tmp.tech.plan.vo.PlanVo" />
+    	
+    	<!-- 批改试卷,查阅批改结果 -->
+    	<typeAlias alias="QuestionVo" type="com.clps.tmp.tech.plan.vo.QuestionVo" />
+    	<typeAlias alias="AnswerSheetVo" type="com.clps.tmp.tech.plan.vo.AnswerSheetVo" />
+    	<typeAlias alias="AnswerInfoVo" type="com.clps.tmp.tech.plan.vo.AnswerInfoVo" />
+    	<typeAlias alias="SectionVo" type="com.clps.tmp.tech.plan.vo.SectionVo" />
+    	
+    	<!-- 成绩管理 -->
+    	<typeAlias alias="ExerciseScoreRatioVo" type="com.clps.tmp.tech.plan.vo.ExerciseScoreRatioVo" />
+    	<typeAlias alias="ExerciseScoreVo" type="com.clps.tmp.tech.plan.vo.ExerciseScoreVo" />
+    	<typeAlias alias="TotalScoreRatioVo" type="com.clps.tmp.tech.plan.vo.TotalScoreRatioVo" />
+    	<typeAlias alias="TotalScoreVo" type="com.clps.tmp.tech.plan.vo.TotalScoreVo" />
+    	<!--成绩分析  -->
+    	<typeAlias alias="GradeVo" type="com.clps.tmp.analysisReport.gradeAnalysis.vo.GradeVo" />
+    	
+    	<!-- 考试年龄分布 -->
+    	<typeAlias alias="AgeVo" type="com.clps.tmp.analysisReport.ageAnalysis.vo.AgeVo"/>
+    	<!-- 分析总表 -->
+    	<typeAlias alias="SummaryVo" type="com.clps.tmp.analysisReport.summary.vo.SummaryVo"/>
+ 		<typeAlias alias="HeadVo" type="com.clps.tmp.analysisReport.summary.vo.HeadVo"/>
+ 		<!-- 按照科目、时间查找公司以及数据 --> 
+ 		<typeAlias alias="GradeAnalysisBySubVo" type="com.clps.tmp.analysisReport.gradeAnalysisBySub.vo.GradeAnalysisBySubVo"/>  
+    	<!-- 按照公司，查找科目以及数据 -->
+    	<typeAlias alias="GradeAnalysisByComVo" type="com.clps.tmp.analysisReport.gradeAnalysisByCom.vo.GradeAnalysisByComVo"/>
+    </typeAliases>
+</configuration>

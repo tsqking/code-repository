@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scoreManager">
+   
+    <!-- 删除原有的数据 -->
+    <delete id="deleteExerciseScore" parameterType="map">
+		delete from `EXERCISE_SCORE` where `plan_id`=#{plan_id}
+	</delete>
+    <delete id="deleteExerciseScoreRatio" parameterType="map">
+		delete from `EXERCISE_SCORE_RATIO` where `plan_id`=#{plan_id}
+	</delete>
+    <delete id="deleteTotalScore" parameterType="map">
+		delete from `TOTAL_SCORE` where `plan_id`=#{plan_id}
+	</delete>
+	
+    <!-- 查询旧的总分比例记录记录 -->
+    <select id="getTotalScoreRatioHis" resultType="TotalScoreRatioVo" parameterType="map">
+		SELECT 
+			normal_ratio,attendance_ratio,attitude_ratio,exam_ratio
+		FROM 
+			TOTAL_SCORE_RATIO
+		WHERE 
+			plan_id=#{plan_id}
+	</select>
+	
+    <!-- 试卷加权比例和期末卷历史信息 -->
+    <select id="getExerciseScoreRatioHis" resultType="ExerciseScoreRatioVo" parameterType="map">
+		SELECT 
+			paper_id,ratio,flag 
+		FROM 
+			EXERCISE_SCORE_RATIO
+		WHERE 
+			plan_id=#{plan_id}
+	</select>
+	
+    <!-- 学生态度分设置历史 -->
+    <select id="getTotalScoreHis" resultType="TotalScoreVo" parameterType="map">
+		SELECT 
+			student_id,attitude_score
+		FROM 
+			TOTAL_SCORE
+		WHERE
+			plan_id=#{plan_id}
+	</select>
+    
+    <!-- 建立空数据 -->
+    <insert id="addExerciseScore" parameterType="map">
+		INSERT INTO `EXERCISE_SCORE` 
+			(`plan_id`, `student_id`, `paper_id`, `true_score`, 
+			`switch_score`, `del`, `create_time`, `create_person`, 
+			`update_time`, `update_person`) VALUES 
+		<foreach collection="listData" item="item" index="index"
+			separator=",">
+			(#{plan_id}, #{item.student_id}, #{item.paper_id}, 
+			#{item.true_score}, #{item.switch_score}, 
+			#{del}, #{create_time}, #{create_person}, 
+			#{update_time}, #{update_person})
+		</foreach>
+	</insert>
+    <insert id="addExerciseScoreRatio" parameterType="map">
+		INSERT INTO `EXERCISE_SCORE_RATIO` 
+			(`plan_id`, `paper_id`, `ratio`, `flag`, 
+			`del`, `create_time`, `create_person`, `update_time`, 
+			`update_person`) VALUES 
+        <foreach collection="listData" item="item" index="index"
+			separator=",">
+			(#{plan_id}, #{item.paper_id}, #{item.ratio}, 
+			#{item.flag}, #{del}, 
+			#{create_time}, #{create_person}, 
+			#{update_time}, #{update_person})
+		</foreach>
+	</insert>
+    <insert id="addTotalScore" parameterType="map">
+		INSERT INTO `TOTAL_SCORE` 
+			(`plan_id`, `student_id`, `normal_score`, `attendance_score`, 
+			`attitude_score`, `exam_score`, `total_score`, `flag`, 
+			`del`, `create_time`, `create_person`, `update_time`, 
+			`update_person`) VALUES 
+        <foreach collection="listData" item="item" index="index"
+			separator=",">
+			(#{plan_id}, #{item.student_id}, '0.00', '0.00', #{item.attitude_score}, '0.00', '0.00', 
+			'0', 
+			#{del}, #{create_time}, #{create_person}, 
+			#{update_time}, #{update_person})
+		</foreach>
+	</insert>
+    <insert id="addTotalScoreRatio" parameterType="map">
+		INSERT INTO `TOTAL_SCORE_RATIO` 
+			(`plan_id`, `normal_ratio`, `attendance_ratio`, `attitude_ratio`, 
+			`exam_ratio`, `del`, `create_time`, `create_person`, 
+			`update_time`, `update_person`) VALUES 
+			(#{plan_id}, #{normal_ratio}, 
+			#{attendance_ratio}, #{attitude_ratio}, 
+			#{exam_ratio}, #{del}, #{create_time}, 
+			#{create_person}, #{update_time}, #{update_person})
+	</insert> 
+    
+    <!-- 查询班级的学生列表+试卷信息 -->
+    <select id="getStudentPaperInfo" resultType="PlanPaperVo" parameterType="map">
+		SELECT a.paper_id,b.student_id,b.score,c.total_score
+		FROM
+			PLAN_PAPER a,PLAN_PAPER_STU_HIS b,PAPER c
+		WHERE 
+			a.id = b.plan_paper_id
+			and c.id = a.paper_id
+			and b.`status`='2'
+			and b.`del`='N'
+			and a.plan_id=#{plan_id}
+		order by b.student_id asc,a.paper_id asc
+	</select>
+    
+    
+    <!-- 学生总分列表 -->
+    <sql id="totalScoreWhere">
+        <where>
+		    a.del='N' and a.plan_id=#{plan_id}
+			<if test="student_name !=null">and b.`name` like concat('%',#{student_name},'%')  </if>
+			<if test="student_no !=null">and b.`no` = #{student_no}  </if>
+			<if test="flag !=null">and a.flag=#{flag}  </if>
+		</where>
+    </sql>
+    <!-- 查询所有的学生总分记录 -->
+	<select id="getTotalScoreCount" resultType="long" parameterType="map">
+		SELECT count(*) FROM TOTAL_SCORE a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		<include refid="totalScoreWhere"/>	
+	</select>
+    <!-- 查询所有的学生总分记录 -->
+	<select id="getTotalScore" resultType="TotalScoreVo" parameterType="map">
+		SELECT a.*,b.name student_name,b.no student_no FROM TOTAL_SCORE a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		<include refid="totalScoreWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+	
+	
+	<!-- 试卷列表 -->
+    <sql id="planPaperWhere">
+        <where>
+		    a.del='N' and a.status='1' and a.plan_id=#{plan_id}
+		    <if test="flag !=null">and c.flag='0' </if>
+		</where>
+    </sql>
+    <!-- 查询所有试卷列表 -->
+	<select id="getPlanPaperCount" resultType="long" parameterType="map">
+		SELECT count(*) FROM PLAN_PAPER a
+		left join PAPER b on a.paper_id=b.id
+		left join EXERCISE_SCORE_RATIO c on a.paper_id=c.paper_id and c.plan_id=#{plan_id}
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o1 on a.`paper_type`=o1.`value`
+		<include refid="planPaperWhere"/>	
+	</select>
+    <!-- 查询所有试卷列表 -->
+	<select id="getPlanPaper" resultType="PlanPaperVo" parameterType="map">
+		SELECT a.*,b.name paper_name,o1.name paper_type_name,c.ratio,c.id exercise_score_ratio_id,
+		(CASE c.flag WHEN 0 THEN 0 WHEN 1 THEN 1 ELSE 0 END) flag FROM PLAN_PAPER a
+		left join PAPER b on a.paper_id=b.id
+		left join EXERCISE_SCORE_RATIO c on a.paper_id=c.paper_id and c.plan_id=#{plan_id}
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+			SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+			oo2.`value`='PAPER_PROP') o1 on a.`paper_type`=o1.`value`
+		<include refid="planPaperWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,a.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+
+	<!-- 设置期末卷 -->
+	<update id="setLastPaper" parameterType="map">
+		UPDATE `EXERCISE_SCORE_RATIO` SET `ratio`='0', `flag`='1',
+		`update_time`=#{update_time}, `update_person`=#{update_person}
+		WHERE `plan_id`=#{plan_id} and `paper_id`=#{paper_id}
+	</update>
+	
+	<!-- 取消期末卷 -->
+	<update id="unsetLastPaper" parameterType="map">
+		UPDATE `EXERCISE_SCORE_RATIO` SET `ratio`='1', `flag`='0',
+		 `update_time`=#{update_time}, `update_person`=#{update_person}
+		WHERE `plan_id`=#{plan_id}
+	</update>
+	
+	<!-- 设置默认加权 -->
+	<update id="setDeRatio" parameterType="map">
+		UPDATE `EXERCISE_SCORE_RATIO` SET `ratio`='1',
+		`update_time`=#{update_time}, `update_person`=#{update_person}
+		 WHERE `plan_id`=#{plan_id} and `flag`='0'
+	</update>
+	
+	<!-- 设置加权 -->
+	<update id="setRatio" parameterType="map">
+		UPDATE `EXERCISE_SCORE_RATIO` SET `ratio`=#{ratio},
+		`update_time`=#{update_time}, `update_person`=#{update_person}
+		 WHERE `plan_id`=#{plan_id} and `flag`='0' and `paper_id`=#{paper_id}
+	</update>
+	
+	<!-- 查询并计算平时分 -->
+	<select id="getStudentNormalScore" resultType="TotalScoreVo" parameterType="map">
+		SELECT 
+		    a.plan_id,a.student_id,cast(sum((b.ratio/c.all_ratio)*a.switch_score) as decimal(5,2)) normal_score
+		FROM 
+			EXERCISE_SCORE a,
+		    EXERCISE_SCORE_RATIO b,
+		    (SELECT sum(ratio) all_ratio FROM EXERCISE_SCORE_RATIO WHERE plan_id=#{plan_id} and flag='0') c
+		WHERE
+			a.plan_id=#{plan_id}
+		    and b.plan_id=#{plan_id}
+		    and b.flag='0'
+		    and a.paper_id=b.paper_id
+		group by a.student_id
+	</select>
+	
+	<!-- 插入平时分 -->
+	<update id="setStudentNormalScore" parameterType="TotalScoreVo">
+		update TOTAL_SCORE set normal_score=#{normal_score} 
+		where plan_id=#{plan_id} and student_id=#{student_id}
+	</update>
+	
+	<!-- 查询并计算考勤分,态度分,期末考试分 -->
+	<select id="getStudentOtherScore" resultType="TotalScoreVo" parameterType="map">
+		SELECT 
+			a.*,
+			CASE b.switch_score WHEN NULL THEN 0 ELSE cast(b.switch_score as decimal(5,2)) END exam_score
+		FROM
+			(SELECT 
+				b.id plan_id,a.student_id,
+				cast(sum((CASE a.sign WHEN 1 THEN 100 WHEN 2 THEN 50 WHEN 3 THEN 50 WHEN 4 THEN 0 ELSE 0 END))/c.count as decimal(5,2)) attendance_score,
+				cast(sum(a.score*10)/c.count as decimal(5,2)) attitude_score,a.attitude_score_old
+			 FROM 
+				( SELECT
+					a.*, b.attitude_score attitude_score_old
+				FROM
+					(
+						SELECT
+							a.*
+						FROM
+							PROCESS_EVAL a,
+							TEACH_PLAN b
+						WHERE
+							a.course_id = b.course_id
+						AND a.class_id = b.class_id
+						AND b.id = #{plan_id}
+						ORDER BY
+							student_id ASC
+					) a
+				LEFT JOIN TOTAL_SCORE b ON a.student_id = b.student_id
+				AND b.plan_id = #{plan_id} ) a,
+				TEACH_PLAN b,
+				(SELECT a.student_id,count(*) count
+				FROM PROCESS_EVAL a,TEACH_PLAN b 
+				WHERE a.course_id=b.course_id and a.class_id=b.class_id and b.id=#{plan_id}
+				group by a.student_id) c
+			WHERE
+				a.course_id=b.course_id
+				and a.class_id=b.class_id
+				and a.student_id=c.student_id
+				and b.id=#{plan_id}
+			group by a.student_id) a
+		left join (SELECT b.student_id,b.switch_score FROM EXERCISE_SCORE_RATIO a,EXERCISE_SCORE b
+			        WHERE a.paper_id=b.paper_id and a.flag='1' and a.plan_id=#{plan_id}) b on a.student_id=b.student_id
+	</select>
+	
+	<!-- 插入考勤分,态度分,期末考试分 -->
+	<update id="setStudentOtherScore" parameterType="TotalScoreVo">
+		UPDATE `TOTAL_SCORE` SET 
+		`attendance_score`=#{attendance_score}, `attitude_score`=#{attitude_score}, `exam_score`=#{exam_score} 
+		WHERE `plan_id`=#{plan_id} and `student_id`=#{student_id}
+	</update>
+	
+	<!-- 插入自定义态度分 -->
+	<update id="setAtt" parameterType="TotalScoreVo">
+		UPDATE `TOTAL_SCORE` SET `attitude_score`=#{attitude_score},
+		`update_time`=#{update_time}, `update_person`=#{update_person}
+		WHERE `plan_id`=#{plan_id} and `student_id`=#{student_id}
+	</update>
+	
+	<!-- 查询总分比例 -->
+	<select id="getTotalRatio" resultType="TotalScoreRatioVo" parameterType="TotalScoreRatioVo">
+		SELECT * FROM TOTAL_SCORE_RATIO WHERE plan_id=#{plan_id}
+	</select>
+	
+	<!-- 保存比例分数 -->
+	<update id="saveTotalRatio" parameterType="TotalScoreRatioVo">
+		UPDATE `TOTAL_SCORE_RATIO` SET 
+		`normal_ratio`=#{normal_ratio}, `attendance_ratio`=#{attendance_ratio}, 
+		`attitude_ratio`=#{attitude_ratio}, `exam_ratio`=#{exam_ratio}, 
+		`update_time`=#{update_time}, `update_person`=#{update_person}
+		WHERE `plan_id`=#{plan_id}
+	</update>
+	
+	<!-- 查询并计算总分 -->
+	<select id="getTotal" resultType="TotalScoreRatioVo" parameterType="TotalScoreRatioVo">
+		SELECT 
+			a.plan_id,a.student_id,
+			cast(
+		    ((a.normal_score*b.normal_ratio+
+				a.attendance_score*b.attendance_ratio+
+				a.attitude_score*b.attitude_ratio+
+				a.exam_score*b.exam_ratio)/
+				(b.normal_ratio+b.attendance_ratio+b.attitude_ratio+b.exam_ratio)) 
+		    as decimal(5,2)) total_score
+		FROM 
+			TOTAL_SCORE a
+			left join TOTAL_SCORE_RATIO b on a.plan_id=b.plan_id
+		WHERE
+			a.plan_id=#{plan_id}
+	</select>
+	
+	<!-- 保存总分 -->
+	<update id="saveTotal" parameterType="TotalScoreRatioVo">
+		UPDATE `TOTAL_SCORE` SET `total_score`=#{total_score},`flag`='1',
+		`update_time`=#{update_time}, `update_person`=#{update_person}
+		WHERE plan_id=#{plan_id} and `student_id`=#{student_id}
+	</update>
+	
+	
+	<!-- 获取平时成绩明细 -->
+    <sql id="detailNormalWhere">
+        <where>
+		    a.plan_id=b.plan_id and
+		    a.paper_id=b.paper_id and
+		    a.paper_id=c.id and
+		    a.student_id=#{student_id} and
+		    a.plan_id=#{plan_id}
+		</where>
+    </sql>
+    <!-- 查询平时成绩 -->
+	<select id="getDetailNormalCount" resultType="long" parameterType="map">
+		SELECT 
+			count(*)
+		FROM 
+		    (SELECT a.*,b.all_ratio FROM EXERCISE_SCORE a
+				left join (SELECT a.plan_id,a.paper_id,b.all_ratio 
+							FROM EXERCISE_SCORE_RATIO a,
+								(SELECT plan_id,sum(ratio) all_ratio FROM EXERCISE_SCORE_RATIO where flag='0' group by plan_id) b
+							WHERE a.plan_id=b.plan_id) b on a.paper_id=b.paper_id and a.plan_id=b.plan_id) a,
+		    EXERCISE_SCORE_RATIO b,
+		    PAPER c
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+					SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+					oo2.`value`='PAPER_PROP') o1 on c.`property`=o1.`value`
+		<include refid="detailNormalWhere"/>	
+	</select>
+    <!-- 查询平时成绩 -->
+	<select id="getDetailNormal" resultType="ExerciseScoreVo" parameterType="map">
+		SELECT 
+			a.*,b.ratio paper_ratio,b.flag paper_flag,
+		    c.`no` paper_no,c.name paper_name,c.description paper_description,
+		    c.instruction paper_instruction,c.total_score paper_total_score,o1.name paper_type,
+		    CASE b.flag WHEN 0 THEN concat(cast(b.ratio/a.all_ratio*100 as decimal(5,2)),'%') ELSE concat(0.00,'%') END ratio_num
+		FROM 
+		    (SELECT a.*,b.all_ratio FROM EXERCISE_SCORE a
+				left join (SELECT a.plan_id,a.paper_id,b.all_ratio 
+							FROM EXERCISE_SCORE_RATIO a,
+								(SELECT plan_id,sum(ratio) all_ratio FROM EXERCISE_SCORE_RATIO where flag='0' group by plan_id) b
+							WHERE a.plan_id=b.plan_id) b on a.paper_id=b.paper_id and a.plan_id=b.plan_id) a,
+		    EXERCISE_SCORE_RATIO b,
+		    PAPER c
+		left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+					SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+					oo2.`value`='PAPER_PROP') o1 on c.`property`=o1.`value`
+		<include refid="detailNormalWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,c.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+	
+	
+	<!-- 获取考勤成绩明细 -->
+    <sql id="detailAttendanceWhere">
+        <where>
+		    a.course_id=b.course_id and
+		    a.class_id=b.class_id and
+		    a.point_id=c.id and
+		    a.teacher_id=d.id and
+		    b.id=#{plan_id} and
+		    a.student_id=#{student_id}
+		</where>
+    </sql>
+    <!-- 查询考勤成绩 -->
+	<select id="getDetailAttendanceCount" resultType="long" parameterType="map">
+		SELECT 
+			count(*)
+		FROM 
+		    (SELECT a.*,o1.name sign_name FROM PROCESS_EVAL a left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+					SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+					oo2.`value`='SIGN') o1 on a.`sign`=o1.`value`) a,
+		    TEACH_PLAN b,
+		    POINT c,
+		    SM_PERSON d	
+		<include refid="detailAttendanceWhere"/>	
+	</select>
+    <!-- 查询考勤成绩 -->
+	<select id="getDetailAttendance" resultType="ExerciseScoreVo" parameterType="map">
+		SELECT 
+			a.*,c.name point_name,c.description point_description,d.name teacher_name
+		FROM 
+		    (SELECT a.*,o1.name sign_name FROM PROCESS_EVAL a left join (select oo1.`name${lang}` as `name`,oo1.`value` from SM_OPTION oo1 join
+					SM_OPTION oo2 on oo1.`parent_id`=oo2.`id` where
+					oo2.`value`='SIGN') o1 on a.`sign`=o1.`value`) a,
+		    TEACH_PLAN b,
+		    POINT c,
+		    SM_PERSON d			
+		<include refid="detailAttendanceWhere"/>
+		ORDER BY ${sortName} ${sortOrder} 
+		<if test="sortName !='update_time'">
+			,b.update_time desc
+		</if>			
+		LIMIT ${offset},${limit} 
+	</select>
+	
+	<!-- 查询总分组成比例 -->
+	<select id="getTotalScoreRatio" resultType="TotalScoreRatioVo" parameterType="PlanPaperVo">
+		SELECT normal_ratio,attendance_ratio,attitude_ratio,exam_ratio FROM TOTAL_SCORE_RATIO WHERE plan_id=#{plan_id}
+	</select>
+	
+	<!-- 导出数据 -->
+	<select id="getTotalScoreToExport" resultType="map" parameterType="String">
+		SELECT a.*,b.name student_name,b.no student_no FROM TOTAL_SCORE a
+		left join `SM_PERSON` b on a.`student_id`=b.`id`
+		WHERE a.del='N' and a.plan_id=#{plan_id} and a.flag='1'
+		ORDER BY student_no asc,a.update_time desc
+	</select>
+	
+	
+	
+				
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gradeBySub">
+	<select id="selectBySub" resultType="GradeAnalysisBySubVo"
+		parameterType="Map">
+		SELECT
+		student_source as company,
+		sum(
+		CASE
+		WHEN score &lt; 30 THEN
+		1
+		ELSE
+		0
+		END
+		) AS
+		`range1`,
+		sum(
+		CASE
+		WHEN score >= 30
+		AND score &lt; 40 THEN
+		1
+		ELSE
+		0
+		END
+		) AS
+		`range2`,
+		sum(
+		CASE
+		WHEN score >= 40
+		AND score &lt; 60 THEN
+		1
+		ELSE
+		0
+		END
+		) AS
+		`range3`,
+		sum(
+		CASE
+		WHEN score >= 60
+		AND score &lt; 80 THEN
+		1
+		ELSE
+		0
+		END
+		) AS
+		`range4`,
+		sum(
+		CASE
+		WHEN score >= 80
+		AND score &lt; 100 THEN
+		1
+		ELSE
+		0
+		END
+		) AS
+		`range5`,
+		sum(
+		CASE
+		WHEN score >= 100
+		AND score &lt; 120 THEN
+		1
+		ELSE
+		0
+		END
+		) AS
+		`range6`,
+		sum(1) AS `total`
+		FROM
+		(
+		SELECT DISTINCT
+		ai.paper_id,
+		ai.user_id,
+		ai.score,
+		sp.student_source
+		FROM
+		answer_info ai
+		LEFT JOIN class_student cs
+		ON ai.user_id = cs.student_id
+		LEFT JOIN
+		class c ON cs.class_id = c.id
+		LEFT JOIN sm_person sp ON cs.student_id =
+		sp.id
+		LEFT JOIN plan_paper pp
+		ON c.id = pp.class_id
+		WHERE
+		1 = 1
+		AND ai.user_type = 1
+		AND ai.score IS NOT
+		NULL
+		<if test="subject!=null and subject!='' ">and c.direction=#{subject}</if>
+		<if test="start_time!=null and start_time!='' ">and pp.paper_start_time>#{start_time}</if>
+		<if test="end_time!=null and end_time!='' ">and
+			pp.paper_end_time<![CDATA[<]]>#{end_time}
+		</if>
+		) a
+		GROUP BY
+		student_source
+	</select>
+</mapper>

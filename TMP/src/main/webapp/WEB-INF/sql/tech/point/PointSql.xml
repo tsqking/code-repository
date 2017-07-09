@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<downTopicData>
+		select a.`name[lang]` as `name`,o2.`name` as `skill_type`,e.`name[lang]` as `first_skill`,d.`name[lang]` as `second_skill`,c.`name[lang]` as `third_skill`,
+		       case when g.material_file_name is null then '×' when g.material_file_name='' then '×' else '√' end as `material`,
+		       case when g.t_handbook_file_name is null then '×' when g.t_handbook_file_name='' then '×' else '√' end as `t_handbook`,
+		       case when g.s_handbook_file_name is null then '×' when g.s_handbook_file_name='' then '×' else '√' end as `s_handbook`,
+		       case when g.reference_file_name is null then '×' when g.reference_file_name='' then '×' else '√' end as `reference`
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='SKILL_TYPE' )o2 ON e.`type`=o2.`value`
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+			 left join `POINT_DETAIL` g on a.`id`=g.`point_id`
+		[where] 
+	</downTopicData>
+	<getPointPage>
+		select a.`id`,a.`name[lang]` as `name`,a.`order`,a.`description[lang]` as `description`,f.`name` as `enable`,a.`update_person`,a.`update_time`,
+		       a.`create_person`,a.`create_time`,c.`id` as `third_skill_id`,c.`name[lang]` as `third_skill`,d.`id` as `second_skill_id`,
+		       d.`name[lang]` as `second_skill`,e.`id` as `first_skill_id`,e.`name[lang]` as `first_skill`
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+		[where] [order] limit [start],[number];
+	</getPointPage>
+	<getPointPageAllCount>
+		select count(*) as ct
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+		[where] 
+	</getPointPageAllCount>
+	
+	<getLimitPointPage>
+		select a.`id`,a.`name[lang]` as `name`,a.`order`,a.`description[lang]` as `description`,f.`name` as `enable`,a.`update_person`,a.`update_time`,
+		       a.`create_person`,a.`create_time`,c.`id` as `third_skill_id`,c.`name[lang]` as `third_skill`,d.`id` as `second_skill_id`,
+		       d.`name[lang]` as `second_skill`,e.`id` as `first_skill_id`,e.`name[lang]` as `first_skill`
+		from (select * from `TEACHER_POINT` where `teacher_id`=:teacher_id and `manage`='Y') tp left join `POINT` a on tp.`point_id`=a.`id` 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+		[where] [order] limit [start],[number];
+	</getLimitPointPage>
+	<getLimitPointPageAllCount>
+		select count(*) as ct
+		from (select * from `TEACHER_POINT` where `teacher_id`=:teacher_id and `manage`='Y') tp left join `POINT` a on tp.`point_id`=a.`id` 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+		[where] 
+	</getLimitPointPageAllCount>
+	
+	<insertPoint>
+		insert into `POINT`(`order`,`name`,`name_en_US`,`description`,`description_en_US`,`enable`,`create_time`,`create_person`,`update_time`,`update_person`)
+		values(case when :order is null then 1 when LENGTH(trim(:order))&lt;1 then 1 else :order end ,:name,:name_en_US,:description,:description_en_US,:enable,:create_time,:create_person,:update_time,:update_person);
+		
+	</insertPoint>
+	
+	<queryPointByUpdateInfo>
+		select cast(`id` as char) as `id` from `POINT` where `update_time`=:update_time and `update_person`=:update_person
+	</queryPointByUpdateInfo>
+	
+	<insertSkillPointMapping>
+		insert into `SKILL_POINT`(`skill_id`,`point_id`)
+		values(:skill_id,:point_id);
+	</insertSkillPointMapping>
+	
+	<insertPointDetail>
+		insert into `POINT_DETAIL`(`point_id`,`cost`,`description`,`description_en_US`,`part`,`from_page`,`to_page`,`goal`,`goal_en_US`,`create_time`,`create_person`,`update_time`,`update_person`)
+		values(:point_id,case when :cost is null then 0 when LENGTH(trim(:cost))&lt;1 then 0 else :cost end ,:description,:description_en_US,:part,
+			case when :from_page is null then 0 when LENGTH(trim(:from_page))&lt;1 then 0 else :from_page end ,
+			case when :to_page is null then 0 when LENGTH(trim(:to_page))&lt;1 then 0 else :to_page end ,:goal,:goal_en_US,:create_time,:create_person,:update_time,:update_person);
+	</insertPointDetail>
+	
+	<updateMaterialInfoByID>
+		update `POINT_DETAIL`
+		set material_file_name=:file_name,material_content_type=:file_type,material_file_size=:file_size,material_dir=:file_dir,update_time=:update_time,update_person=:update_person
+		where `point_id`=:point_id
+	</updateMaterialInfoByID>
+	
+	<updateTHandBookInfoByID>
+		update `POINT_DETAIL`
+		set t_handbook_file_name=:file_name,t_handbook_content_type=:file_type,t_handbook_file_size=:file_size,t_handbook_dir=:file_dir,update_time=:update_time,update_person=:update_person
+		where `point_id`=:point_id
+	</updateTHandBookInfoByID>
+	
+	<updateSHandBookInfoByID>
+		update `POINT_DETAIL`
+		set s_handbook_file_name=:file_name,s_handbook_content_type=:file_type,s_handbook_file_size=:file_size,s_handbook_dir=:file_dir,update_time=:update_time,update_person=:update_person
+		where `point_id`=:point_id
+	</updateSHandBookInfoByID>
+	
+	<updateReferenceInfoByID>
+		update `POINT_DETAIL`
+		set reference_file_name=:file_name,reference_content_type=:file_type,reference_file_size=:file_size,reference_dir=:file_dir,update_time=:update_time,update_person=:update_person
+		where `point_id`=:point_id
+	</updateReferenceInfoByID>
+	
+	<updatePointUpdateInfo>
+		update `POINT`
+		set `update_time`=:update_time,`update_person`=:update_person
+		where `id`=:point_id
+	</updatePointUpdateInfo>
+	
+	<getPointInfoByID>
+ 		select a.`id`,a.`name`,a.`name_en_US`,a.`order`,a.`description`,a.`description_en_US`,f.`value` as `enable_key`,
+           	   f.`name` as `enable`,c.`id` as `third_skill_id`,c.`name` as `third_skill`,d.`id` as `second_skill_id`,
+		       d.`name` as `second_skill`,e.`id` as `first_skill_id`,e.`name` as `first_skill`,
+		       a.`update_time`,a.`update_person`
+		from `POINT` a 
+		     left join `SKILL_POINT` b on a.id=b.point_id 
+		     left join `SKILL` c on ((b.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (b.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (b.skill_id=e.id and e.`level`='1'))
+		     left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='STATUS' )f ON a.`enable`=f.`value`
+        where a.`id`=:point_id 
+	</getPointInfoByID>
+	
+	<getDetailInfoByID>
+	    select b.`point_id`,b.`description`,b.`description_en_US`,b.`goal`,b.`goal_en_US`,b.`cost`,b.`part` as `part_key`,c.`name` as `part`,
+	           b.`from_page`,b.`to_page`,b.`material_file_name`,b.`material_content_type`,b.`material_file_size`,b.`material_dir`,
+	           b.`t_handbook_file_name`,b.`t_handbook_content_type`,b.`t_handbook_file_size`,b.`t_handbook_dir`,
+	           b.`s_handbook_file_name`,b.`s_handbook_content_type`,b.`s_handbook_file_size`,b.`s_handbook_dir`,
+	           b.`reference_file_name`,b.`reference_content_type`,b.`reference_file_size`,b.`reference_dir`,
+	           b.`update_time`,b.`update_person`
+	    from `POINT_DETAIL` b
+	         left join (select o1.`name[lang]` as `name`,o1.`value` as `value` from `SM_OPTION` o1 left join `SM_OPTION` o2 on o1.`parent_id`=o2.`id` where o2.`value`='WHETHER' )c ON b.`part`=c.`value`
+		where b.`point_id`=:point_id
+	</getDetailInfoByID>
+	
+	<updatePoint>
+		update `POINT`
+		set `enable`=:enable,`name`=:name,`name_en_US`=:name_en_US,`description`=:description,`description_en_US`=:description_en_US,
+			`order`=case when :order is null then 1 when LENGTH(trim(:order))&lt;1 then 1 else :order end ,
+		    `update_time`=:update_time,`update_person`=:update_person
+		where `id`=:id
+		and `update_time`=:last_update_time
+		and `update_person`=:last_update_person
+	</updatePoint>
+	
+	<updateSkillPointMapping>
+		update `SKILL_POINT`
+		set `skill_id`=:skill_id
+		where `point_id`=:point_id
+	</updateSkillPointMapping>
+	
+	<updateDetail>
+		update `POINT_DETAIL`
+		set `description`=:description,`description_en_US`=:description_en_US,`goal`=:goal,`goal_en_US`=:goal_en_US,
+		    `cost`=case when :cost is null then 0 when LENGTH(trim(:cost))&lt;1 then 0 else :cost end ,`part`=:part,
+		    `from_page`=case when :from_page is null then 0 when LENGTH(trim(:from_page))&lt;1 then 0 else :from_page end,
+		    `to_page`=case when :to_page is null then 0 when LENGTH(trim(:to_page))&lt;1 then 0 else :to_page end,
+		    `update_time`=:update_time,`update_person`=:update_person
+		where `point_id`=:point_id
+		and `update_time`=:last_update_time
+		and `update_person`=:last_update_person
+	</updateDetail>
+	
+	<checkCourseWhenDelete>
+		select b.`name[lang]` as `name` ,b.`no`
+		from `COURSE_POINT` a left join `COURSE` b on a.`course_id`=b.`id`
+		where a.`point_id`=:point_id
+	</checkCourseWhenDelete>
+	
+	<checkTeachPlanWhenDelete>
+		select distinct c.`name[lang]` as `name`,c.`no`
+		from `DETAIL_PLAN` a left join `TEACH_PLAN` b on a.`teach_plan_id`=b.`id`
+		     left join `COURSE` c on b.`course_id`=c.`id`
+		where a.`point_id`=:point_id
+	</checkTeachPlanWhenDelete>
+	
+	<checkOtherWhenDelete>
+		select sum(`ct`) as `CT`
+		from ( 
+		     select 'id' as `id`,count(*) as `CT` FROM `TEACH_HIST` where `point_id`=:point_id
+		     union all
+		     select 'id' as `id`,count(*) as `CT` FROM `TEACH_PRACTICE` where `point_id`=:point_id 
+		) a 
+		group by `id`
+	</checkOtherWhenDelete>
+	
+	<deleteTeacherPointMapping>
+		delete from `TEACHER_POINT` where `point_id`=:point_id
+	</deleteTeacherPointMapping>
+	
+	<deleteSkillPointMapping>
+		delete from `SKILL_POINT` where `point_id`=:point_id
+	</deleteSkillPointMapping>
+	
+	<deletePoint>
+		delete from `POINT` where `id`=:point_id
+	</deletePoint>
+	
+	<deletePointDetail>
+		delete from `POINT_DETAIL` where `point_id`=:point_id
+	</deletePointDetail>
+	
+	<copyInsertPoint>
+		insert into `POINT`(`order`,`name`,`name_en_US`,`description`,`description_en_US`,`enable`,`create_time`,`create_person`,`update_time`,`update_person`)
+		select `order`,`name`,`name_en_US`,`description`,`description_en_US`,`enable`,:create_time as `create_time`,:create_person as `create_person`,
+		       :update_time as `update_time`,:update_person as `update_person`
+		from `POINT`
+		where `id`=:id
+	</copyInsertPoint>
+	
+	<copyInsertDetail>
+		insert into `POINT_DETAIL`(`point_id`,`cost`,`description`,`description_en_US`,`part`,`from_page`,`to_page`,`goal`,`goal_en_US`,`create_time`,`create_person`,`update_time`,`update_person`,
+		            material_file_name,material_content_type,material_file_size,material_dir,t_handbook_file_name,t_handbook_content_type,t_handbook_file_size,t_handbook_dir,
+		            s_handbook_file_name,s_handbook_content_type,s_handbook_file_size,s_handbook_dir,reference_file_name,reference_content_type,reference_file_size,reference_dir)
+		select :point_id as `point_id`,`cost`,`description`,`description_en_US`,`part`,`from_page`,`to_page`,`goal`,`goal_en_US`,
+		       :create_time as `create_time`,:create_person as `create_person`,:update_time as `update_time`,:update_person as `update_person`,
+		       `material_file_name`,`material_content_type`,`material_file_size`,:material_dir as `material_dir`,
+		       `t_handbook_file_name`,`t_handbook_content_type`,`t_handbook_file_size`,:t_handbook_dir as `t_handbook_dir`,
+		       `s_handbook_file_name`,`s_handbook_content_type`,`s_handbook_file_size`,:s_handbook_dir as `s_handbook_dir`,
+		       `reference_file_name`,`reference_content_type`,`reference_file_size`,:reference_dir as `reference_dir`
+		from `POINT_DETAIL`
+		where `point_id`=:description
+	</copyInsertDetail>
+	
+	<getPointOptionBySkillIds>
+		select b.`id` as `id`,b.`name[lang]` as `text`
+		from `SKILL_POINT` a 
+		     left join `POINT` b on a.point_id=b.id 
+		     left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+		     left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+		     left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+		where b.`enable`='T'
+    	[condition]
+    	order by b.`order` asc
+	</getPointOptionBySkillIds>
+	
+	<grantManagePriToTeacherSelf>
+		insert into `TEACHER_POINT`(`teacher_id`,`point_id`,`manage`)
+		values(:teacher_id,:point_id,:manage)
+	</grantManagePriToTeacherSelf>
+</SQL>

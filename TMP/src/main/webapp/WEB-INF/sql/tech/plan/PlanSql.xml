@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<!-- 获取教学计划分页信息 -->
+	<query_plan_page>
+		SELECT
+			a.`id`,a.`course_id`,b.`name` `course_id_name`,a.`class_id`,c.`name` `class_id_name`,d.`location`,
+			a.`start_time`,a.`end_time`,a.`create_time`,a.`create_person`,a.`update_time`,a.`update_person`
+		FROM `TEACH_PLAN` a
+		left join (select `id`,`name[lang]` `name` from `COURSE`) b on a.`course_id`=b.`id`
+		left join (select `id`,concat(`session[lang]`,' ',`name[lang]`) as `name` from `CLASS`) c on a.`class_id`=c.`id`
+		left join `CLASS` d on a.`class_id`=d.`id`
+		[where] [order] limit [start],[number];
+	</query_plan_page>
+	<!-- 获取教学计划总条数 -->
+	<query_plan_allcount>
+		SELECT count(*) allcount FROM `TEACH_PLAN` a [where];
+	</query_plan_allcount>
+	<!-- 获取下拉框 课程名->ID -->
+	<query_allcourse_name_id>
+		SELECT concat(`name[lang]`," - ",`no`) as `text`,`id` as `id` FROM `COURSE` order by `update_time` desc;
+	</query_allcourse_name_id>
+	<!-- 获取下拉框 班级名->ID -->
+	<query_allclass_name_id>
+		SELECT concat(`session[lang]`,' ', `name[lang]`) as `text`,`id` as `id` FROM `CLASS` order by `update_time` desc;
+	</query_allclass_name_id>
+	<!-- 获得教师的select的信息  -->
+	<query_teacher_select>
+		SELECT `id` `id`,`[name]` `text` FROM SM_PERSON where role='2' order by `name` asc;
+	</query_teacher_select>
+	<!-- 获得知识点完成状态  -->
+	<query_point_finish_status>
+		select o1.`name[lang]` `text`,o1.`value` `id` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='POINT_FINISH_STATE';
+	</query_point_finish_status>
+	<!-- 修改教学计划时间信息  -->
+	<update_teach_plan>
+		UPDATE `TEACH_PLAN` SET `start_time`=:start_time, `end_time`=:end_time, 
+			`update_time`=:update_time, `update_person`=:update_person WHERE `id`=:id;
+	</update_teach_plan>
+	<!-- 修改教学计划时间信息2(只修改结束时间) -->
+	<update_teach_plan2>
+		UPDATE `TEACH_PLAN` SET `end_time`=:end_time,`update_time`=:update_time, `update_person`=:update_person WHERE `id`=:id;
+	</update_teach_plan2>
+	<!-- 修改详细的知识点时间  -->
+	<update_plan_point>	
+		UPDATE `DETAIL_PLAN` SET 
+			`starttime`=:starttime, `endtime`=:endtime, `cost`=case when :cost is null then 0 when cast( :cost as char) ='null' then 0 when LENGTH(trim(:cost)) &lt; 1 then 0 else :cost end
+		WHERE `teach_plan_id`=:teach_plan_id and `point_id`=:point_id;
+	</update_plan_point>
+	<!-- 修改详细的知识点时间2(修改结束时间,老师,时长,状态)  -->
+	<update_plan_point2>	
+		UPDATE `DETAIL_PLAN` SET 
+			`starttime`=:starttime, `endtime`=:endtime, `cost`=case when :cost is null then 0 when cast( :cost as char) ='null' then 0 when LENGTH(trim(:cost)) &lt; 1 then 0 else :cost end, 
+			`teacher_id`=case when :teacher_id is null then 0 when cast( :teacher_id as char) ='null' then 0 when LENGTH(trim(:teacher_id)) &lt; 1 then 0 else :teacher_id end, `finish_state`=:finish_state
+		WHERE `teach_plan_id`=:teach_plan_id and `point_id`=:point_id;
+	</update_plan_point2>	
+	<!-- 查找课程的知识点信息 -->
+	<query_plan_point_skill_list_course>
+		select e.`name` as `first`,
+			   e.`name_en_US` as `first_en_US`,cast(e.`id` as char) as `first_id`,
+			   d.`name` as `second`,
+			   d.`name_en_US` as `second_en_US`,cast(d.`id` as char) as `second_id`,
+	           c.`name` as `third`,
+	           c.`name_en_US` as `third_en_US`,cast(c.`id` as char) as `third_id`,
+               b.`name` as `point`,
+               b.`name_en_US` as `point_en_US`,cast(b.`id` as char) as `point_id`,
+			   g.`cost`
+	    from  `COURSE_POINT` f 
+			  left join `SKILL_POINT` a on f.`point_id`=a.`point_id`
+			  left join `POINT` b on a.point_id=b.id
+	          left join `SKILL` c on ((a.skill_id=c.id and c.`level`='3'))
+	          left join `SKILL` d on ((c.parent_id=d.id and d.`level`='2') or (a.skill_id=d.id and d.`level`='2'))
+	          left join `SKILL` e on ((d.parent_id=e.id and e.`level`='1') or (a.skill_id=e.id and e.`level`='1'))
+	          left join `POINT_DETAIL` g on g.point_id=b.id
+	    where b.`enable`='T' and f.`course_id`=:course_id
+	    order by e.`order` asc,e.`id` asc,d.`order` asc,d.`id` asc,c.`order` asc,c.`id` asc,b.`order` asc,b.`id` asc ;
+	</query_plan_point_skill_list_course>	
+	<!-- 添加教学计划 -->	
+	<add_plan>		
+		INSERT INTO `TEACH_PLAN` 
+			(`course_id`, `class_id`, `start_time`, `end_time`, `tree_snap`, `create_time`, `create_person`, `update_time`, `update_person`) 
+		VALUES 
+			(:course_id, :class_id, :start_time, :end_time, :tree_snap, :create_time, :create_person, :update_time, :update_person);
+	</add_plan>
+	<!-- 添加教学计划-详细知识点 -->	
+	<add_plan_detail>		
+		INSERT INTO `DETAIL_PLAN` 
+			(`teach_plan_id`, `point_id`, `starttime`, `endtime`, `finish_state`, `cost`) 
+		VALUES 
+			(:teach_plan_id, :point_id, :starttime, :endtime, :finish_state, case when :cost is null then 0 when cast( :cost as char) ='null' then 0 when LENGTH(trim(:cost)) &lt; 1 then 0 else :cost end);
+	</add_plan_detail>	
+	<!-- 删除教学计划-详细知识点 -->
+	<delete_plan>
+		DELETE FROM `TEACH_PLAN` WHERE `id`=:id;
+	</delete_plan>
+	<!-- 删除教学计划-详细知识点 -->
+	<delete_plan_detail>
+		DELETE FROM `DETAIL_PLAN` WHERE `teach_plan_id`=:teach_plan_id;
+	</delete_plan_detail>
+	<!-- 更新教学计划的最后更新时间和用户 -->
+	<update_teach_plan_update_time>
+		UPDATE `TEACH_PLAN` SET `update_time`=:update_time, `update_person`=:update_person WHERE `id`=:id;
+	</update_teach_plan_update_time>
+	<!-- 查询教学计划的序列化信息 -->	
+	<query_teach_plan_tree_snap>
+		SELECT `tree_snap` FROM TEACH_PLAN where id=:id;
+	</query_teach_plan_tree_snap>
+	<!-- 配合序列化信息查询查询详细信息 -->	
+	<query_detail_plan_tree_snap>
+		SELECT f.`teach_plan_id`,f.`point_id`,a.`name[lang]` as `point`,
+			f.`starttime`,f.`endtime`,f.`cost`,f.`teacher_id`,h.`[name]` `teacher_name`,f.`finish_state`,o.`name` `finish_state_name`
+		from `DETAIL_PLAN` f
+			left join (select o1.`name[lang]` `name`,o1.`value` from SM_OPTION  o1 join  SM_OPTION  o2  on o1.`parent_id`=o2.`id` where  o2.`value`='POINT_FINISH_STATE') o on f.`finish_state`=o.`value`
+			left join `SM_PERSON` h on f.`teacher_id`=h.id
+			left join `POINT` a on f.`point_id`=a.id
+		where `teach_plan_id`=:id and f.`point_id` in ( [point_ids] );
+	</query_detail_plan_tree_snap>	
+</SQL>

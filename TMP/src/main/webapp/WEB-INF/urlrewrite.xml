@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 2.5//EN"
+        "http://tuckey.org/res/dtds/urlrewrite2.5.dtd">
+<urlrewrite>
+	<rule>
+		<from>/getBtTable.html</from>
+		<to>/demo/demo!getBtTableDemo.do</to>
+	</rule>
+	<rule>
+		<from>/([0-9]+)/([0-9a-zA-Z]{10}).html</from>
+		<to>/tech/teacherPlan!toOnlineTestPage.do?planPaperVo.paper_number=$2&amp;planPaperVo.plan_id=$1</to>
+	</rule>
+</urlrewrite>

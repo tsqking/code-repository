@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+	<queryDemo>
+		select id,name from test_table where id=:id
+	</queryDemo>
+	<getCount>
+		select count(*) ct from test_table		
+	</getCount>
+</SQL>
