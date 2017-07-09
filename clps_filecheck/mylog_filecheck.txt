@@ -1,0 +1,12 @@
+2016-12-22 16:37:07,742  INFO 普通文件 .classpath
+普通文件 .project
+文件夹   .settings
+文件夹   bin
+文件夹   jar
+普通文件 mylog_filecheck.txt
+文件夹   src
+
+此目录下一共有7条记录
+
+2016-12-22 16:37:07,766  INFO 匹配字符请指定文件包含字符（如abc-abc-123)
+
