@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+	"http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<!-- START SNIPPET: xworkSample -->
+<struts>
+	<!-- Some or all of these can be flipped to true for debugging -->
+	<constant name="struts.i18n.reload" value="false" />
+	<constant name="struts.devMode" value="true" />
+	<!-- 动态调用方法 -->
+	<constant name="struts.enable.DynamicMethodInvocation" value="true"></constant>
+	<constant name="struts.objectFactory" value="spring"></constant>
+	<package name="default" extends="struts-default,json-default"
+		namespace="/">
+		<interceptors>
+			<interceptor name="authInter"
+				class="com.clps.mms.sys.action.interceptor.AuthorityInterceptor" />
+			<interceptor name="userInter"
+				class="com.clps.mms.sys.action.interceptor.UserInterceptor"></interceptor>
+		</interceptors>
+		<global-results>
+			<result name="login">/WEB-INF/jsp/login.jsp</result>
+		</global-results>
+		<!-- struts2.5 为了增加安全性，通配符 -->
+		<global-allowed-methods>regex:.*</global-allowed-methods>
+		<action name="login" class="com.clps.mms.sys.action.UserLoginAction">
+			<result name="success">index.htm</result>
+			<result name="input">/WEB-INF/jsp/login.jsp</result>
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="authInter"></interceptor-ref>
+		</action>
+		<action name="userInfo_*" class="com.clps.mms.sys.action.UserAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+
+		<action name="roleInfo_*" class="com.clps.mms.sys.action.RoleAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+
+		<action name="menuInfo_*" class="com.clps.mms.sys.action.MenuAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+
+		<action name="LogEquipmentModel_*" class="com.clps.mms.sys.action.LogAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+
+		<action name="Tree_*" class="com.clps.mms.sys.action.TreeAction"
+			method="{1}">
+		</action>
+
+		<action name="departmentInfo_*" class="com.clps.mms.sys.action.DepartmentAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+		
+		<action name="equipment_*" class="com.clps.mms.booking.action.EquipmentAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+		<action name="meetingroom_*" class="com.clps.mms.booking.action.MeetingroomAction"
+			method="{1}">
+			<result name="json" type="json">
+				<param name="root">resultMap</param>
+			</result>
+			<result name="input" type="json">
+				<param name="root">resultMap</param>
+			</result>
+		</action>
+		
+	</package>
+
+
+</struts>
+
+<!-- END SNIPPET: xworkSample -->
+

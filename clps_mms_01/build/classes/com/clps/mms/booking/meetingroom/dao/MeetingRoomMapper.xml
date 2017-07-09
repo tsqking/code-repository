@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.mms.booking.meetingroom.dao.MeetingRoomDao">
+
+	<resultMap type="MeetingRoom" id="MeetingRoomResult">
+		<id column="roo_id" property="roomId"/>
+		<result column="roo_name" property="roomName"/>
+		<result column="roo_number" property="roomNumber"/>
+		<result column="roo_address" property="roomAddress"/>
+		<result column="roo_phone" property="roomPhone"/>
+		<result column="roo_state" property="roomState"/>
+		<result column="roo_topic" property="roomTopic"/>
+		<result column="roo_remarks" property="roomRemark"/>
+		<result column="roo_createdate" property="createDate"/>
+		<result column="roo_createname" property="createName"/>
+		<result column="roo_updatedate" property="updateDate"/>
+		<result column="roo_updatename" property="updateName"/>
+		<result column="roo_isEnable" property="isEnable"/>
+	</resultMap>
+
+	<insert id="insertMeetingRoom" parameterType="MeetingRoom" keyProperty="roomId" useGeneratedKeys="true">
+		insert into tbl_meetingroom
+		(roo_name,
+		roo_number,
+		roo_address,
+		roo_phone,
+		roo_state,
+		roo_topic,
+		roo_remarks,
+		roo_createdate,
+		roo_createname,
+		roo_isEnable)
+		values(
+		#{roomName},
+		#{roomNumber},
+		#{roomAddress},
+		#{roomPhone},
+		#{roomState},
+		#{roomTopic},
+		#{roomRemark},
+		#{createDate},
+		#{createName},
+		#{isEnable})
+	</insert>
+	<select id="queryMeetingRoomByName" parameterType="java.lang.String"
+		resultMap="MeetingRoomResult">
+		select * from tbl_meetingroom
+		where
+		roo_name=#{roomName}
+	</select>
+
+	<select id="queryMeetingRoomById" parameterType="java.lang.Long"
+		resultMap="MeetingRoomResult">
+		select 
+		roo_id,
+		roo_name,
+		roo_number,
+		roo_address,
+		roo_phone,
+		roo_state,
+		roo_topic,
+		roo_remarks,
+		roo_createdate,
+		roo_createname,
+		roo_updatedate,
+		roo_updatename,
+		roo_isEnable
+		from tbl_meetingroom
+		where
+		roo_id=#{roomId}
+
+	</select>
+
+	<update id="deleteMeetingRoomById" parameterType="java.lang.Long">
+		UPDATE tbl_meetingroom SET
+		roo_isEnable=0 WHERE roo_id = #{roomId} AND roo_isEnable=1
+	</update>
+	
+	<update id="updateMeetingRoomById" parameterType="MeetingRoom">
+		UPDATE tbl_meetingroom
+		<trim prefix="set" suffixOverrides=",">
+			<if test="roomName != null">roo_name = #{roomName},</if>
+			<if test="roomNumber != null">roo_number = #{roomNumber},</if>
+			<if test="roomAddress != null">roo_address = #{roomAddress},</if>
+			<if test="roomPhone != null">roo_phone = #{roomPhone},</if>
+			<if test="roomState != null">roo_state = #{roomState},</if>
+			<if test="updateDate != null">roo_updatedate = #{updateDate},</if>
+			<if test="updateName != null">roo_updatename = #{updateName}</if>
+		</trim>
+		WHERE roo_id = #{roomId} AND roo_isEnable=1
+	</update>
+	
+	
+	<select id="queryAllMeetingRoom" resultMap="MeetingRoomResult">
+		select 
+		roo_id,
+		roo_name,
+		roo_number,
+		roo_address,
+		roo_phone,
+		roo_state,
+		roo_topic,
+		roo_remarks,
+		roo_createdate,
+		roo_createname,
+		roo_updatedate,
+		roo_updatename,
+		roo_isEnable
+		from tbl_meetingroom
+		where  roo_isEnable=1
+	</select>
+	
+	<select id="queryMeetingroomLst" parameterType="Map" resultMap="MeetingRoomResult">
+		select 
+		roo_id,
+		roo_name,
+		roo_number,
+		roo_address,
+		roo_phone,
+		roo_state,
+		roo_topic,
+		roo_remarks,
+		roo_createdate,
+		roo_createname,
+		roo_updatedate,
+		roo_updatename,
+		roo_isEnable
+		from tbl_meetingroom
+		<where>
+		roo_isEnable=1
+		<if test="condition !=null and condition !=''">AND roo_name like 
+		concat(concat('%',#{condition}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND roo_number like 
+		concat(concat('%',#{condition2}),'%')</if>
+		<if test="condition3 !=null and condition3 !=''">AND roo_address like 
+		concat(concat('%',#{condition3}),'%')</if>
+		<if test="condition4 !=null and condition4 !=''">AND roo_state like 
+		concat(concat('%',#{condition4}),'%')</if>
+		<if test="condition5 !=null and condition5 !=''">AND roo_createdate >=#{condition5}</if>
+		<if test="condition6 !=null and condition6 !=''">AND roo_createdate &lt;=#{condition6}</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+			limit #{offset},#{limit}
+		</where>
+	</select>
+	
+	<select id="queryMeetingroomCount" resultType="Long" parameterType="Map">
+		select
+		count(*) as count
+		from tbl_meetingroom
+		<where>
+		roo_isEnable=1
+		<if test="condition !=null and condition !=''">AND roo_name like 
+		concat(concat('%',#{condition}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND roo_number like 
+		concat(concat('%',#{condition2}),'%')</if>
+		<if test="condition3 !=null and condition3 !=''">AND roo_address like 
+		concat(concat('%',#{condition3}),'%')</if>
+		<if test="condition4 !=null and condition4 !=''">AND roo_state like 
+		concat(concat('%',#{condition4}),'%')</if>
+		<if test="condition5 !=null and condition5 !=''">AND roo_createdate >=#{condition5}</if>
+		<if test="condition6 !=null and condition6 !=''">AND roo_createdate &lt;=#{condition6}</if>
+		</where>
+	</select>
+	
+	<select id="queryAllNames" resultType="java.lang.String">
+		select distinct roo_name from tbl_meetingroom where roo_isEnable=1 order by roo_name asc
+	</select>
+	
+	<select id="queryAllNumber" resultType="java.lang.Integer">
+		select distinct roo_number from tbl_meetingroom where roo_isEnable=1 order by roo_number desc
+	</select>
+	
+	<select id="queryAllAddresses" resultType="java.lang.String">
+		select distinct roo_address from tbl_meetingroom where roo_isEnable=1 order by roo_address desc
+	</select>
+</mapper>

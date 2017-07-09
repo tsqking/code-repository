@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.mms.log.equipment.dao.IEquipmentLogDaoMapper">
+<!-- 保存 数据至tbl_equipment_log表-->
+	<insert id="saveEquipmentInfo" parameterType="LogBean">
+		INSERT INTO
+		tbl_equipment_log(
+		log_equipment_id,
+		log_equipment_name,
+		log_up_type,
+		log_up_content,
+		log_up_name,
+		log_time)
+		values(#{Id},
+		#{name},#{type},#{content},#{updateName},#{createTime})
+	</insert>
+	<!-- 根据设备名称查询记录 -->
+	<select id="selectEquipmentInfo" parameterType="LogBean"
+		resultType="LogBean">
+		select
+		log_equipment_name,
+		log_up_type,
+		log_up_content,
+		log_up_name,
+		log_time
+		from tbl_equipment_log
+		where
+		log_equipment_name=#{name}
+	</select>
+	<!-- 查询所有设备记录信息 -->
+	<select id="queryAll" parameterType="Map" resultType="LogBean">
+		SELECT
+		log_equipment_name as name,
+		log_up_type as type,
+		log_up_content as content,
+		log_up_name as updateName,
+		log_time as createTime
+		FROM tbl_equipment_log
+	</select>
+	<!-- 根据id查询设备记录信息 -->
+	<select id="queryEquipmentLogById" parameterType="LogBean">
+	select 
+		log_equipment_id,
+		log_equipment_name,
+		log_up_type,
+		log_up_content,
+		log_up_name,
+		log_createTime
+		from tbl_equipment_log
+	where
+		log_equipment_id=#{Id}
+	</select>
+
+
+	<!-- 查询总记录列表 -->
+	<select id="queryEquipmentInfoLst" parameterType="Map"
+		resultType="LogBean">
+		select
+		log_equipment_name as name,
+		log_up_type as type,
+		log_up_content as content,
+		log_up_name as updateName,
+		log_time as createTime
+		FROM `tbl_equipment_log`
+		<include refid="queryEquInfo_condition"></include>
+		<if test="sortName !=null and sortName !='' ">ORDER BY `${sortname}` ${sortorder}   </if>
+		limit ${offset},${limit}
+	</select>
+
+	<!-- 总数查询 -->
+	<select id="queryEquInfoCount" resultType="Long" parameterType="Map">
+		select
+		count(*) as count
+		from `tbl_equipment_log`
+		<include refid="queryEquInfo_condition"></include>
+	</select>
+	
+	<!-- 模糊查询条件 -->
+	<sql id="queryEquInfo_condition">
+		<where>
+		1=1 
+		<if test="condition1!=null and condition1!=''">and log_time >=#{condition1}</if>	
+		<if test="condition2!=null and condition2!=''">and log_time &lt;#{condition2}</if>
+		 <if test="condition3!=null and condition3!=''">and log_up_type like 
+		concat(concat('%',#{condition3}),'%')</if> 
+		<if test="condition4!=null and condition4!=''">and log_up_content like 
+		concat(concat('%',#{condition4}),'%')</if> 
+		</where>
+	</sql> 
+</mapper>

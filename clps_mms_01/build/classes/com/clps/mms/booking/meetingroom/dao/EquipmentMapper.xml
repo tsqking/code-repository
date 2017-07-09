@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.mms.booking.meetingroom.dao.EquipmentDao">
+
+	<resultMap type="Equipment" id="equipmentResult">
+		<id column="equ_id" property="equipmentId"/>
+		<result column="equ_name" property="equipmentName"/>
+		<result column="equ_price" property="equipmentPrice"/>
+		<result column="equ_state" property="equipmentState"/>
+		<result column="equ_use" property="equipmentUse"/>
+		<result column="equ_type" property="equipmentType"/>
+		<result column="equ_remarks" property="equipmentRemark"/>
+		<result column="equ_createtime" property="createDate"/>
+		<result column="equ_createname" property="createName"/>
+		<result column="equ_updatetime" property="updateDate"/>
+		<result column="equ_updatename" property="updateName"/>
+		<result column="equ_isEnable" property="isEnable"/>
+	</resultMap>
+	<!-- 列表查询信息 -->
+	<select id="queryEquipmentLst" parameterType="Map" resultMap="equipmentResult">
+		select * from tbl_equipment
+		<where>
+		equ_isEnable=1
+		<if test="condition !=null and condition !=''">AND equ_name like 
+		concat(concat('%',#{condition}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND equ_state like 
+		concat(concat('%',#{condition2}),'%')</if>
+		<if test="condition3 !=null and condition3 !=''">AND equ_type like 
+		concat(concat('%',#{condition3}),'%')</if>
+		<if test="condition4 !=null and condition4 !=''">AND equ_createtime >=#{condition4}</if>
+		<if test="condition5 !=null and condition5 !=''">AND equ_createtime &lt;=#{condition5}</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+			limit #{offset},#{limit}
+		</where>
+	</select>
+	
+	<select id="queryEquipmentCount" resultType="Long" parameterType="Map">
+		select
+		count(*) as count
+		from tbl_equipment
+		<where>
+		equ_isEnable=1
+		<if test="condition !=null and condition !=''">AND equ_name like 
+		concat(concat('%',#{condition}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND equ_state like 
+		concat(concat('%',#{condition2}),'%')</if>
+		<if test="condition3 !=null and condition3 !=''">AND equ_type like 
+		concat(concat('%',#{condition3}),'%')</if>
+		<if test="condition4 !=null and condition4 !=''">AND equ_createtime >=#{condition4}</if>
+		<if test="condition5 !=null and condition5 !=''">AND equ_createtime &lt;=#{condition5}</if>
+		</where>
+	</select>
+	
+	<insert id="insertEquipment" parameterType="Equipment" keyProperty="equipmentId" useGeneratedKeys="true">
+		insert into tbl_equipment
+		(equ_name,
+		equ_price,
+		equ_state,
+		equ_use,
+		equ_type,
+		equ_remarks,
+		equ_createtime,
+		equ_createname,
+		equ_updatetime,
+		equ_updatename,
+		equ_isEnable)
+		values(
+		#{equipmentName},
+		#{equipmentPrice},
+		#{equipmentState},
+		#{equipmentUse},
+		#{equipmentType},
+		#{equipmentRemark},
+		#{createDate},
+		#{createName},
+		#{updateDate},
+		#{updateName},
+		#{isEnable})
+	</insert>
+	
+	<update id="deleteEquipmentById" parameterType="java.lang.Long">
+		UPDATE tbl_equipment SET
+		equ_isEnable=0 WHERE equ_id = #{equipmentId} AND equ_isEnable=1
+	</update>
+	
+	<update id="updateEquipmentById" parameterType="Equipment">
+		UPDATE tbl_equipment
+		<trim prefix="set" suffixOverrides=",">
+			<if test="equipmentName != null">equ_name = #{equipmentName},</if>
+			<if test="equipmentPrice != null">equ_price = #{equipmentPrice},</if>
+			<if test="equipmentState != null">equ_state = #{equipmentState},</if>
+			<if test="equipmentUse != null">equ_use = #{equipmentUse},</if>
+			<if test="equipmentType != null">equ_type = #{equipmentType},</if>
+			<if test="equipmentRemark !=null">equ_remarks = #{equipmentRemark},</if>
+			<if test="updateDate != null">equ_updatetime = #{updateDate},</if>
+			<if test="updateName != null">equ_updatename = #{updateName}</if>
+		</trim>
+		WHERE equ_id = #{equipmentId} AND equ_isEnable=1
+	</update>
+
+	<select id="queryEquipmentById" parameterType="java.lang.Long" resultMap="equipmentResult">
+		select 
+		equ_id,
+		equ_name,
+		equ_price,
+		equ_state,
+		equ_use,
+		equ_type,
+		equ_remarks,
+		equ_createtime,
+		equ_createname,
+		equ_updatetime,
+		equ_updatename,
+		equ_isEnable
+		from tbl_equipment
+		where
+		equ_id=#{equipmentId} AND equ_isEnable=1
+	</select>
+
+	<select id="queryEquipmentByName" parameterType="java.lang.String"
+		resultMap="equipmentResult">
+		select * from tbl_equipment
+		where
+		equ_name=#{equipmentName}
+	</select>
+
+	<select id="queryAllType" resultType="java.lang.String">
+		select distinct equ_type from tbl_equipment where equ_isEnable=1 order by equ_type desc
+	</select>
+
+	<select id="queryAllNames" resultType="java.lang.String">
+		select distinct equ_name from tbl_equipment where equ_isEnable=1 order by equ_name asc
+	</select>
+</mapper>

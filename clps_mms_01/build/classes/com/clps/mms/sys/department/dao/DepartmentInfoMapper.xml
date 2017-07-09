@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clps.mms.sys.department.dao.DepartmentInfoMapper">
+
+	 <!-- 添加部门信息  -->
+	 <insert id="insertDepartmentInfo" parameterType="DepartmentInfo" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO
+		tbl_department(
+		dep_name,
+		dep_desc,
+		dep_manager,
+		dep_tel,
+		dep_email,
+		dep_createdate,
+		dep_createname,
+		dep_updatedate,
+		dep_updatename,
+		dep_isenable)
+		VALUES(
+		#{name},
+		#{descp},
+		#{manager},
+		#{tel},
+		#{email},
+		#{createdate},
+		#{createname},
+		#{updatedate},
+		#{updatename},
+		1)
+	</insert>
+
+	<!-- 根据id查询部门信息 -->
+	<select id="queryDepartmentInfoById" parameterType="Long" resultType="DepartmentInfo">
+		SELECT dep_id as id,
+		dep_name as name,
+		dep_desc as descp, 
+		dep_manager as manager, 
+		dep_tel as tel, 
+		dep_email as email, 
+		dep_createdate as createdate,
+		dep_createname as createname,
+		dep_updatedate as updatedate,
+		dep_updatename as updatename
+		FROM tbl_department 
+		WHERE dep_id=#{id} AND  dep_isenable=1 
+	</select>
+	
+	<!-- 根据name查询部门信息 -->
+	<select id="queryDepartmentInfoByName" parameterType="String" resultType="DepartmentInfo">
+		SELECT dep_id as id,
+		dep_name as name,
+		dep_desc as descp, 
+		dep_manager as manager, 
+		dep_tel as tel, 
+		dep_email as email, 
+		dep_createdate as createdate,
+		dep_createname as createname,
+		dep_updatedate as updatedate,
+		dep_updatename as updatename
+		FROM tbl_department  
+		WHERE dep_name=#{name} AND dep_isenable=1
+	</select>
+	
+	<!-- 根据id更新部门信息 -->
+	<update id="updateDepartmentInfoById" parameterType="DepartmentInfo">
+		UPDATE tbl_department
+		<trim prefix="set" suffixOverrides=",">
+			<if test="name != null">dep_name = #{name},</if>
+			<if test="createdate != null">dep_createdate = #{createdate},</if>
+			<if test="createname != null">dep_createname = #{createname},</if>
+			dep_desc = #{descp},
+			dep_manager = #{manager},
+			dep_tel = #{tel},
+			dep_email = #{email},
+			dep_updatedate = #{updatedate},
+			dep_updatename = #{updatename}
+			
+		</trim>
+		WHERE dep_id = #{id} AND dep_isenable=1
+	</update>
+	
+	<!-- 根据id删除部门信息 -->
+    <update id="deleteDepartmentInfoById" parameterType="Long">
+		UPDATE tbl_department SET
+		dep_isenable=0 WHERE dep_id = #{id} AND dep_isenable=1
+	</update>
+	
+	<!-- 总数查询 -->
+	<select id="queryDepartmentInfoCount" resultType="Long" parameterType="Map">
+		select
+		count(*) as count
+		from tbl_department
+		<where>
+			dep_isenable=1
+		<if test="condition1 !=null and condition1 !=''">AND dep_id like concat(concat('%',#{condition1}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND dep_name like concat(concat('%',#{condition2}),'%')</if>
+		</where>
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="queryDepartmentInfoLst" parameterType="Map" resultType="DepartmentInfo">
+		SELECT dep_id as id,
+		dep_name as name,
+		dep_desc as descp, 
+		dep_manager as manager, 
+		dep_tel as tel, 
+		dep_email as email, 
+		dep_createdate as createdate,
+		dep_createname as createname,
+		dep_updatedate as updatedate,
+		dep_updatename as updatename
+		FROM tbl_department 
+		<where>
+			dep_isenable=1
+		<if test="condition1 !=null and condition1 !=''">AND dep_id like concat(concat('%',#{condition1}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND dep_name like concat(concat('%',#{condition2}),'%')</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+			limit #{offset},#{limit}
+		</where>
+	</select>
+	
+	<!-- 查询所有部门信息 -->
+	<select id="queryAll" resultType="DepartmentInfo">
+		SELECT dep_id as id,
+		dep_name as name,
+		dep_desc as descp, 
+		dep_manager as manager, 
+		dep_tel as tel, 
+		dep_email as email, 
+		dep_createdate as createdate,
+		dep_createname as createname,
+		dep_updatedate as updatedate,
+		dep_updatename as updatename
+		FROM tbl_department 
+		WHERE dep_isenable=1
+	</select>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clps.mms.sys.menu.dao.MenuDao">
+	<!-- 插入菜单 -->
+	<insert id="insertMenu" parameterType="Menu">
+		insert into tbl_menu(
+		mnu_id,
+		mnu_name,
+		mnu_url,
+		mnu_create_user,
+		mnu_create_time,
+		mnu_parent_id,
+		mnu_child_id,
+		mnu_root_id,
+		mnu_logo_url,
+		mnu_desc,
+		mnu_is_enable
+		)values(
+		#{mnu_id},
+		#{mnu_name},
+		#{mnu_url},
+		#{mnu_create_user},
+		#{mnu_create_time},
+		#{mnu_parent_id},
+		#{mnu_child_id},
+		#{mnu_root_id},
+		#{mnu_logo_url},
+		#{mnu_desc},
+		#{mnu_is_enable}
+		)
+	</insert>
+	<!-- 根据id查找菜单 -->
+	<update id="deleteMenuById" parameterType="String">
+		update tbl_menu
+		set
+		mnu_is_enable=0
+		where
+		mnu_id=#{mnu_id}
+	</update>
+	<!-- 根据id更新菜单 -->
+	<update id="updateMenuById" parameterType="Menu">
+		update tbl_menu
+		set
+		mnu_name=#{mnu_name},
+		mnu_url=#{mnu_url},
+		mnu_update_user=#{mnu_update_user},
+		mnu_update_time=#{mnu_update_time},
+		mnu_parent_id=#{mnu_parent_id},
+		mnu_child_id=#{mnu_child_id},
+		mnu_root_id=#{mnu_root_id},
+		mnu_logo_url=#{mnu_logo_url},
+		mnu_desc=#{mnu_desc}
+		where
+		mnu_id=#{mnu_id}
+	</update>
+	<!-- 根据id查找菜单 -->
+	<select id="findMenuById" parameterType="String" resultType="Menu">
+		select
+		mnu_id,
+		mnu_name,
+		mnu_url,
+		mnu_create_user,
+		mnu_create_time,
+		mnu_update_user,
+		mnu_update_time,
+		mnu_parent_id,
+		mnu_child_id,
+		mnu_root_id,
+		mnu_logo_url,
+		mnu_desc
+		from
+		tbl_menu
+		where
+		mnu_id=#{mnu_id}
+		and
+		mnu_is_enable=1
+	</select>
+	<!-- 查询菜单数量 -->
+	<select id="queryMenuInfoCount" resultType="Long" parameterType="Map">
+		select
+		count(*) as count
+		from tbl_menu
+		where mnu_is_enable=1
+	</select>
+	<!-- 查询菜单信息列表并排序 -->
+	<select id="queryMenuInfoLst" parameterType="Map" resultType="Menu">
+		select
+		mnu_id,
+		mnu_name,
+		mnu_url,
+		mnu_create_user,
+		mnu_create_time,
+		mnu_update_user,
+		mnu_update_time,
+		mnu_parent_id,
+		mnu_child_id,
+		mnu_root_id,
+		mnu_logo_url,
+		mnu_desc
+		from
+		tbl_menu
+		where
+		mnu_is_enable=1
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+		limit #{offset},#{limit}
+	</select>
+	<!-- 查询所有菜单 -->
+	<select id="queryAllMenu" resultType="Menu">
+		select
+		mnu_id,
+		mnu_name,
+		mnu_url,
+		mnu_create_user,
+		mnu_create_time,
+		mnu_update_user,
+		mnu_update_time,
+		mnu_parent_id,
+		mnu_child_id,
+		mnu_root_id,
+		mnu_logo_url,
+		mnu_desc
+		from
+		tbl_menu
+		where
+		mnu_is_enable=1
+	</select>
+</mapper>

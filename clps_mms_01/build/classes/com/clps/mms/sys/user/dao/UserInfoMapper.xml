@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clps.mms.sys.user.dao.UserInfoMapper">
+
+	<select id="queryAll" resultType="UserInfo">
+		SELECT u_id as id,
+		u_name as name,
+		u_nickname as nickname,
+		u_gender as gender,
+		u_mobnum as mobnum,
+		u_email as email,
+		u_department as department,
+		u_position as position,
+		u_createname as createname,
+		u_updatedate as updatedate,
+		u_updatename as updatename,
+		u_updatedate as updatedate FROM tbl_user WHERE u_isEnable=1
+	</select>
+	<select id="queryLoginUserInfoByName" parameterType="String"
+		resultType="UserInfo">
+		SELECT u_id as id,
+		u_name as name,
+		u_password as password,
+		u_department as department,
+		u_position as position
+		FROM tbl_user WHERE u_name=#{name} AND u_isEnable=1
+	</select>
+	<select id="queryUserInfoByName" parameterType="String"
+		resultType="UserInfo">
+		SELECT u_id as id,
+		u_name as name,
+		u_nickname as nickname,
+		u_gender as gender,
+		u_mobnum as mobnum,
+		u_email as email,
+		u_department as department,
+		u_position as position,
+		u_createname as createname,
+		u_updatedate as updatedate,
+		u_updatename as updatename,
+		u_updatedate as updatedate FROM tbl_user WHERE u_name=#{name} AND u_isEnable=1
+	</select>
+	<select id="queryUserInfoById" parameterType="Long" resultType="UserInfo">
+		SELECT u_id as id,
+		u_name as name,
+		u_nickname as nickname,
+		u_gender as gender,
+		u_mobnum as mobnum,
+		u_email as email,
+		u_department as department,
+		u_position as position,
+		u_createname as createname,
+		u_updatedate as updatedate,
+		u_updatename as updatename,
+		u_updatedate as updatedate FROM tbl_user WHERE u_id=#{id} AND u_isEnable=1
+	</select>
+
+
+	<!-- <insert id="saveMenu" parameterType="Menu" keyProperty="m_id" useGeneratedKeys="true"> 
+		INSERT INTO tbl_menu(m_name,m_description,m_address,m_createDate,m_createName,m_updateDate,m_updateName,m_image,m_superid) 
+		VALUES(#{m_name},#{m_description},#{m_address},#{m_createDate},#{m_createName},#{m_updateDate},#{m_updateName},#{m_image},#{m_superid}) 
+		</insert> -->
+
+	<!-- 总数查询 -->
+	<select id="queryUserInfoCount" resultType="Long" parameterType="Map">
+		select
+		count(*) as count
+		from tbl_user
+		where u_isEnable=1
+	</select>
+
+	<select id="queryUserInfoLst" parameterType="Map" resultType="UserInfo">
+		SELECT u_id as id,
+		u_name as name,
+		u_nickname as nickname,
+		u_gender as gender,
+		u_mobnum as mobnum,
+		u_email as email,
+		u_department as department,
+		u_position as position,
+		u_createname as createname,
+		u_createdate as createdate,
+		u_updatename as updatename,
+		u_updatedate as updatedate FROM tbl_user WHERE u_isEnable=1
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+			limit #{offset},#{limit}
+	</select>
+    <insert id="insertUserInfo" parameterType="UserInfo" keyProperty="id"
+		useGeneratedKeys="true">
+		INSERT INTO
+		tbl_user(u_name,
+		u_nickname,
+		u_password,
+		u_gender,
+		u_mobnum,
+		u_email,
+		u_department,
+		u_position,
+		u_createname,
+		u_createdate,
+		u_updatename,
+		u_updatedate,
+		u_isEnable)
+		VALUES(#{name},#{nickname},#{password},#{gender},#{mobNum},#{email},#{department},#{position},
+		#{createname},#{createdate},#{updatename},#{updatedate},1)
+	</insert>
+	<update id="updateUserInfoById" parameterType="UserInfo">
+		UPDATE tbl_user
+		<trim prefix="set" suffixOverrides=",">
+			<if test="nickname != null">u_nickname = #{nickname},</if>
+			<if test="gender != null">u_gender = #{gender},</if>
+			<if test="mobNum != null">u_mobnum = #{mobNum},</if>
+			<if test="email != null">u_email = #{email},</if>
+			<if test="department != null">u_department = #{department},</if>
+			<if test="position != null">u_position = #{position},</if>
+			<if test="updatename != null">u_updatename = #{updatename},</if>
+			<if test="updatedate != null">u_updatedate = #{updatedate}</if>
+		</trim>
+		WHERE u_id = #{id} AND u_isEnable=1
+	</update>
+    <update id="deleteUserInfoById" parameterType="Long">
+		UPDATE tbl_user SET
+		u_isEnable=0 WHERE u_id = #{id} AND u_isEnable=1
+	</update>
+</mapper>

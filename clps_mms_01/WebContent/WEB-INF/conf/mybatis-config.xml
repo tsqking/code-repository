@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+    <!DOCTYPE configuration  
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<settings>
+		<!-- changes from the defaults -->
+		<setting name="lazyLoadingEnabled" value="false" />
+		<!-- 打印查询语句 -->
+        <setting name="logImpl" value="STDOUT_LOGGING" />
+	</settings>
+	<typeAliases>
+		<!--这里给实体类取别名，方便在mapper配置文件中使用 -->
+		<typeAlias alias="UserInfo" type="com.clps.mms.sys.user.model.UserInfo" />
+		<typeAlias alias="Menu" type="com.clps.mms.sys.menu.model.Menu" />
+		<typeAlias alias="MeetingRoom" type="com.clps.mms.booking.meetingroom.model.MeetingRoom" />
+		<typeAlias alias="Equipment" type="com.clps.mms.booking.meetingroom.model.Equipment"/>
+		<typeAlias alias="DepartmentInfo" type="com.clps.mms.sys.department.model.DepartmentInfo" />
+		<typeAlias alias="RoleInfo" type="com.clps.mms.sys.role.model.RoleInfo" />
+		<typeAlias alias="LogBean" type="com.clps.mms.log.model.LogBean"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="com/clps/mms/log/equipment/dao/EquipmentLogDaoMapper.xml"/>
+	<!-- 设备日志映射文件 -->
+		<mapper resource="com/clps/mms/log/equipment/dao/EquipmentLogDaoMapper.xml"/>
+		<mapper resource="com/clps/mms/booking/meetingroom/dao/EquipmentMapper.xml"/>
+		<mapper resource="com/clps/mms/booking/meetingroom/dao/MeetingRoomMapper.xml"/>
+	</mappers>
+</configuration>

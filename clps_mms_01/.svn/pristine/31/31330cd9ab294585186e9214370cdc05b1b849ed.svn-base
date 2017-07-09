@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clps.mms.sys.role.dao.RoleInfoMapper">
+	<select id="queryRoleInfoByName" parameterType="String" resultType="RoleInfo">
+		SELECT 
+			rol_id as id,
+		   	rol_name as name,
+		   	rol_create_name as create_name,
+		   	rol_create_time as create_time,
+		   	rol_update_name as update_name,
+		   	rol_update_time as update_time,
+		   	rol_is_enable as is_Enable,
+		   	rol_description as description
+	    FROM    
+	    	tbl_role 
+	    WHERE   
+	    	rol_name=#{name} AND rol_is_enable=1
+	</select>
+	<select id="queryRoleInfoByCreateName" parameterType="String" resultType="RoleInfo">
+		SELECT 
+			rol_id as id,
+		   	rol_name as name,
+		   	rol_create_name as create_name,
+		   	rol_create_time as create_time,
+		   	rol_update_name as update_name,
+		   	rol_update_time as update_time,
+		   	rol_is_enable as is_Enable,
+		   	rol_description as description
+	    FROM    
+	    	tbl_role 
+	    WHERE   
+	    	rol_create_name=#{rol_create_name} AND rol_is_enable=1
+	</select>
+	<select id="queryRoleInfoById" parameterType="Long" resultType="RoleInfo">
+		SELECT 
+			rol_id as id,
+		   	rol_name as name,
+		   	rol_create_name as create_name,
+		   	rol_create_time as create_time,
+		   	rol_update_name as update_name,
+		   	rol_update_time as update_time,
+		   	rol_is_enable as is_Enable,
+		   	rol_description as description
+	    FROM    
+	    	tbl_role 
+	    WHERE   
+	    	rol_id=#{id} AND rol_is_enable=1
+	</select>
+	<select id="queryAll" resultType="RoleInfo">
+		SELECT 
+			rol_id as id,
+		   	rol_name as name,
+		   	rol_create_name as create_name,
+		   	rol_create_time as create_time,
+		   	rol_update_name as update_name,
+		   	rol_update_time as update_time,
+		   	rol_is_enable as is_Enable,
+		   	rol_description as description
+	    FROM    
+	    	tbl_role 
+	    WHERE 
+	    	rol_is_enable=1
+	</select>
+	
+	 <insert id="insertRoleInfo" parameterType="RoleInfo" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO
+			tbl_role(
+			   	rol_name,
+			   	rol_create_name,
+			   	rol_create_time,
+			   	rol_update_name,
+			   	rol_update_time,
+			   	rol_is_enable,
+			   	rol_description)
+		VALUES(#{name},#{create_name},#{create_time},#{update_name},#{update_time},1,#{ description})
+	</insert>
+	<update id="updateRoleInfoById" parameterType="RoleInfo">
+		UPDATE 
+			 tbl_role
+			<trim prefix="set" suffixOverrides=",">
+				<if test="name != null">rol_name = #{name},</if>
+				<if test="create_name != null">rol_create_name = #{create_name},</if>
+				<if test="create_time != null">rol_create_time = #{create_time},</if>
+				<if test="description != null">rol_description = #{description},</if>
+				rol_update_name=#{update_name},
+				rol_update_time=#{update_time}
+			</trim>
+		WHERE 
+			rol_id = #{id} AND rol_is_enable=1
+	</update>
+    <update id="deleteRoleInfoById" parameterType="Long">
+		UPDATE
+			tbl_role
+		SET
+			rol_is_enable=0 WHERE rol_id = #{id} AND rol_is_enable=1
+	</update>
+	
+	<!-- 总数查询 -->
+	<select id="queryRoleInfoCount" resultType="Long" parameterType="Map">
+		SELECT
+			count(*) as count
+		FROM 
+			tbl_role
+		<where>
+			rol_is_enable=1
+		<if test="condition1 !=null and condition1 !=''">AND rol_name like concat(concat('%',#{condition1}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND rol_create_name like concat(concat('%',#{condition2}),'%')</if>
+		<if test="condition3 !=null and condition3 !=''">AND rol_create_time >= #{condition3}</if>
+		<if test="condition4 !=null and condition4 !=''">AND rol_create_time &lt;= #{condition4}</if>
+		</where> 
+	</select>
+
+	<select id="queryRoleInfoLst" parameterType="Map" resultType="RoleInfo">
+		SELECT 
+			rol_id as id,
+		   	rol_name as name,
+		   	rol_create_name as create_name,
+		   	rol_create_time as create_time,
+		   	rol_update_name as update_name,
+		   	rol_update_time as update_time,
+		   	rol_is_enable as is_Enable,
+		   	rol_description as description
+		FROM 
+			tbl_role 
+		<where>
+			rol_is_enable=1
+		<if test="condition1 !=null and condition1 !=''">AND rol_name like concat(concat('%',#{condition1}),'%')</if>
+		<if test="condition2 !=null and condition2 !=''">AND rol_create_name like concat(concat('%',#{condition2}),'%')</if>
+		<if test="condition3 !=null and condition3 !=''">AND rol_create_time >= #{condition3}</if>
+		<if test="condition4 !=null and condition4 !=''">AND rol_create_time &lt;= #{condition4}</if>
+		<if test="sortname !=null and sortname !='' ">ORDER BY ${sortname} ${sortorder}</if>
+			limit #{offset},#{limit}
+		</where> 
+	</select>
+</mapper>

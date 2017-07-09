@@ -1,0 +1,6 @@
+#mysql connect ?useUnicode=true;characterEncoding=utf8
+driver=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/mms
+username=root
+password=root
+
